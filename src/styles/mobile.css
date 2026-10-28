@@ -59,10 +59,10 @@
   .float--a11y,.float--cart{left:10px}
   .float--cart{bottom:68px}
   .float svg{width:24px;height:24px}
-  body.is-product .float{bottom:78px}
-  body.is-product .float--cart{bottom:132px}
+  body.is-product .float{bottom:74px;width:42px;height:42px}
+  body.is-product .float--cart{display:none} /* header cart is enough next to the sticky buy bar */
   .a11y{left:10px;bottom:124px;width:calc(100vw - 20px)}
-  body.is-product .a11y{bottom:188px}
+  body.is-product .a11y{bottom:124px}
 
   /* Basket modal */
   .bm__body{padding:20px}
