@@ -96,7 +96,9 @@ button.pcard__btn:disabled{opacity:.6}
 /* ===== Mobile product cards: horizontal soft card (image start, details, sizes in one scrollable row, pill button) ===== */
 @media (max-width:767px){
   .hs__item{flex-basis:90%}
-  .hs__item--feature{flex-basis:70%}
+  .hs__track{align-items:flex-start}
+  .hs__item--feature{flex-basis:62%}
+  .hs__item--feature img{height:auto;aspect-ratio:3/4}
   .grid{grid-template-columns:1fr!important;gap:14px}
   article.pcard{border:0;border-radius:16px;box-shadow:0 6px 24px rgba(0,0,0,.08);padding:14px;gap:10px;overflow:hidden}
   article.pcard .pcard__link{display:grid;grid-template-columns:104px minmax(0,1fr);grid-template-areas:"img h3" "img sold" "img price";column-gap:14px;align-content:start;align-items:start}
