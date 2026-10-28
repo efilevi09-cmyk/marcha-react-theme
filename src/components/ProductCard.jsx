@@ -40,11 +40,12 @@ function useSizes(p) {
 
 export default function ProductCard({ p }) {
   const img = p.images?.[0];
-  const { add, busy } = useCart();
+  const { add } = useCart();
   const { sizes } = useSizes(p);
   const [size, setSize] = useState(null);
   const [hint, setHint] = useState(false);
   const [error, setError] = useState('');
+  const [pending, setPending] = useState(false); // per-card, so adding one pair never greys out the other cards
   const path = toPath(p.permalink);
 
   const addToCart = async () => {
@@ -52,11 +53,12 @@ export default function ProductCard({ p }) {
     const chosen = sizes.find((x) => x.term.slug === size);
     if (!chosen) { setHint(true); setTimeout(() => setHint(false), 900); return; }
     setError('');
+    setPending(true);
     try {
       await add(chosen.variation.id, 1, chosen.variation.attributes.map((a) => ({ attribute: a.name, value: a.value })), {
         item: { name: p.name, image: img?.thumbnail || img?.src, size: chosen.term.name },
       });
-    } catch (e) { setError(e.message); }
+    } catch (e) { setError(e.message); } finally { setPending(false); }
   };
 
   return (
@@ -77,7 +79,7 @@ export default function ProductCard({ p }) {
       )}
       {error && <p className="pcard__error" role="alert">{error}</p>}
       {sizes.length > 0
-        ? <button type="button" className="pcard__btn" disabled={busy} onClick={addToCart}>{size ? 'הוספה לסל' : 'בחרי מידה'}</button>
+        ? <button type="button" className="pcard__btn" disabled={pending} aria-busy={pending} onClick={addToCart}>{pending ? 'מוסיפה…' : size ? 'הוספה לסל' : 'בחרי מידה'}</button>
         : <Link to={path} className="pcard__btn">בחר אפשרויות</Link>}
     </article>
   );

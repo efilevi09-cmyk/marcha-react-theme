@@ -5,6 +5,7 @@ import { money } from '../lib/format.js';
 import BundleBar from '../components/BundleBar.jsx';
 import ProductCard from '../components/ProductCard.jsx';
 import { ReviewList } from '../components/Reviews.jsx';
+import '../styles/page.css';
 import '../styles/cart.css';
 
 function Coupon() {
@@ -50,6 +51,7 @@ function Related({ items }) {
       <h2 id="rel-title">אולי יעניין אותך</h2>
       <div className="cartpage__relgrid">{list.map((p) => <ProductCard key={p.id} p={p} />)}</div>
     </section>
+    </>
   );
 }
 
@@ -59,8 +61,12 @@ export default function Cart() {
   const fees = cart?.fees || [];
   useEffect(() => { document.title = 'עגלת קניות - Marcha Ballerina'; }, []);
   return (
+    <>
+    <header className="pagehero">
+      <p className="pagehero__accent" aria-hidden="true">Cart</p>
+      <h1 className="pagehero__title">עגלת קניות</h1>
+    </header>
     <section className="cartpage container" aria-busy={busy}>
-      <h1 className="section-title">עגלת קניות</h1>
       {cart && !items.length && <p className="cartpage__empty">העגלה ריקה. <a href={window.MARCHA?.siteUrl}>חזרה לחנות</a></p>}
       {items.length > 0 && (
         <div className="cartpage__layout">
@@ -103,5 +109,6 @@ export default function Cart() {
         </div>
       )}
     </section>
+    </>
   );
 }

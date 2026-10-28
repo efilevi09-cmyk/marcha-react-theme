@@ -45,3 +45,47 @@
   .cartpage__list li{grid-template-columns:72px minmax(0,1fr) auto auto auto;grid-template-areas:"img meta qty tot rm";gap:12px}
   .cartpage__qty{grid-area:qty}.cartpage__list li>strong{grid-area:tot}.cartpage__rm{align-self:center}
 }
+
+/* ===== Cart redesign: soft product cards (image start, details, stepper), all breakpoints ===== */
+.cartpage{padding-block:clamp(16px,3vw,36px) clamp(40px,6vw,80px)}
+.cartpage__list{gap:14px;margin:12px 0 20px}
+.cartpage__list li{position:relative;display:grid;grid-template-columns:96px minmax(0,1fr);grid-template-areas:"img meta" "img ctrl";gap:6px 14px;align-items:start;padding:14px;background:#fff;border:0;border-radius:16px;box-shadow:0 6px 24px rgba(0,0,0,.08)}
+.cartpage__list img{grid-area:img;width:96px;height:96px;border-radius:12px;object-fit:cover;background:#f6f4f1}
+.cartpage__meta{grid-area:meta;padding-inline-end:34px;gap:2px}
+.cartpage__meta a{font-size:16px;line-height:1.3}
+.cartpage__meta span{font-size:14px;color:#666}
+.cartpage__qty{grid-area:ctrl;justify-self:start;align-self:end;display:inline-flex;align-items:center;gap:4px;padding:3px;background:#f3f1ee;border-radius:99px}
+.cartpage__qty button{width:32px;height:32px;border:0;border-radius:50%;background:#fff;font-size:18px;line-height:1;box-shadow:0 1px 3px rgba(0,0,0,.12);transition:background .15s}
+.cartpage__qty button:hover{background:var(--c-mint)}
+.cartpage__qty output{min-width:28px;text-align:center;font-weight:700}
+.cartpage__list li>strong{grid-area:ctrl;justify-self:end;align-self:end;font-size:18px}
+.cartpage__rm{position:absolute;top:10px;inset-inline-end:10px;width:28px;height:28px;border:0;border-radius:50%;background:#f3f1ee;font-size:18px;line-height:1;display:grid;place-items:center}
+.cartpage__rm:hover{background:#000;color:#fff}
+@media (min-width:768px){
+  .cartpage__list li{grid-template-columns:96px minmax(0,1fr) auto auto;grid-template-areas:"img meta qty tot";align-items:center;gap:16px}
+  .cartpage__qty{grid-area:qty;align-self:center}.cartpage__list li>strong{grid-area:tot;align-self:center;min-width:72px;text-align:end}
+  .cartpage__meta{padding-inline-end:0}
+  .cartpage__rm{top:-8px;inset-inline-end:-8px;background:#fff;box-shadow:0 1px 4px rgba(0,0,0,.18)}
+}
+.cartpage__sum{padding:20px;background:#fafafa;border-radius:16px;gap:10px}
+.cartpage__sum .btn{margin-top:8px;font-weight:700}
+.coupon input{border:1px solid #bdbdbd;border-radius:0;min-height:48px}
+.coupon input:focus{outline:0;border-color:#000;box-shadow:0 0 0 3px var(--c-mint)}
+
+/* related products: one horizontal card per row, sizes in a single scrollable row */
+.cartpage__aside h2{font-size:clamp(20px,2vw,26px)}
+.cartpage__relgrid{grid-template-columns:1fr;gap:14px}
+.cartpage__relgrid .pcard{border:0;border-radius:16px;box-shadow:0 6px 24px rgba(0,0,0,.08);padding:14px;gap:10px;overflow:hidden}
+.cartpage__relgrid .pcard__link{display:grid;grid-template-columns:104px minmax(0,1fr);grid-template-areas:"img h3" "img sold" "img price";column-gap:14px;align-content:start;align-items:start}
+.cartpage__relgrid .pcard__link img{grid-area:img;width:104px;height:104px;object-fit:cover;border-radius:12px}
+.cartpage__relgrid .pcard h3{grid-area:h3;margin:0;min-height:0;font-size:16px;font-weight:700}
+.cartpage__relgrid .pcard__sold{grid-area:sold;margin:2px 0 0;min-height:0}
+.cartpage__relgrid .pcard__sold.is-empty{display:none}
+.cartpage__relgrid .pcard__price{grid-area:price;margin:6px 0 0;align-self:end}
+.cartpage__relgrid .pcard__badge{inset-inline-start:auto;inset-inline-end:0;top:0;border-radius:0 0 0 8px;font-size:12px}
+.cartpage__relgrid .pcard__sizes{display:flex;flex-wrap:nowrap;gap:6px;overflow-x:auto;padding:2px 2px 6px;margin:0;scroll-snap-type:x proximity;-webkit-overflow-scrolling:touch;scrollbar-width:thin}
+.cartpage__relgrid .pcard__sizes button{flex:none;width:38px;height:34px;border-radius:8px;scroll-snap-align:start}
+.cartpage__relgrid .pcard__btn,.cartpage__relgrid button.pcard__btn{width:100%;margin:0;border-radius:99px;background:var(--c-mint);color:#000;font-weight:700;padding:13px}
+.cartpage__relgrid .pcard__btn:hover{background:#000;color:#fff}
+.cartpage__relgrid .pcard__btn:disabled{opacity:.6}
+.cartpage__relgrid .pcard__error{margin:0}

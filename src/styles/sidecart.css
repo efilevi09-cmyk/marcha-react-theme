@@ -13,3 +13,14 @@
 .sc__sum p{margin:0;display:flex;justify-content:space-between;gap:12px}
 .sc__fee{color:#1a7f37}
 .sc .btn{text-align:center}
+
+/* side cart: same soft cards as the cart page */
+.sc__list{gap:12px}
+.sc__list li{position:relative;padding:12px;background:#fff;border-radius:14px;box-shadow:0 4px 18px rgba(0,0,0,.08);align-items:center}
+.sc__list img{border-radius:10px}
+.sc__list li>div{display:grid;gap:4px;min-width:0}
+.sc__qty{align-items:center;gap:6px}
+.sc__qty button{min-width:30px;height:30px;border:0;border-radius:99px;background:#f3f1ee;padding:0 10px;font:inherit}
+.sc__qty button:hover{background:var(--c-mint)}
+.sc__qty button:last-child{margin-inline-start:auto;font-size:13px;color:#666;background:none;text-decoration:underline}
+.sc .btn{border-radius:99px;font-weight:700}
