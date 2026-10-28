@@ -4,7 +4,7 @@
  */
 defined( 'ABSPATH' ) || exit;
 
-define( 'MARCHA_THEME_VERSION', '0.1.18' );
+define( 'MARCHA_THEME_VERSION', '0.1.19' );
 
 add_action( 'after_setup_theme', function () {
 	add_theme_support( 'title-tag' );
@@ -58,7 +58,10 @@ add_action( 'wp_enqueue_scripts', function () {
 		'isNative'    => marcha_is_native_route(),
 		'isLoggedIn'  => is_user_logged_in(),
 	);
-	wp_add_inline_script( 'marcha-app', 'window.MARCHA=' . wp_json_encode( $config ) . ';', 'before' );
+	// Printed as inert JSON so optimisation plugins (WP Rocket delay-JS) cannot defer or rewrite it.
+	add_action( 'wp_print_scripts', function () use ( $config ) {
+		echo '<script type="application/json" id="marcha-config">' . wp_json_encode( $config ) . '</script>' . "\n"; // phpcs:ignore WordPress.Security.EscapeOutput
+	}, 1 );
 }, 20 );
 
 // Load as ES module.

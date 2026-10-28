@@ -5,6 +5,12 @@ import App from './App.jsx';
 import './styles/tokens.css';
 import './styles/base.css';
 
+try {
+  window.MARCHA = JSON.parse(document.getElementById('marcha-config').textContent);
+} catch (e) {
+  window.MARCHA = window.MARCHA || {};
+}
+
 createRoot(document.getElementById('root')).render(
   <React.StrictMode>
     <BrowserRouter>
