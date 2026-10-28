@@ -13,7 +13,7 @@ defined( 'ABSPATH' ) || exit;
 </head>
 <body <?php body_class( 'marcha-app' ); ?>>
 <?php wp_body_open(); ?>
-<div id="root"></div>
+<div id="root"><?php echo marcha_seo_fallback_html(); // phpcs:ignore WordPress.Security.EscapeOutput ?></div>
 <div id="wp-native-content" class="native-content__source">
 <?php
 if ( marcha_is_native_route() ) {
