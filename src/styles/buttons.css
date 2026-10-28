@@ -37,3 +37,7 @@ body .woocommerce-checkout #place_order{padding:16px 25px;font-size:20px}
 /* on dark backgrounds the black pill gets a white outline so it stays visible */
 body .pagecta .btn,body .showcase__text .btn,body .ftr .btn{border-color:#fff!important}
 body .pagecta .btn:hover,body .showcase__text .btn:hover,body .ftr .btn:hover{background:#fff!important;color:#000!important}
+
+/* The "to checkout" button in the added-to-cart popup is the one green call to action */
+body .bm .btn--mint{background:var(--c-mint)!important;color:#000!important;border-color:var(--c-mint)!important}
+body .bm .btn--mint:hover{background:#000!important;color:#fff!important;border-color:#000!important}
