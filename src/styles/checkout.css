@@ -10,3 +10,4 @@
 .woocommerce-checkout-review-order-table tr.cart_item td{border:0;padding:6px}
 .woocommerce-checkout-review-order-table .product-quantity{white-space:nowrap}
 .mc-item__img{width:48px!important;height:48px!important}
+.woocommerce-checkout-review-order-table thead{display:none}
