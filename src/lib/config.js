@@ -11,3 +11,6 @@ export const SORTS = [
   ['menu_order', 'סידור ברירת מחדל'], ['popularity', 'למיין לפי פופולריות'], ['rating', 'למיין לפי דירוג ממוצע'],
   ['date', 'למיין לפי המעודכן ביותר'], ['price', 'למיין מהזול ליקר'], ['price-desc', 'למיין מהיקר לזול'],
 ];
+
+/** Customer-service WhatsApp (same number the old site used). */
+export const WHATSAPP_URL = 'https://api.whatsapp.com/send?phone=972559296934';

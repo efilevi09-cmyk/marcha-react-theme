@@ -6,7 +6,7 @@ import { BUNDLE } from '../lib/config.js';
 import { money, toMinor } from '../lib/format.js';
 import ProductCard from '../components/ProductCard.jsx';
 import { Stars, ReviewList, ReviewForm } from '../components/Reviews.jsx';
-import { ShareIcon, TruckIcon, ReturnIcon, ShieldIcon, CardIcon, ChatIcon, ZoomIcon } from '../components/Icons.jsx';
+import { ShareIcon, TruckIcon, ReturnIcon, ShieldIcon, CardIcon, ChatIcon, ZoomIcon, WhatsAppIcon } from '../components/Icons.jsx';
 import '../styles/product.css';
 import '../styles/reviews.css';
 
@@ -46,6 +46,8 @@ export default function Product() {
   const [zoom, setZoom] = useState(false);
   const [copied, setCopied] = useState(false);
   const [rating, setRating] = useState(null);
+
+  useEffect(() => { document.body.classList.add('is-product'); return () => document.body.classList.remove('is-product'); }, []);
 
   useEffect(() => {
     setSize(null); setActive(0); setError(''); setQty(1); setTab('desc'); setRelated([]);
@@ -157,7 +159,7 @@ export default function Product() {
           </div>
 
           <ul className="trust">{TRUST.map(([Icon, t, d]) => <li key={t}><Icon /><b>{t}</b><span>{d}</span></li>)}</ul>
-          <a className="advice" href={WHATSAPP} target="_blank" rel="noopener noreferrer"><ChatIcon /><span><b>צריכה עזרה במידה?</b> שלחי הודעה ונחזור אליך בהקדם</span><i aria-hidden="true">←</i></a>
+          <a className="advice" href={WHATSAPP} target="_blank" rel="noopener noreferrer"><WhatsAppIcon /><span><b>צריכה עזרה במידה?</b> שלחי הודעה ונחזור אליך בהקדם</span><i aria-hidden="true">←</i></a>
         </div>
       </article>
 
