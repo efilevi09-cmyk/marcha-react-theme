@@ -6,9 +6,10 @@ const key = (slug) => { try { return decodeURIComponent(slug); } catch (e) { ret
 export const cacheProducts = (list) => { (Array.isArray(list) ? list : []).forEach((p) => p?.slug && productCache.set(key(p.slug), p)); return list; };
 export const cachedProduct = (slug) => productCache.get(key(slug)) || null;
 
-let cartToken = null;
+// The cart lives in the WooCommerce session cookie (same one the native checkout reads). A Cart-Token
+// would create a separate guest cart that the checkout page cannot see, so it is never sent.
 let storeNonce = null;
-try { cartToken = sessionStorage.getItem('marcha_cart_token'); } catch (e) { /* storage unavailable */ }
+try { sessionStorage.removeItem('marcha_cart_token'); } catch (e) { /* storage unavailable */ }
 
 async function request(path, { method = 'GET', body, headers = {}, withMeta = false } = {}) {
   const { restUrl } = cfg();
@@ -17,11 +18,9 @@ async function request(path, { method = 'GET', body, headers = {}, withMeta = fa
     credentials: 'same-origin',
     // Store API uses its own rotating `Nonce` header; wp/v2 reads are public, so no nonce is sent
     // (a stale/foreign X-WP-Nonce makes WordPress reject the request with "cookie check failed").
-    headers: { 'Content-Type': 'application/json', ...(path.startsWith('wc/store') && storeNonce ? { Nonce: storeNonce } : {}), ...(cartToken ? { 'Cart-Token': cartToken } : {}), ...headers },
+    headers: { 'Content-Type': 'application/json', ...(path.startsWith('wc/store') && storeNonce ? { Nonce: storeNonce } : {}), ...headers },
     body: body ? JSON.stringify(body) : undefined,
   });
-  const t = res.headers.get('Cart-Token');
-  if (t) { cartToken = t; try { sessionStorage.setItem('marcha_cart_token', t); } catch (e) { /* ignore */ } }
   const nn = res.headers.get('Nonce');
   if (nn) storeNonce = nn;
   if (!res.ok) throw new Error((await res.json().catch(() => ({}))).message || res.statusText);
