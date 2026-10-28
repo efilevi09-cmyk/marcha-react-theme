@@ -23,7 +23,6 @@
 .cats a b,.cats a span{position:relative}
 .cats a::before{content:"";position:absolute;inset:0;background:rgba(0,0,0,.25)}
 .story img{width:100%}
-@media (min-width:768px){
 /* About */
 .about{display:grid;gap:24px;justify-items:center;text-align:center}
 .about__text{display:grid;gap:14px;justify-items:center;font-size:clamp(18px,2.2vw,22px);line-height:1.5}
