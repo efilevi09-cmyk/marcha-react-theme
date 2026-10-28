@@ -47,11 +47,6 @@ export default function Home() {
           ))}
         </div>
       </section>
-      <section className="container block">
-        <a className="story" href={base + 'product/gerbera-woman/'}>
-          <img src={up('2026/04/כל-צעד-הוא-סיפור-יפה.webp')} alt="כל צעד הוא סיפור יפה" loading="lazy" />
-        </a>
-      </section>
       <ProductSection id="new-title" title="חדש באתר" script="New in" orderby="date" terms={terms} pattern={PATTERN} />
       <section className="block container home-reviews" aria-labelledby="reviews-title">
         <p className="script-title" aria-hidden="true">Reviews</p>
