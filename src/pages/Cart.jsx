@@ -51,7 +51,6 @@ function Related({ items }) {
       <h2 id="rel-title">אולי יעניין אותך</h2>
       <div className="cartpage__relgrid">{list.map((p) => <ProductCard key={p.id} p={p} />)}</div>
     </section>
-    </>
   );
 }
 
