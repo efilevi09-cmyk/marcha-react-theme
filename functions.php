@@ -139,3 +139,20 @@ $marcha_rocket_skip = function ( $list ) {
 foreach ( array( 'rocket_exclude_css', 'rocket_exclude_js', 'rocket_exclude_defer_js', 'rocket_delay_js_exclusions', 'rocket_exclude_async_css', 'rocket_rucss_external_exclusions' ) as $marcha_hook ) {
 	add_filter( $marcha_hook, $marcha_rocket_skip );
 }
+
+/**
+ * Checkout order review: show the product thumbnail next to the name so every item reads as one compact row.
+ */
+add_filter(
+	'woocommerce_cart_item_name',
+	function ( $name, $cart_item ) {
+		if ( ! function_exists( 'is_checkout' ) || ! is_checkout() || is_wc_endpoint_url( 'order-received' ) ) {
+			return $name;
+		}
+		$product = $cart_item['data'];
+		$thumb   = $product ? $product->get_image( 'woocommerce_gallery_thumbnail', array( 'class' => 'mc-item__img', 'loading' => 'lazy' ) ) : '';
+		return '<span class="mc-item">' . $thumb . '<span class="mc-item__name">' . wp_strip_all_tags( $name ) . '</span></span>';
+	},
+	10,
+	2
+);

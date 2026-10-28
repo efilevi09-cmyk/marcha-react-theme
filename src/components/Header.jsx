@@ -33,7 +33,7 @@ export default function Header() {
         </a>
         <button className="hdr__cart" aria-label="פתחי עגלה" onClick={() => setOpen(true)}>
           <span className="hdr__bag"><BagIcon /><b className="hdr__count">{count}</b></span>
-          <span className="hdr__total">{cart ? money(cart.totals.total_items, cart.totals) : ''}</span>
+          <span className="hdr__total">{cart ? money(String(Number(cart.totals.total_items) + Number(cart.totals.total_fees || 0)), cart.totals) : ''}</span>
         </button>
       </div>
       <nav className={`hdr__menu${menu ? ' is-open' : ''}`} aria-label="ראשי">
