@@ -1,18 +1,41 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import * as api from '../lib/api.js';
 import { useCart } from '../lib/CartContext.jsx';
 import { BUNDLE } from '../lib/config.js';
 import { money, toMinor } from '../lib/format.js';
 import ProductCard from '../components/ProductCard.jsx';
+import { ShareIcon, TruckIcon, ReturnIcon, ShieldIcon, CardIcon, ChatIcon, ZoomIcon } from '../components/Icons.jsx';
 import '../styles/product.css';
 
-const INFO = [
-  ['משלוחים מהירים לכל הארץ', 'קבלי את הנעליים עד פתח הבית תוך 3 ימי עסקים'],
-  ['החלפות והחזרות בקלות', 'לא התאימו? תוכלי להחליף או להחזיר ללא דאגות.'],
-  ['נוחות ללא פשרות', 'עיצוב אורגונומי המותאם גם לאמא וגם לבת'],
-  ['תשלום מאובטח', 'קנייה בטוחה עם כל אמצעי התשלום המובילים'],
+const TRUST = [
+  [TruckIcon, 'משלוחים מהירים לכל הארץ', 'עד פתח הבית תוך 3 ימי עסקים'],
+  [ReturnIcon, 'החלפות והחזרות בקלות', 'לא התאימו? תוכלי להחליף או להחזיר ללא דאגות'],
+  [ShieldIcon, 'נוחות ללא פשרות', 'עיצוב אורגונומי המותאם גם לאמא וגם לבת'],
+  [CardIcon, 'תשלום מאובטח', 'קנייה בטוחה עם כל אמצעי התשלום המובילים'],
 ];
+const WHATSAPP = 'https://api.whatsapp.com/send?phone=0559296934';
+
+const Stars = ({ value }) => (
+  <span className="stars" role="img" aria-label={`דירוג ${value} מתוך 5`}>
+    {[1, 2, 3, 4, 5].map((n) => <i key={n} className={n <= Math.round(value) ? 'on' : ''}>★</i>)}
+  </span>
+);
+
+function Lightbox({ image, onClose }) {
+  useEffect(() => {
+    const onKey = (e) => e.key === 'Escape' && onClose();
+    document.addEventListener('keydown', onKey);
+    document.body.style.overflow = 'hidden';
+    return () => { document.removeEventListener('keydown', onKey); document.body.style.overflow = ''; };
+  }, [onClose]);
+  return (
+    <div className="lightbox" role="dialog" aria-modal="true" aria-label="תמונה מוגדלת" onClick={onClose}>
+      <button className="lightbox__close" onClick={onClose} aria-label="סגרי">×</button>
+      <img src={image.src} alt={image.alt || ''} onClick={(e) => e.stopPropagation()} />
+    </div>
+  );
+}
 
 export default function Product() {
   const slug = decodeURIComponent(useParams().slug);
@@ -20,66 +43,138 @@ export default function Product() {
   const [p, setP] = useState(null);
   const [active, setActive] = useState(0);
   const [size, setSize] = useState(null);
+  const [qty, setQty] = useState(1);
   const [error, setError] = useState('');
   const [related, setRelated] = useState([]);
+  const [tab, setTab] = useState('desc');
+  const [zoom, setZoom] = useState(false);
+  const [copied, setCopied] = useState(false);
 
   useEffect(() => {
-    setP(null); setSize(null); setActive(0); setError('');
+    setP(null); setSize(null); setActive(0); setError(''); setQty(1); setTab('desc');
     api.getProduct(slug).then((prod) => {
       setP(prod);
-      if (prod?.categories?.[0]) api.getProducts({ category: prod.categories[0].id, per_page: 5 }).then((r) => setRelated(r.filter((x) => x.id !== prod.id).slice(0, 4)));
+      if (prod?.categories?.[0]) api.getProducts({ category: prod.categories[0].id, per_page: 9 }).then((r) => setRelated(r.filter((x) => x.id !== prod.id).slice(0, 8)));
       if (prod) document.title = `${prod.name.replace(/<[^>]+>/g, '')} - Marcha Ballerina`;
     });
   }, [slug]);
 
   const sizeAttr = useMemo(() => p?.attributes?.find((a) => a.has_variations && /size/i.test(a.taxonomy || '')) || p?.attributes?.find((a) => a.has_variations), [p]);
   const variation = useMemo(() => p?.variations?.find((v) => v.attributes.some((a) => a.value === size)), [p, size]);
+  const closeZoom = useCallback(() => setZoom(false), []);
 
   if (!p) return <div className="container product__loading" aria-busy="true">טוענים…</div>;
 
-  const submit = async () => {
+  const submit = async (goCheckout) => {
     if (sizeAttr && !size) { setError('נא לבחור מידה'); return; }
     setError('');
     try {
-      if (variation) await add(variation.id, 1, variation.attributes.map((a) => ({ attribute: a.name, value: a.value })));
-      else await add(p.id, 1);
+      if (variation) await add(variation.id, qty, variation.attributes.map((a) => ({ attribute: a.name, value: a.value })), { open: !goCheckout });
+      else await add(p.id, qty, undefined, { open: !goCheckout });
+      if (goCheckout) window.location.href = window.MARCHA?.checkoutUrl;
     } catch (e) { setError(e.message); }
   };
 
+  const share = async () => {
+    const data = { title: p.name.replace(/<[^>]+>/g, ''), url: window.location.href };
+    try {
+      if (navigator.share) await navigator.share(data);
+      else { await navigator.clipboard.writeText(data.url); setCopied(true); setTimeout(() => setCopied(false), 2000); }
+    } catch (e) { /* user cancelled */ }
+  };
+
+  const img = p.images[active];
+  const extraAttrs = (p.attributes || []).filter((a) => a.terms?.length);
+  const unitPrice = money(toMinor(BUNDLE.unit, p.prices), p.prices);
+
   return (
-    <article className="product container">
-      <div className="product__gallery">
-        {p.images[active] && <img className="product__main" src={p.images[active].src} srcSet={p.images[active].srcset} sizes="(min-width:1025px) 50vw, 100vw" alt={p.images[active].alt || p.name} />}
-        <ul className="product__thumbs">
-          {p.images.map((im, i) => (
-            <li key={im.id}><button type="button" className={i === active ? 'is-on' : ''} onClick={() => setActive(i)} aria-label={`תמונה ${i + 1}`}><img src={im.thumbnail} alt="" loading="lazy" /></button></li>
+    <>
+      <article className="product container">
+        <div className="product__gallery">
+          {img && (
+            <div className="product__stage">
+              <img className="product__main" src={img.src} srcSet={img.srcset} sizes="(min-width:1025px) 50vw, 100vw" alt={img.alt || p.name} />
+              <button type="button" className="product__zoom" onClick={() => setZoom(true)}><ZoomIcon /> הגדלה</button>
+            </div>
+          )}
+          {p.images.length > 1 && (
+            <ul className="product__thumbs">
+              {p.images.map((im, i) => (
+                <li key={im.id}><button type="button" className={i === active ? 'is-on' : ''} onClick={() => setActive(i)} aria-label={`תמונה ${i + 1}`}><img src={im.thumbnail} alt="" loading="lazy" /></button></li>
+              ))}
+            </ul>
+          )}
+        </div>
+
+        <div className="product__info">
+          <nav className="crumbs" aria-label="פירורי לחם">
+            <Link to="/">בית</Link> / {p.categories?.[0] && <><Link to={`/product-category/${p.categories[0].slug}/`} dangerouslySetInnerHTML={{ __html: p.categories[0].name }} /> / </>}
+            <span dangerouslySetInnerHTML={{ __html: p.name }} />
+          </nav>
+          <p className="product__bar">{BUNDLE.bar}</p>
+          <div className="product__head">
+            {p.categories?.[0] && <p className="product__cat" dangerouslySetInnerHTML={{ __html: p.categories[0].name }} />}
+            <button type="button" className="product__share" onClick={share} aria-label="שיתוף המוצר"><ShareIcon /><span>{copied ? 'הקישור הועתק' : 'שיתוף'}</span></button>
+          </div>
+          <h1 dangerouslySetInnerHTML={{ __html: p.name }} />
+          <p className="product__meta">
+            {p.review_count > 0 ? <><Stars value={Number(p.average_rating)} /> <span>({p.review_count} ביקורות)</span></> : <span>(אין ביקורות עדיין)</span>}
+            <b className={p.is_in_stock ? 'in' : 'out'}>{p.is_in_stock ? 'במלאי' : 'אזל מהמלאי'}</b>
+          </p>
+          <p className="product__price"><s>{money(p.prices.regular_price, p.prices)}</s> <strong>{unitPrice}</strong></p>
+          <div className="product__desc" dangerouslySetInnerHTML={{ __html: p.short_description || '' }} />
+
+          {sizeAttr && (
+            <fieldset className="sizes">
+              <legend>{sizeAttr.name}{size && <em>: {sizeAttr.terms.find((t) => t.slug === size)?.name}</em>}</legend>
+              <div>{sizeAttr.terms.filter((t) => p.variations.some((v) => v.attributes.some((a) => a.value === t.slug))).map((t) => (
+                <button key={t.id} type="button" className={`size${size === t.slug ? ' is-on' : ''}`} aria-pressed={size === t.slug} onClick={() => { setSize(t.slug); setError(''); }}>{t.name}</button>
+              ))}</div>
+            </fieldset>
+          )}
+          {error && <p role="alert" className="product__error">{error}</p>}
+
+          <div className="product__buy">
+            <div className="qty" role="group" aria-label="כמות">
+              <button type="button" onClick={() => setQty((q) => Math.max(1, q - 1))} aria-label="פחות">−</button>
+              <output>{qty}</output>
+              <button type="button" onClick={() => setQty((q) => q + 1)} aria-label="יותר">+</button>
+            </div>
+            <button className="btn btn--mint" disabled={busy || !p.is_in_stock} onClick={() => submit(true)}>קנה עכשיו</button>
+            <button className="btn btn--black" disabled={busy || !p.is_in_stock} onClick={() => submit(false)}>הוסף לסל</button>
+          </div>
+
+          <ul className="trust">{TRUST.map(([Icon, t, d]) => <li key={t}><Icon /><b>{t}</b><span>{d}</span></li>)}</ul>
+          <a className="advice" href={WHATSAPP} target="_blank" rel="noopener noreferrer"><ChatIcon /><span><b>צריכה עזרה במידה?</b> שלחי הודעה ונחזור אליך בהקדם</span><i aria-hidden="true">←</i></a>
+        </div>
+      </article>
+
+      <section className="container ptabs">
+        <div role="tablist" className="ptabs__list">
+          {[['desc', 'תיאור המוצר'], ['spec', 'פרטים נוספים'], ['reviews', `ביקורות (${p.review_count || 0})`]].map(([k, l]) => (
+            <button key={k} role="tab" aria-selected={tab === k} className={tab === k ? 'is-on' : ''} onClick={() => setTab(k)}>{l}</button>
           ))}
-        </ul>
-      </div>
-      <div className="product__info">
-        <p className="product__bar">{BUNDLE.bar}</p>
-        <nav className="crumbs" aria-label="פירורי לחם"><Link to="/">עמוד בית</Link> / {p.categories?.[0] && <Link to={`/product-category/${p.categories[0].slug}/`} dangerouslySetInnerHTML={{ __html: p.categories[0].name }} />}</nav>
-        <h1 dangerouslySetInnerHTML={{ __html: p.name }} />
-        <div className="product__desc" dangerouslySetInnerHTML={{ __html: p.short_description || p.description }} />
-        <p className="product__price"><s>{money(p.prices.regular_price, p.prices)}</s> <strong>{money(toMinor(BUNDLE.unit, p.prices), p.prices)}</strong></p>
-        {sizeAttr && (
-          <fieldset className="sizes">
-            <legend>{sizeAttr.name}</legend>
-            <div>{sizeAttr.terms.filter((t) => p.variations.some((v) => v.attributes.some((a) => a.value === t.slug))).map((t) => (
-              <button key={t.id} type="button" className={`size${size === t.slug ? ' is-on' : ''}`} aria-pressed={size === t.slug} onClick={() => { setSize(t.slug); setError(''); }}>{t.name}</button>
-            ))}</div>
-          </fieldset>
-        )}
-        {error && <p role="alert" className="product__error">{error}</p>}
-        <button className="btn btn--black product__add" disabled={busy} onClick={submit}>הוספה לסל</button>
-        <ul className="product__info-list">{INFO.map(([t, d]) => <li key={t}><b>{t}</b><span>{d}</span></li>)}</ul>
-      </div>
+        </div>
+        <div role="tabpanel" className="ptabs__panel">
+          {tab === 'desc' && <div dangerouslySetInnerHTML={{ __html: p.description || p.short_description || '' }} />}
+          {tab === 'spec' && (extraAttrs.length ? <dl className="spec">{extraAttrs.map((a) => <React.Fragment key={a.id || a.name}><dt>{a.name}</dt><dd>{a.terms.map((t) => t.name).join(', ')}</dd></React.Fragment>)}</dl> : <p>אין פרטים נוספים.</p>)}
+          {tab === 'reviews' && <p>{p.review_count > 0 ? `${p.review_count} ביקורות, דירוג ממוצע ${p.average_rating}` : 'אין ביקורות עדיין.'}</p>}
+        </div>
+      </section>
+
       {related.length > 0 && (
-        <section className="product__related">
+        <section className="container product__related">
+          <p className="script-title" aria-hidden="true">Paris under my feet</p>
           <h2 className="section-title">יכול להוסיף לסטייל שלך</h2>
           <div className="grid">{related.map((r) => <ProductCard key={r.id} p={r} />)}</div>
         </section>
       )}
-    </article>
+
+      <div className="stickybuy" aria-hidden={false}>
+        <span>{unitPrice}</span>
+        <button className="btn btn--black" disabled={busy || !p.is_in_stock} onClick={() => submit(false)}>הוסף לסל</button>
+      </div>
+      {zoom && img && <Lightbox image={img} onClose={closeZoom} />}
+    </>
   );
 }

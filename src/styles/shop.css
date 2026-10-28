@@ -15,7 +15,7 @@
 .toolbar p{margin:0}
 .toolbar select{padding:12px;font:inherit;border:1px solid #333;background:#fff}
 .more{display:block;margin:24px auto 0}
-.pcard__link{display:block;position:relative}
+.pcard__link{display:flex;flex-direction:column;position:relative;flex:1}
 .pcard__price s{opacity:.6;margin-inline-end:6px}
 .pcard__btn{display:block;background:#000;color:#fff;text-align:center;padding:14px;margin:0 10px 10px}
 
@@ -31,3 +31,5 @@
 .swatch{width:44px;height:44px}
 .filter__title{font-size:22px}
 .swatches{gap:14px}
+.pcard__btn{margin-top:auto}.pcard__price{margin-top:auto}.pcard h3{min-height:3em}
+.pcard__link+.pcard__btn{margin-top:0}

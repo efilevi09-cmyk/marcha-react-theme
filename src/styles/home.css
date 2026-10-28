@@ -7,7 +7,7 @@
 .grid{display:grid;gap:12px;grid-template-columns:repeat(2,1fr);margin-top:24px}
 @media (min-width:768px){.grid{grid-template-columns:repeat(3,1fr)}}
 @media (min-width:1025px){.grid{grid-template-columns:repeat(4,1fr)}}
-.pcard{border:1px solid #000;background:#fff;position:relative}
+.pcard{border:1px solid #000;background:#fff;position:relative;display:flex;flex-direction:column}
 .pcard__badge{position:absolute;inset-inline-start:0;top:12px;background:var(--c-orange);color:#fff;padding:2px 10px;font-size:14px;z-index:1}
 .pcard h3{font-size:16px;font-weight:400;margin:8px 10px 0}
 .pcard__price{margin:4px 10px 12px;font-weight:700}

@@ -9,3 +9,9 @@ export const BagIcon = (p) => (<svg {...base} {...p}><path d="M5 8h14l-1 12H6zM9
 export const SearchIcon = (p) => (<svg {...base} {...p}><circle cx="11" cy="11" r="6.5" /><path d="m16 16 4.5 4.5" /></svg>);
 export const FacebookIcon = (p) => (<svg {...base} {...p} fill="currentColor" stroke="none"><path d="M13.5 21v-7.6h2.6l.4-3h-3V8.5c0-.9.3-1.5 1.5-1.5h1.6V4.3c-.3 0-1.2-.1-2.3-.1-2.3 0-3.8 1.4-3.8 3.9v2.3H8v3h2.5V21z" /></svg>);
 export const InstagramIcon = (p) => (<svg {...base} {...p}><rect x="3.5" y="3.5" width="17" height="17" rx="5" /><circle cx="12" cy="12" r="4" /><circle cx="17" cy="7" r=".8" fill="currentColor" /></svg>);
+export const ShareIcon = (p) => (<svg {...base} {...p}><circle cx="6" cy="12" r="2.3" /><circle cx="17.5" cy="6" r="2.3" /><circle cx="17.5" cy="18" r="2.3" /><path d="m8 11 7.5-4M8 13l7.5 4" /></svg>);
+export const ReturnIcon = (p) => (<svg {...base} {...p}><path d="M9 7 4.5 11.5 9 16M5 11.5h9a5 5 0 0 1 0 10h-2" transform="translate(0 -3)" /></svg>);
+export const ShieldIcon = (p) => (<svg {...base} {...p}><path d="M12 3 5 6v5.5c0 4.3 3 7.7 7 9.5 4-1.8 7-5.2 7-9.5V6z" /><path d="m9 12 2.2 2.2L15.5 10" /></svg>);
+export const CardIcon = (p) => (<svg {...base} {...p}><rect x="3" y="5.5" width="18" height="13" rx="2" /><path d="M3 10h18M7 15h3" /></svg>);
+export const ChatIcon = (p) => (<svg {...base} {...p}><path d="M4 5h16v11H9l-5 4z" /></svg>);
+export const ZoomIcon = (p) => (<svg {...base} {...p} width="18" height="18"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5" /></svg>);

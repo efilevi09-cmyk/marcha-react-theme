@@ -19,7 +19,7 @@ export function CartProvider({ children }) {
   const value = {
     cart, open, busy, setOpen,
     count: cart?.items_count || 0,
-    add: async (id, qty, variation) => { await run(() => api.addToCart(id, qty, variation)); setOpen(true); },
+    add: async (id, qty, variation, { open = true } = {}) => { await run(() => api.addToCart(id, qty, variation)); if (open) setOpen(true); },
     update: (key, qty) => run(() => api.updateCartItem(key, qty)),
     remove: (key) => run(() => api.removeCartItem(key)),
   };
