@@ -4,7 +4,7 @@
  */
 defined( 'ABSPATH' ) || exit;
 
-define( 'MARCHA_THEME_VERSION', '0.1.3' );
+define( 'MARCHA_THEME_VERSION', '0.1.4' );
 
 add_action( 'after_setup_theme', function () {
 	add_theme_support( 'title-tag' );
@@ -115,3 +115,5 @@ add_action( 'template_redirect', function () {
 	include get_template_directory() . '/index.php';
 	exit;
 }, PHP_INT_MAX );
+
+require_once get_template_directory() . '/inc/updater.php';
