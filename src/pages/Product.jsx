@@ -5,8 +5,10 @@ import { useCart } from '../lib/CartContext.jsx';
 import { BUNDLE } from '../lib/config.js';
 import { money, toMinor } from '../lib/format.js';
 import ProductCard from '../components/ProductCard.jsx';
+import { Stars, ReviewList, ReviewForm } from '../components/Reviews.jsx';
 import { ShareIcon, TruckIcon, ReturnIcon, ShieldIcon, CardIcon, ChatIcon, ZoomIcon } from '../components/Icons.jsx';
 import '../styles/product.css';
+import '../styles/reviews.css';
 
 const TRUST = [
   [TruckIcon, 'משלוחים מהירים לכל הארץ', 'עד פתח הבית תוך 3 ימי עסקים'],
@@ -15,12 +17,6 @@ const TRUST = [
   [CardIcon, 'תשלום מאובטח', 'קנייה בטוחה עם כל אמצעי התשלום המובילים'],
 ];
 const WHATSAPP = 'https://api.whatsapp.com/send?phone=0559296934';
-
-const Stars = ({ value }) => (
-  <span className="stars" role="img" aria-label={`דירוג ${value} מתוך 5`}>
-    {[1, 2, 3, 4, 5].map((n) => <i key={n} className={n <= Math.round(value) ? 'on' : ''}>★</i>)}
-  </span>
-);
 
 function Lightbox({ image, onClose }) {
   useEffect(() => {
@@ -49,14 +45,17 @@ export default function Product() {
   const [tab, setTab] = useState('desc');
   const [zoom, setZoom] = useState(false);
   const [copied, setCopied] = useState(false);
+  const [rating, setRating] = useState(null);
 
   useEffect(() => {
     setSize(null); setActive(0); setError(''); setQty(1); setTab('desc'); setRelated([]);
     window.scrollTo(0, 0);
+    setRating(null);
     let alive = true;
     api.getProduct(slug).then((prod) => {
       if (!alive) return;
       setP(prod);
+      if (prod) api.getReviews({ product: prod.id, per_page: 1 }).then((r) => alive && setRating(r.summary)).catch(() => {});
       if (prod) document.title = `${prod.name.replace(/<[^>]+>/g, '')} - Marcha Ballerina`;
       // Related products load lazily so they never block the first paint.
       if (prod?.categories?.[0]) api.getProducts({ category: prod.categories[0].id, per_page: 9 }).then((r) => alive && setRelated(r.filter((x) => x.id !== prod.id).slice(0, 8))).catch(() => {});
@@ -81,8 +80,9 @@ export default function Product() {
     if (sizeAttr && !size) { setError('נא לבחור מידה'); return; }
     setError('');
     try {
-      if (variation) await add(variation.id, qty, variation.attributes.map((a) => ({ attribute: a.name, value: a.value })), { open: !goCheckout });
-      else await add(p.id, qty, undefined, { open: !goCheckout });
+      const item = { name: p.name, image: p.images?.[0]?.thumbnail || p.images?.[0]?.src, size: sizeAttr?.terms.find((t) => t.slug === size)?.name };
+      if (variation) await add(variation.id, qty, variation.attributes.map((a) => ({ attribute: a.name, value: a.value })), { open: !goCheckout, item });
+      else await add(p.id, qty, undefined, { open: !goCheckout, item });
       if (goCheckout) window.location.href = window.MARCHA?.checkoutUrl;
     } catch (e) { setError(e.message); }
   };
@@ -130,7 +130,7 @@ export default function Product() {
           </div>
           <h1 dangerouslySetInnerHTML={{ __html: p.name }} />
           <p className="product__meta">
-            {p.review_count > 0 ? <><Stars value={Number(p.average_rating)} /> <span>({p.review_count} ביקורות)</span></> : <span>(אין ביקורות עדיין)</span>}
+            {rating?.count > 0 ? <button type="button" className="linklike" onClick={() => { setTab('reviews'); document.querySelector('.ptabs')?.scrollIntoView({ behavior: 'smooth' }); }}><Stars value={rating.average} /> <span>({rating.count} ביקורות)</span></button> : <span>(אין ביקורות עדיין)</span>}
             <b className={p.is_in_stock ? 'in' : 'out'}>{p.is_in_stock ? 'במלאי' : 'אזל מהמלאי'}</b>
           </p>
           <p className="product__price"><s>{money(p.prices.regular_price, p.prices)}</s> <strong>{unitPrice}</strong></p>
@@ -163,14 +163,14 @@ export default function Product() {
 
       <section className="container ptabs">
         <div role="tablist" className="ptabs__list">
-          {[['desc', 'תיאור המוצר'], ['spec', 'פרטים נוספים'], ['reviews', `ביקורות (${p.review_count || 0})`]].map(([k, l]) => (
+          {[['desc', 'תיאור המוצר'], ['spec', 'פרטים נוספים'], ['reviews', `ביקורות${rating ? ` (${rating.count})` : ''}`]].map(([k, l]) => (
             <button key={k} role="tab" aria-selected={tab === k} className={tab === k ? 'is-on' : ''} onClick={() => setTab(k)}>{l}</button>
           ))}
         </div>
         <div role="tabpanel" className="ptabs__panel">
           {tab === 'desc' && <div dangerouslySetInnerHTML={{ __html: p.description || p.short_description || '' }} />}
           {tab === 'spec' && (extraAttrs.length ? <dl className="spec">{extraAttrs.map((a) => <React.Fragment key={a.id || a.name}><dt>{a.name}</dt><dd>{a.terms.map((t) => t.name).join(', ')}</dd></React.Fragment>)}</dl> : <p>אין פרטים נוספים.</p>)}
-          {tab === 'reviews' && <p>{p.review_count > 0 ? `${p.review_count} ביקורות, דירוג ממוצע ${p.average_rating}` : 'אין ביקורות עדיין.'}</p>}
+          {tab === 'reviews' && <><ReviewList product={p.id} perPage={6} /><ReviewForm product={p.id} /></>}
         </div>
       </section>
 

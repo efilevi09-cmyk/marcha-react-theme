@@ -8,6 +8,7 @@ export function CartProvider({ children }) {
   const [cart, setCart] = useState(null);
   const [open, setOpen] = useState(false);
   const [busy, setBusy] = useState(false);
+  const [added, setAdded] = useState(null);
 
   const run = useCallback(async (fn) => {
     setBusy(true);
@@ -17,9 +18,9 @@ export function CartProvider({ children }) {
   useEffect(() => { api.getCart().then(setCart).catch(() => {}); }, []);
 
   const value = {
-    cart, open, busy, setOpen,
+    cart, open, busy, setOpen, added, closeAdded: () => setAdded(null),
     count: cart?.items_count || 0,
-    add: async (id, qty, variation, { open = true } = {}) => { await run(() => api.addToCart(id, qty, variation)); if (open) setOpen(true); },
+    add: async (id, qty, variation, { open = true, item } = {}) => { await run(() => api.addToCart(id, qty, variation)); if (open) { if (item) setAdded({ ...item, at: Date.now() }); else setOpen(true); } },
     update: (key, qty) => run(() => api.updateCartItem(key, qty)),
     remove: (key) => run(() => api.removeCartItem(key)),
   };

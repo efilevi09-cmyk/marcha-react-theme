@@ -1,0 +1,31 @@
+.bm{position:fixed;inset:0;z-index:120;display:grid;place-items:center;padding:12px}
+.bm__overlay{position:absolute;inset:0;background:rgba(0,0,0,.55);border:0;animation:bm-fade .25s ease both}
+.bm__card{--bx:42%;--by:61%;position:relative;background:#fff;width:min(960px,100%);max-height:calc(100dvh - 24px);overflow:auto;display:grid;grid-template-columns:1fr;box-shadow:0 20px 60px rgba(0,0,0,.35);animation:bm-in .35s cubic-bezier(.2,.8,.2,1) both}
+.bm__close{position:absolute;z-index:3;inset-block-start:8px;inset-inline-start:12px;background:rgba(255,255,255,.9);border:0;width:40px;height:40px;border-radius:50%;font-size:28px;line-height:1;cursor:pointer}
+.bm__scene{position:relative;overflow:hidden;aspect-ratio:1/1;background:#eee}
+.bm__photo{position:absolute;inset-inline:0;top:-45%;width:100%;height:auto}
+.bm__fly{position:absolute;width:34%;aspect-ratio:1;object-fit:contain;background:#fff;border-radius:12px;box-shadow:0 8px 24px rgba(0,0,0,.25);left:var(--bx);top:var(--by);translate:-50% -50%;animation:bm-drop 1.1s .25s cubic-bezier(.5,0,.3,1) both}
+.bm__pop{position:absolute;left:var(--bx);top:var(--by);translate:-50% -50%;background:var(--c-mint);font-weight:700;padding:4px 10px;border-radius:99px;animation:bm-pop .9s 1.2s ease both;opacity:0}
+.bm__body{display:flex;flex-direction:column;gap:12px;padding:24px;justify-content:center;animation:bm-fade .4s 1s ease both}
+.bm__body h2{margin:0;font-size:clamp(26px,4vw,38px)}
+.bm__name{margin:0;font-size:18px}
+.bm__count{margin:0;opacity:.7}
+.bm__more{background:none;border:0;text-decoration:underline;font:inherit;padding:8px;cursor:pointer}
+.bm .btn{text-align:center}
+.bm__close:focus-visible,.bm__more:focus-visible{outline:3px solid var(--c-mint);outline-offset:2px}
+@keyframes bm-fade{from{opacity:0}}
+@keyframes bm-in{from{opacity:0;transform:translateY(24px) scale(.97)}}
+/* The product starts above the basket, shrinks and drops inside, then the "+1" badge pops. */
+@keyframes bm-drop{
+  0%{transform:translateY(-120%) rotate(-10deg) scale(1.1);opacity:0}
+  25%{opacity:1}
+  70%{transform:translateY(-8%) rotate(4deg) scale(.55);opacity:1}
+  100%{transform:translateY(18%) rotate(0) scale(.2);opacity:0}
+}
+@keyframes bm-pop{0%{opacity:0;transform:translateY(8px) scale(.6)}30%{opacity:1;transform:translateY(-12px) scale(1.1)}100%{opacity:0;transform:translateY(-36px)}}
+@media(min-width:760px){
+  .bm__card{--by:70%;grid-template-columns:minmax(0,360px) 1fr;max-height:min(680px,calc(100dvh - 24px))}
+  .bm__scene{aspect-ratio:683/1024;max-height:680px}
+  .bm__photo{top:0;height:100%;object-fit:cover}
+  .bm__body{padding:40px}
+}

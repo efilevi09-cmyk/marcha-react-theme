@@ -1,0 +1,27 @@
+.reviews__summary{display:flex;align-items:center;gap:8px;font-size:18px;margin:0 0 20px;justify-content:center;flex-wrap:wrap}
+.reviews__grid{list-style:none;margin:0;padding:0;display:grid;gap:16px;grid-template-columns:1fr}
+.review{background:#fff;border:1px solid var(--c-border);padding:20px;display:flex;flex-direction:column;gap:10px;text-align:start;break-inside:avoid}
+.review__head{display:flex;justify-content:space-between;align-items:center;font-size:14px;opacity:.9}
+.review__text{margin:0;line-height:1.6;flex:1}
+.review__by{margin:0;display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.review__ok{font-size:13px;color:#1a7f37}
+.review__imgs{display:flex;gap:8px;flex-wrap:wrap}
+.review__imgs img{width:72px;height:72px;object-fit:cover}
+.stars i{font-style:normal;color:#ccc}.stars i.on{color:#f5b400}
+.linklike{background:none;border:0;padding:0;text-decoration:underline;font:inherit;cursor:pointer}
+.rform{display:grid;gap:12px;max-width:560px;margin-top:32px;padding-top:24px;border-top:1px solid var(--c-border)}
+.rform h3{margin:0}
+.rform label{display:grid;gap:6px;font-weight:700}
+.rform input,.rform textarea{font:inherit;padding:12px;border:1px solid #000;background:#fff;font-weight:400}
+.rform fieldset{border:0;padding:0;margin:0}
+.rform legend{font-weight:700;margin-bottom:6px}
+.rform__stars button{background:none;border:0;font-size:34px;line-height:1;color:#ccc;padding:2px 4px;cursor:pointer;transition:transform .15s}
+.rform__stars button.on{color:#f5b400}
+.rform__stars button:hover{transform:scale(1.15)}
+.rform__stars button:focus-visible,.rform input:focus-visible,.rform textarea:focus-visible{outline:3px solid var(--c-mint);outline-offset:2px}
+.rform__hp{position:absolute;inset-inline-start:-9999px;width:1px;height:1px;opacity:0}
+.rform__error{color:#c00;margin:0}
+.rform__done{padding:16px;background:#f0fff9;border:1px solid var(--c-mint)}
+.home-reviews{text-align:center}
+@media(min-width:700px){.reviews__grid{grid-template-columns:repeat(2,1fr)}}
+@media(min-width:1025px){.reviews__grid{grid-template-columns:repeat(3,1fr)}}

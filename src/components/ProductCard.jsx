@@ -1,4 +1,5 @@
-import React from 'react';
+import React, { useMemo, useState } from 'react';
+import { useCart } from '../lib/CartContext.jsx';
 import { Link } from 'react-router-dom';
 import { money, toMinor } from '../lib/format.js';
 import { BUNDLE } from '../lib/config.js';
@@ -18,17 +19,58 @@ export function Price({ prices, single }) {
   );
 }
 
+/** Sizes that actually have a variation, so the shopper can pick one without opening the product. */
+function useSizes(p) {
+  return useMemo(() => {
+    const attr = p.attributes?.find((a) => a.has_variations && /size/i.test(a.taxonomy || '')) || p.attributes?.find((a) => a.has_variations);
+    if (!attr || !p.variations?.length) return { attr: null, sizes: [] };
+    const sizes = attr.terms
+      .map((t) => ({ term: t, variation: p.variations.find((v) => v.attributes.some((a) => a.value === t.slug)) }))
+      .filter((x) => x.variation);
+    return { attr, sizes };
+  }, [p]);
+}
+
 export default function ProductCard({ p }) {
   const img = p.images?.[0];
+  const { add, busy } = useCart();
+  const { sizes } = useSizes(p);
+  const [size, setSize] = useState(null);
+  const [hint, setHint] = useState(false);
+  const [error, setError] = useState('');
+  const path = toPath(p.permalink);
+
+  const addToCart = async () => {
+    if (!sizes.length) return;
+    const chosen = sizes.find((x) => x.term.slug === size);
+    if (!chosen) { setHint(true); setTimeout(() => setHint(false), 900); return; }
+    setError('');
+    try {
+      await add(chosen.variation.id, 1, chosen.variation.attributes.map((a) => ({ attribute: a.name, value: a.value })), {
+        item: { name: p.name, image: img?.thumbnail || img?.src, size: chosen.term.name },
+      });
+    } catch (e) { setError(e.message); }
+  };
+
   return (
     <article className="pcard">
-      <Link to={toPath(p.permalink)} className="pcard__link">
+      <Link to={path} className="pcard__link">
         <span className="pcard__badge">{BUNDLE.badge}</span>
         {img && <img src={img.src} srcSet={img.srcset} sizes="(min-width:1025px) 25vw, 50vw" alt={img.alt || p.name} loading="lazy" />}
         <h3 dangerouslySetInnerHTML={{ __html: p.name }} />
         <Price prices={p.prices} />
       </Link>
-      <Link to={toPath(p.permalink)} className="pcard__btn">בחר אפשרויות</Link>
+      {sizes.length > 0 && (
+        <div className={`pcard__sizes${hint ? ' is-hint' : ''}`} role="group" aria-label="בחירת מידה">
+          {sizes.map(({ term }) => (
+            <button key={term.id} type="button" className={size === term.slug ? 'is-on' : ''} aria-pressed={size === term.slug} onClick={() => { setSize(term.slug); setHint(false); }}>{term.name}</button>
+          ))}
+        </div>
+      )}
+      {error && <p className="pcard__error" role="alert">{error}</p>}
+      {sizes.length > 0
+        ? <button type="button" className="pcard__btn" disabled={busy} onClick={addToCart}>{size ? 'הוספה לסל' : 'בחרי מידה'}</button>
+        : <Link to={path} className="pcard__btn">בחר אפשרויות</Link>}
     </article>
   );
 }

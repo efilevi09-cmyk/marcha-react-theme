@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import * as api from '../lib/api.js';
 import ProductCard from '../components/ProductCard.jsx';
+import { ReviewList } from '../components/Reviews.jsx';
 import '../styles/home.css';
 
 const up = (path) => encodeURI(`${window.MARCHA?.uploadsUrl || ''}/${path}`);
@@ -53,6 +54,11 @@ export default function Home() {
           <h2 className="section-title">הכי נמכרים</h2>
           <div className="grid">{best.map((p) => <ProductCard key={p.id} p={p} />)}</div>
         </div>
+      </section>
+      <section className="block container home-reviews" aria-labelledby="reviews-title">
+        <p className="script-title" aria-hidden="true">Reviews</p>
+        <h2 className="section-title" id="reviews-title">מה הלקוחות אומרות</h2>
+        <ReviewList perPage={6} />
       </section>
       <section className="block container about">
         <p className="script-title" aria-hidden="true">About</p>

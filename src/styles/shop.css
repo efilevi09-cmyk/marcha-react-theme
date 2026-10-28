@@ -33,3 +33,16 @@
 .swatches{gap:14px}
 .pcard__btn{margin-top:auto}.pcard__price{margin-top:auto}.pcard h3{min-height:3em}
 .pcard__link+.pcard__btn{margin-top:0}
+
+/* Size chips on product cards */
+.pcard__sizes{display:flex;flex-wrap:wrap;gap:5px;justify-content:center;padding:6px 10px 10px;margin-top:auto}
+.pcard__sizes button{min-width:34px;height:30px;padding:0 6px;font-size:14px;background:#fff;border:1px solid #000;cursor:pointer;transition:background .15s,color .15s,transform .15s}
+.pcard__sizes button:hover{transform:translateY(-1px)}
+.pcard__sizes button.is-on{background:#000;color:#fff}
+.pcard__sizes button:focus-visible{outline:3px solid var(--c-mint);outline-offset:1px}
+.pcard__sizes.is-hint{animation:chips-shake .4s}
+.pcard__error{color:#c00;font-size:13px;margin:0 10px 6px;text-align:center}
+button.pcard__btn{border:0;font:inherit;cursor:pointer;width:calc(100% - 20px)}
+button.pcard__btn:disabled{opacity:.6}
+.pcard__sizes+.pcard__btn,.pcard__error+.pcard__btn{margin-top:0}
+@keyframes chips-shake{25%{transform:translateX(5px)}75%{transform:translateX(-5px)}}
