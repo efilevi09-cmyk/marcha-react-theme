@@ -4,7 +4,7 @@
  */
 defined( 'ABSPATH' ) || exit;
 
-define( 'MARCHA_THEME_VERSION', '0.1.17' );
+define( 'MARCHA_THEME_VERSION', '0.1.18' );
 
 add_action( 'after_setup_theme', function () {
 	add_theme_support( 'title-tag' );
@@ -117,3 +117,16 @@ add_action( 'template_redirect', function () {
 }, PHP_INT_MAX );
 
 require_once get_template_directory() . '/inc/updater.php';
+
+/**
+ * WP Rocket: never minify/combine/delay the app bundle. It is already minified and versioned,
+ * and Rocket's own copies (wp-content/cache/min) kept serving stale builds to guests.
+ */
+$marcha_rocket_skip = function ( $list ) {
+	$list   = (array) $list;
+	$list[] = '/wp-content/themes/marcha-react-theme/dist/assets/(.*)';
+	return $list;
+};
+foreach ( array( 'rocket_exclude_css', 'rocket_exclude_js', 'rocket_exclude_defer_js', 'rocket_delay_js_exclusions', 'rocket_exclude_async_css', 'rocket_rucss_external_exclusions' ) as $marcha_hook ) {
+	add_filter( $marcha_hook, $marcha_rocket_skip );
+}
