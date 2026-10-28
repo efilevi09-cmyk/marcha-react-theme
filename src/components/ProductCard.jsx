@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { money } from '../lib/format.js';
+import { money, toMinor } from '../lib/format.js';
 import { BUNDLE } from '../lib/config.js';
 
 const toPath = (url) => { try { return new URL(url).pathname; } catch (e) { return url; } };
@@ -13,7 +13,7 @@ export function Price({ prices, single }) {
   return (
     <p className="pcard__price">
       <s>{regular}</s>
-      <strong>{single ? money(BUNDLE.unit * 100, prices) : money(BUNDLE.unit * 100, prices)}</strong>
+      <strong>{single ? money(toMinor(BUNDLE.unit, prices), prices) : money(toMinor(BUNDLE.unit, prices), prices)}</strong>
     </p>
   );
 }

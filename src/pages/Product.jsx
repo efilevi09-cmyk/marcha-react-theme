@@ -3,7 +3,7 @@ import { Link, useParams } from 'react-router-dom';
 import * as api from '../lib/api.js';
 import { useCart } from '../lib/CartContext.jsx';
 import { BUNDLE } from '../lib/config.js';
-import { money } from '../lib/format.js';
+import { money, toMinor } from '../lib/format.js';
 import ProductCard from '../components/ProductCard.jsx';
 import '../styles/product.css';
 
@@ -61,7 +61,7 @@ export default function Product() {
         <nav className="crumbs" aria-label="פירורי לחם"><Link to="/">עמוד בית</Link> / {p.categories?.[0] && <Link to={`/product-category/${p.categories[0].slug}/`} dangerouslySetInnerHTML={{ __html: p.categories[0].name }} />}</nav>
         <h1 dangerouslySetInnerHTML={{ __html: p.name }} />
         <div className="product__desc" dangerouslySetInnerHTML={{ __html: p.short_description || p.description }} />
-        <p className="product__price"><s>{money(p.prices.regular_price, p.prices)}</s> <strong>{money(BUNDLE.unit * 100, p.prices)}</strong></p>
+        <p className="product__price"><s>{money(p.prices.regular_price, p.prices)}</s> <strong>{money(toMinor(BUNDLE.unit, p.prices), p.prices)}</strong></p>
         {sizeAttr && (
           <fieldset className="sizes">
             <legend>{sizeAttr.name}</legend>
