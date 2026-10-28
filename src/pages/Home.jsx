@@ -69,9 +69,9 @@ export default function Home() {
         </div>
         <ul className="about__stats">
           <li><b>2005</b><span>שנת הקמה</span></li>
-          <li><b>עשרות</b><span>סניפים בעולם</span></li>
-          <li><b>22–42</b><span>מידות</span></li>
-          <li><b>25,000+</b><span>לקוחות מרוצות</span></li>
+          <li><b><bdi dir="ltr">4.9 ★</bdi></b><span>דירוג מ-165 ביקורות</span></li>
+          <li><b><bdi dir="ltr">22–42</bdi></b><span>מידות</span></li>
+          <li><b><bdi dir="ltr">25,000+</bdi></b><span>לקוחות מרוצות</span></li>
         </ul>
       </section>
       <section className="branches" aria-labelledby="branches-title" style={{ '--branches-d': `url(${up('2026/03/מרשה-1.webp')})`, '--branches-m': `url(${up('2026/03/נעלי-בלרינה-עגולות-מרשה.webp')})` }}>
