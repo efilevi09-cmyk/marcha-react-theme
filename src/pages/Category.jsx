@@ -41,7 +41,7 @@ export default function Category({ all = false }) {
 
   return (
     <>
-      <section className="banner" style={cat?.image ? { backgroundImage: `url(${cat.image.src})` } : undefined}>
+      <section className="banner" style={{ backgroundImage: `url(${window.MARCHA?.uploadsUrl}/2025/03/279.webp)` }}>
         <h1 dangerouslySetInnerHTML={{ __html: title || '' }} />
         {cat?.description && <div className="banner__desc" dangerouslySetInnerHTML={{ __html: cat.description }} />}
       </section>

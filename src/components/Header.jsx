@@ -26,7 +26,7 @@ export default function Header() {
           <img src={`${window.MARCHA?.uploadsUrl || ''}/2025/03/Marchalogo-1-300x111.png`} alt="Marcha Ballerina" width="150" height="55" />
         </a>
         <button className="hdr__cart" aria-label="פתחי עגלה" onClick={() => setOpen(true)}>
-          <span>{cart ? money(cart.totals.total_price, cart.totals) : ''}</span>
+          <span>{cart ? money(cart.totals.total_items, cart.totals) : ''}</span>
           <b className="hdr__count">{count}</b>
         </button>
       </div>

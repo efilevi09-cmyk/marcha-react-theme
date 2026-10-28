@@ -4,7 +4,7 @@
  */
 defined( 'ABSPATH' ) || exit;
 
-define( 'MARCHA_THEME_VERSION', '0.1.8' );
+define( 'MARCHA_THEME_VERSION', '0.1.9' );
 
 add_action( 'after_setup_theme', function () {
 	add_theme_support( 'title-tag' );
