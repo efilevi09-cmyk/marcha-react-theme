@@ -71,7 +71,8 @@
   border: 0;
 }
 .page-body--commerce .woocommerce-order-overview li {
-  flex: 1 1 150px;
+  flex: 1 1 140px;
+  box-sizing: border-box;
   display: flex;
   flex-direction: column;
   gap: 4px;
