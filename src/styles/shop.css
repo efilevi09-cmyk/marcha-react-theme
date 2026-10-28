@@ -54,3 +54,30 @@ button.pcard__btn:disabled{opacity:.6}
 .filters--inline .swatches{margin:0}
 .grid__empty{text-align:center;margin:24px 0;color:#666}
 .pcard__sold{margin:4px 10px 0;font-size:14px;color:#b04a00;font-weight:700}
+
+/* Compact colour row on the home page */
+.filters--inline{margin:10px auto 0}
+.filters--inline .filter__title{display:inline-block;font-size:15px;margin:0 0 0 10px;vertical-align:middle}
+.filters--inline .filter__row{display:inline-flex;align-items:center;gap:10px;flex-wrap:wrap;justify-content:center;vertical-align:middle}
+.filters--inline .swatches{gap:8px;margin:0;flex-wrap:wrap}
+.filters--inline .swatch{width:24px;height:24px;border-radius:50%;position:relative}
+.filters--inline .swatch::after{content:"";position:absolute;inset:-8px} /* larger tap area */
+.filters--inline .swatch.is-on{outline-width:2px}
+.filters--inline .reset{font-size:13px;padding:4px 10px;background:none;border:1px solid #bbb;box-shadow:none}
+@media (max-width:767px){.filters--inline .swatches{flex-wrap:nowrap;overflow-x:auto;max-width:100%;padding:10px 4px;scrollbar-width:none}.filters--inline .swatches::-webkit-scrollbar{display:none}.filters--inline .filter__row{flex-wrap:nowrap;max-width:100%}}
+
+/* Horizontal product row */
+.hs{position:relative;margin-top:20px}
+.hs__track{display:flex;gap:12px;overflow-x:auto;scroll-snap-type:x mandatory;scrollbar-width:none;-webkit-overflow-scrolling:touch;padding-bottom:6px;overscroll-behavior-x:contain}
+.hs__track::-webkit-scrollbar{display:none}
+.hs__item{flex:0 0 calc((100% - 12px) / 2.15);scroll-snap-align:start;min-width:0;display:flex}
+.hs__item>.pcard{flex:1;margin:0}
+.hs__item--feature img{width:100%;height:100%;object-fit:cover}
+.hs.is-loading .hs__track{opacity:.5;transition:opacity .2s}
+.hs__btn{position:absolute;top:38%;z-index:3;width:44px;height:44px;border-radius:50%;border:0;background:#fff;color:#000;font-size:30px;line-height:1;box-shadow:0 4px 14px rgba(0,0,0,.25);display:none;place-items:center;transition:background .2s,opacity .2s}
+.hs__btn:hover:not(:disabled){background:var(--c-mint)}
+.hs__btn:disabled{opacity:0;pointer-events:none}
+.hs__btn--prev{right:-8px}
+.hs__btn--next{left:-8px}
+@media (min-width:768px){.hs__item{flex-basis:calc((100% - 36px) / 3.2)}.hs__btn{display:grid}}
+@media (min-width:1025px){.hs__item{flex-basis:calc((100% - 48px) / 4.2)}}

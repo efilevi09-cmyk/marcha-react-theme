@@ -37,6 +37,9 @@ export const getColorTerms = () => request('wp/v2/zeva?per_page=100&hide_empty=t
 /** Colour term ids that actually occur in a category (so empty swatches are hidden). */
 export const getCategoryColorIds = (category) =>
   request(`wp/v2/product?per_page=100&_fields=zeva&product_cat=${category}`).then((r) => new Set(r.flatMap((x) => x.zeva || [])));
+/** Colour term ids used by a given set of products. */
+export const getColorIdsOf = (ids) =>
+  ids.length ? request(`wp/v2/product?per_page=100&_fields=zeva&include=${ids.join(',')}`).then((r) => new Set(r.flatMap((x) => x.zeva || []))) : Promise.resolve(new Set());
 const productIdsByColor = (colors, category) =>
   request(`wp/v2/product?per_page=100&_fields=id&zeva=${colors.join(',')}${category ? `&product_cat=${category}` : ''}`).then((r) => r.map((x) => x.id));
 

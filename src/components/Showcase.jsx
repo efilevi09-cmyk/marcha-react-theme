@@ -58,8 +58,8 @@ export default function Showcase({ slides, up }) {
                 <img src={up(b.img)} alt={b.alt} width="1584" height="672" decoding="async" loading={k === 0 ? 'eager' : 'lazy'} fetchPriority={k === 0 ? 'high' : undefined} draggable="false" />
               </picture>
               <div className="showcase__text">
-                <p className="showcase__eyebrow" aria-hidden="true">{b.eyebrow}</p>
                 <h2>{b.title}</h2>
+                <p className="showcase__eyebrow" aria-hidden="true">{b.eyebrow}</p>
                 <p>{b.text}</p>
                 <Link className="btn btn--black" to={b.to} tabIndex={k === i ? 0 : -1}>{b.cta}</Link>
               </div>

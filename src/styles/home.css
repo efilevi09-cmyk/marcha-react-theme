@@ -90,3 +90,15 @@
   .showcase__dots{bottom:16px}
 }
 @media (prefers-reduced-motion:reduce){.showcase__track{transition:none}}
+
+/* Banner copy: one-line title with the English script directly beneath, aligned to the same edge. */
+.showcase__item{container-type:inline-size}
+.showcase__text{justify-items:start;text-align:start}
+.showcase__text h2{white-space:nowrap;font-size:clamp(24px,7.5cqw,56px)}
+.showcase__eyebrow{white-space:nowrap;margin-top:-4px!important;font-size:clamp(26px,6cqw,56px)!important;text-align:start}
+.showcase__text p:not(.showcase__eyebrow){max-width:28ch}
+@media (min-width:768px){
+  .showcase__text{width:max-content;max-width:60%}
+  .showcase__text h2{font-size:clamp(26px,3.6cqw,60px)}
+  .showcase__eyebrow{font-size:clamp(28px,3.4cqw,56px)!important}
+}

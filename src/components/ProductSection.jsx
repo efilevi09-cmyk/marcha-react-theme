@@ -1,19 +1,25 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { queryProducts } from '../lib/api.js';
+import { getColorIdsOf, queryProducts } from '../lib/api.js';
 import ProductCard from './ProductCard.jsx';
 import ColorFilter from './ColorFilter.jsx';
+import HScroller from './HScroller.jsx';
 
-/** Home-page product block with its own colour filter; the grid re-queries the shop as colours change. */
+/** Home-page product row: one swipeable line, with a colour filter limited to the colours of its own products. */
 export default function ProductSection({ title, script, orderby, terms, feature, pattern, id }) {
   const [colors, setColors] = useState([]);
   const [items, setItems] = useState([]);
+  const [available, setAvailable] = useState(null);
   const [loading, setLoading] = useState(true);
   const req = useRef(0);
   useEffect(() => {
     const n = ++req.current;
     setLoading(true);
-    queryProducts({ per_page: 8, orderby, order: 'desc', colors })
-      .then((r) => n === req.current && setItems(r.data))
+    queryProducts({ per_page: 12, orderby, order: 'desc', colors })
+      .then((r) => {
+        if (n !== req.current) return;
+        setItems(r.data);
+        if (!colors.length) getColorIdsOf(r.data.map((p) => p.id)).then((set) => n === req.current && setAvailable(set)).catch(() => {});
+      })
       .catch(() => n === req.current && setItems([]))
       .finally(() => n === req.current && setLoading(false));
   }, [orderby, colors]);
@@ -23,11 +29,11 @@ export default function ProductSection({ title, script, orderby, terms, feature,
       <div className="container">
         <p className="script-title" aria-hidden="true">{script}</p>
         <h2 className="section-title" id={id}>{title}</h2>
-        <ColorFilter terms={terms} selected={colors} onToggle={toggle} onReset={() => setColors([])} />
-        <div className="grid" aria-busy={loading}>
-          {feature && !colors.length && feature}
-          {items.map((p) => <ProductCard key={p.id} p={p} />)}
-        </div>
+        <ColorFilter terms={terms} selected={colors} available={available} onToggle={toggle} onReset={() => setColors([])} label="צבע:" />
+        <HScroller label={title} className={loading ? 'is-loading' : ''}>
+          {feature && !colors.length && <div className="hs__item hs__item--feature">{feature}</div>}
+          {items.map((p) => <div className="hs__item" key={p.id}><ProductCard p={p} /></div>)}
+        </HScroller>
         {!loading && !items.length && <p className="grid__empty">אין כרגע דגמים בצבע הזה. נסי צבע אחר.</p>}
       </div>
     </section>
