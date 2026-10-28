@@ -89,3 +89,4 @@
 .cartpage__relgrid .pcard__btn:hover{background:#000;color:#fff}
 .cartpage__relgrid .pcard__btn:disabled{opacity:.6}
 .cartpage__relgrid .pcard__error{margin:0}
+.cartpage__relgrid .pcard__badge{display:none}
