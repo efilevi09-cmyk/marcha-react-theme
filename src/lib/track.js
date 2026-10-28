@@ -12,7 +12,11 @@ const push = (event, ecommerce) => {
 };
 
 const num = (minor, unit = 2) => Number((Number(minor || 0) / 10 ** unit).toFixed(unit));
-const clean = (s) => String(s || '').replace(/<[^>]+>/g, '');
+const clean = (s) => {
+  const t = document.createElement('textarea');
+  t.innerHTML = String(s || '').replace(/<[^>]+>/g, '');
+  return t.value;
+};
 
 export function itemFromCartLine(line, qty) {
   const unit = line.prices?.currency_minor_unit ?? 2;
