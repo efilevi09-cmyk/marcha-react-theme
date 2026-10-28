@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import * as api from '../lib/api.js';
 import { COLOR_HEX, SORTS } from '../lib/config.js';
@@ -15,6 +15,7 @@ export default function Category({ all = false }) {
   const [items, setItems] = useState([]);
   const [meta, setMeta] = useState({ total: 0, pages: 1, page: 1 });
   const [loading, setLoading] = useState(true);
+  const reqId = useRef(0);
 
   useEffect(() => { api.getColorTerms().then(setTerms).catch(() => {}); }, []);
   useEffect(() => {
@@ -25,13 +26,17 @@ export default function Category({ all = false }) {
 
   const load = useCallback(async (page, append) => {
     setLoading(true);
+    const id = ++reqId.current; // ignore out-of-order responses
     const params = { page, orderby: orderby === 'price-desc' ? 'price' : orderby, order: orderby === 'price' ? 'asc' : orderby === 'menu_order' ? 'asc' : 'desc', colors };
     if (!all && cat) params.category = cat.id;
     try {
       const r = await api.queryProducts(params);
+      if (id !== reqId.current) return;
       setItems((prev) => (append ? [...prev, ...r.data] : r.data));
       setMeta({ total: r.total, pages: r.pages, page });
-    } finally { setLoading(false); }
+    } catch (e) {
+      if (id === reqId.current) setItems([]);
+    } finally { if (id === reqId.current) setLoading(false); }
   }, [all, cat, colors, orderby]);
 
   useEffect(() => { if (all || cat) load(1, false); }, [cat, colors, orderby, all, load]);
