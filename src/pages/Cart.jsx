@@ -72,8 +72,7 @@ export default function Cart() {
                   {i.images?.[0] && <img src={i.images[0].thumbnail} alt="" width="96" height="96" />}
                   <div className="cartpage__meta">
                     <a href={i.permalink} dangerouslySetInnerHTML={{ __html: i.name }} />
-                    <span>{i.variation?.map((v) => `${v.attribute}: ${v.value}`).join(' · ')}</span>
-                    <span>{money(i.prices.price, i.prices)}</span>
+                    <span>{[...(i.variation || []).map((v) => `${v.attribute}: ${v.value}`), money(i.prices.price, i.prices)].join(' · ')}</span>
                   </div>
                   <div className="cartpage__qty">
                     <button onClick={() => update(i.key, i.quantity - 1)} aria-label="פחות">−</button>
