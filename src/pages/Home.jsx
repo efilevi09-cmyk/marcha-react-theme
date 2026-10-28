@@ -10,6 +10,11 @@ const SHOWCASE = [
   { slug: 'flats', side: 'right', img: '2026/10/marcha-hero-flats-wide.jpg', imgM: '2026/10/marcha-hero-flats-tall.jpg', alt: 'אישה בבית קפה פריזאי נועלת נעלי בובה ורודות של מרשה בלרינה', eyebrow: 'Café de Paris', title: 'נעלי בובה לכל יום', text: '66 דגמים עגולים בצבעים שאי אפשר לבחור ביניהם – ועוד 3 זוגות ב-300 ₪.', cta: 'לנעלי הבובה', to: '/product-category/balarina-a/' },
   { slug: 'boots', side: 'left', img: '2026/10/marcha-hero-boots-wide.jpg', imgM: '2026/10/marcha-hero-boots-tall.jpg', alt: 'שתי נשים בפריז בגשם נועלות מגפי גומי קצרים של מרשה בלרינה', eyebrow: 'Rainy Paris', title: 'מגפי גומי לחורף', text: 'מגפי צ׳לסי קצרים ואלגנטיים – שחור מבריק, קטיפה ואפור. יוצאים לגשם בסטייל.', cta: 'למגפיים', to: '/product-category/boots/' },
 ];
+const CATS = [
+  { href: 'product-category/balarina-a/', img: '2026/10/marcha-cat-round.jpg', alt: 'אישה ברחוב פריזאי נועלת נעלי בלרינה עגולות כתומות', title: 'בלרינה עגול לנשים וילדות', sizes: 'מידות 22-43' },
+  { href: 'product-category/בלרינה-שפיץ/', img: '2026/10/marcha-cat-pointed.jpg', alt: 'אישה בבית קפה פריזאי נועלת נעלי בלרינה שפיץ בז׳', title: 'בלרינה שפיץ לנשים', sizes: 'מידות 35-43' },
+  { href: 'product-category/boots/', img: '2026/10/marcha-cat-boots.jpg', alt: 'אישה בגשם בפריז נועלת מגפי גומי שחורים', title: 'מגפי גומי', sizes: 'חורף 2026' },
+];
 const BRANCHES = [
   { name: 'סניף ירושלים', address: 'קניון רב שפע', query: 'קניון רב שפע ירושלים' },
   { name: 'סניף בני ברק', address: 'רחוב ירושלים 10', query: 'ירושלים 10 בני ברק' },
@@ -34,8 +39,12 @@ export default function Home() {
         <p className="script-title" aria-hidden="true">Your style</p>
         <h2 className="section-title">קטגוריות</h2>
         <div className="cats">
-          <a href={base + 'product-category/balarina-a/'} style={{ backgroundImage: `url(${up('2026/03/נעליים-כתומות.webp')})` }}><b>בלרינה עגול לנשים וילדות</b><span>מידות - 22-43</span></a>
-          <a href={base + 'product-category/בלרינה-שפיץ/'} style={{ backgroundImage: `url(${up('2026/03/נעלי-שפיץ-1.webp')})` }}><b>בלרינה שפיץ לנשים</b><span>מידות - 35-43</span></a>
+          {CATS.map((c) => (
+            <a key={c.img} href={base + c.href} aria-label={`${c.title} – ${c.sizes}`}>
+              <img src={up(c.img)} alt={c.alt} width="1376" height="768" loading="lazy" decoding="async" />
+              <span className="cats__text"><b>{c.title}</b><span>{c.sizes}</span></span>
+            </a>
+          ))}
         </div>
       </section>
       <section className="container block">
