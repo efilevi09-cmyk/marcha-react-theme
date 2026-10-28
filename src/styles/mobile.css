@@ -45,7 +45,7 @@
   .cartpage__rm{width:40px;height:40px}
   .coupon form{flex-direction:column}
   .coupon .btn{width:100%}
-  .cartpage__relgrid{grid-template-columns:repeat(2,1fr)}
+  .cartpage__relgrid{grid-template-columns:1fr}
   .bundle p{font-size:16px}
 
   /* Footer + Instagram */
