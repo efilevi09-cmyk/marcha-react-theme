@@ -5,15 +5,21 @@ import { ReviewList } from '../components/Reviews.jsx';
 import '../styles/home.css';
 
 const up = (path) => encodeURI(`${window.MARCHA?.uploadsUrl || ''}/${path}`);
+const BRANCHES = [
+  { name: 'סניף ירושלים', address: 'קניון רב שפע', query: 'קניון רב שפע ירושלים' },
+  { name: 'סניף בני ברק', address: 'רחוב ירושלים 10', query: 'ירושלים 10 בני ברק' },
+];
 const PATTERN = up('2025/03/מרשה-בלרינה-נעלים-1.png');
 
 export default function Home() {
   const [hot, setHot] = useState([]);
   const [best, setBest] = useState([]);
+  const [ig, setIg] = useState([]);
   const base = window.MARCHA?.siteUrl || '/';
   useEffect(() => {
     api.getProducts({ per_page: 8, orderby: 'date' }).then(setHot).catch(() => {});
     api.getProducts({ per_page: 8, orderby: 'popularity' }).then(setBest).catch(() => {});
+  api.getInstagram().then((f) => setIg(f.items || [])).catch(() => {});
   }, []);
   return (
     <>
@@ -60,17 +66,45 @@ export default function Home() {
         <h2 className="section-title" id="reviews-title">מה הלקוחות אומרות</h2>
         <ReviewList perPage={6} />
       </section>
-      <section className="block container about">
+      <section className="block container about" aria-labelledby="about-title">
         <p className="script-title" aria-hidden="true">About</p>
-        <h2 className="section-title">מרשה מותג בין לאומי מאז 2005</h2>
-        <p><strong>מרשה בלרינה התחילה</strong> את דרכה בתור קונספט בין לאומי ראשוני וייחודי של דוכני נעלי בלרינה קלאסיות ואופנתיות המעוצבות בהשראה פריזאית.</p>
-        <img className="about__img" src={up('2025/03/אודות-מרשה.png')} alt="מרשה בלרינה" loading="lazy" />
-        <a className="btn btn--black" href={base + 'אודות/'}>עוד עלינו</a>
+        <h2 className="section-title" id="about-title">מרשה מותג בין לאומי מאז 2005</h2>
+        <div className="about__text">
+          <p className="about__lead">נעלי בלרינה<br />עם נשמה פריזאית.</p>
+          <p>מרשה בלרינה נולדה מאהבה<br />לסטייל, לנשיות ולנוחות.</p>
+          <p>התחלנו כדוכנים וחנויות<br />בהשראה פריזאית.</p>
+          <p>עשרות סניפים ברחבי העולם:<br />הונג קונג, הפיליפינים,<br />פראג, דובאי ודרום אפריקה.</p>
+          <p>היום הקסם הזה מגיע<br />ישר אלייך הביתה.</p>
+          <p>נעליים לכל אישה, נערה וילדה,<br />במידות 22 עד 42,<br />בצבעים וסגנונות לכל טעם.</p>
+          <p>אלגנטיות, נוחות ואיכות<br />ללא פשרות.</p>
+          <p className="about__quote">כל צעד הוא ריקוד קטן של שמחה.</p>
+          <a className="btn btn--black" href={base + 'אודות/'}>עוד עלינו</a>
+        </div>
+        <div className="about__media">
+          <img className="about__img" src={up('2025/03/אודות-מרשה.png')} alt="מרשה בלרינה" loading="lazy" />
+          {ig.slice(0, 2).map((it) => <img key={it.src} className="about__thumb" src={it.src} alt="" loading="lazy" />)}
+        </div>
+        <ul className="about__stats">
+          <li><b>2005</b><span>שנת הקמה</span></li>
+          <li><b>עשרות</b><span>סניפים בעולם</span></li>
+          <li><b>22–42</b><span>מידות</span></li>
+          <li><b>25,000+</b><span>לקוחות מרוצות</span></li>
+        </ul>
       </section>
-      <section className="branches" style={{ backgroundImage: `url(${up('2025/03/הסניפים-שלנו.png')})` }}>
-        <h2 className="section-title">הסניפים שלנו</h2>
-        <p>סניף ירושלים – קניון רב שפע</p>
-        <p>סניף בני ברק – רחוב ירושלים 10</p>
+      <section className="branches" aria-labelledby="branches-title" style={{ '--branches-d': `url(${up('2026/03/מרשה-1.webp')})`, '--branches-m': `url(${up('2026/03/נעלי-בלרינה-עגולות-מרשה.webp')})` }}>
+        <div className="branches__inner">
+          <p className="script-title" aria-hidden="true">Visit us</p>
+          <h2 className="section-title" id="branches-title">הסניפים שלנו</h2>
+          <ul className="branches__list">
+            {BRANCHES.map((b) => (
+              <li key={b.name}>
+                <h3>{b.name}</h3>
+                <p>{b.address}</p>
+                <a className="btn btn--mint" href={`https://waze.com/ul?q=${encodeURIComponent(b.query)}&navigate=yes`} target="_blank" rel="noopener noreferrer">ניווט בוויז</a>
+              </li>
+            ))}
+          </ul>
+        </div>
       </section>
     </>
   );
