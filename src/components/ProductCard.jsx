@@ -3,6 +3,7 @@ import { useCart } from '../lib/CartContext.jsx';
 import { Link } from 'react-router-dom';
 import { money, toMinor } from '../lib/format.js';
 import { BUNDLE } from '../lib/config.js';
+import { BasketIcon } from './Icons.jsx';
 
 const toPath = (url) => { try { return new URL(url).pathname; } catch (e) { return url; } };
 
@@ -79,7 +80,7 @@ export default function ProductCard({ p }) {
       )}
       {error && <p className="pcard__error" role="alert">{error}</p>}
       {sizes.length > 0
-        ? <button type="button" className="pcard__btn" disabled={pending} aria-busy={pending} onClick={addToCart}>{pending ? 'מוסיפה…' : size ? 'הוספה לסל' : 'בחרי מידה'}</button>
+        ? <button type="button" className="pcard__btn" disabled={pending} aria-busy={pending} onClick={addToCart}>{size && <BasketIcon className="btn__basket" />}{pending ? 'מוסיפה…' : size ? 'הוספה לסל' : 'בחרי מידה'}</button>
         : <Link to={path} className="pcard__btn">בחר אפשרויות</Link>}
     </article>
   );

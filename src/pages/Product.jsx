@@ -6,7 +6,7 @@ import { BUNDLE } from '../lib/config.js';
 import { money, toMinor } from '../lib/format.js';
 import ProductCard, { Sold } from '../components/ProductCard.jsx';
 import { Stars, ReviewList, ReviewForm } from '../components/Reviews.jsx';
-import { ShareIcon, TruckIcon, ReturnIcon, ShieldIcon, CardIcon, ChatIcon, ZoomIcon, WhatsAppIcon } from '../components/Icons.jsx';
+import { ShareIcon, TruckIcon, ReturnIcon, ShieldIcon, CardIcon, ChatIcon, ZoomIcon, WhatsAppIcon, BasketIcon } from '../components/Icons.jsx';
 import '../styles/product.css';
 import '../styles/reviews.css';
 
@@ -156,7 +156,7 @@ export default function Product() {
               <button type="button" onClick={() => setQty((q) => q + 1)} aria-label="יותר">+</button>
             </div>
             <button className="btn btn--mint" disabled={busy || !p.is_in_stock} onClick={() => submit(true)}>קנה עכשיו</button>
-            <button className="btn btn--black" disabled={busy || !p.is_in_stock} onClick={() => submit(false)}>הוסף לסל</button>
+            <button className="btn btn--black" disabled={busy || !p.is_in_stock} aria-busy={busy} onClick={() => submit(false)}><BasketIcon className="btn__basket" />הוסף לסל</button>
           </div>
 
           <ul className="trust">{TRUST.map(([Icon, t, d]) => <li key={t}><Icon /><b>{t}</b><span>{d}</span></li>)}</ul>
@@ -187,7 +187,7 @@ export default function Product() {
 
       <div className="stickybuy" aria-hidden={false}>
         <span>{unitPrice}</span>
-        <button className="btn btn--black" disabled={busy || !p.is_in_stock} onClick={() => submit(false)}>הוסף לסל</button>
+        <button className="btn btn--black" disabled={busy || !p.is_in_stock} aria-busy={busy} onClick={() => submit(false)}><BasketIcon className="btn__basket" />הוסף לסל</button>
       </div>
       {zoom && img && <Lightbox image={img} onClose={closeZoom} />}
     </>

@@ -15,9 +15,13 @@ body .checkout_coupon button.button,
 body .woocommerce .button.alt,
 body .woocommerce button.button{
   display:inline-flex;align-items:center;justify-content:center;gap:8px;
-  background:#000!important;color:#fff!important;border:2px solid #000!important;border-radius:99px!important;
+  background-color:#000!important;
+  background-image:linear-gradient(to left,var(--c-mint) 50%,#000 50%)!important;
+  background-size:210% 100%!important;background-position:0 0!important;
+  color:#fff!important;border:2px solid #000!important;border-radius:99px!important;
   font-weight:700;text-align:center;text-decoration:none;cursor:pointer;
-  transition:transform .2s ease,background .2s ease,color .2s ease,box-shadow .2s ease,opacity .2s ease;
+  position:relative;overflow:hidden;isolation:isolate;
+  transition:background-position .5s cubic-bezier(.22,.8,.2,1),transform .25s ease,color .35s ease,border-color .35s ease,box-shadow .3s ease,opacity .2s ease;
 }
 body .btn:hover,body .btn--mint:hover,body .btn--black:hover,
 body .pcard__btn:hover,body button.pcard__btn:hover,body article.pcard>.pcard__btn:hover,
@@ -25,7 +29,7 @@ body .cartpage__relgrid .pcard__btn:hover,
 body .woocommerce-checkout #place_order:hover,
 body .checkout_coupon button.button:hover,
 body .woocommerce button.button:hover{
-  background:#262626!important;color:#fff!important;transform:translateY(-2px);box-shadow:0 8px 20px rgba(0,0,0,.22);
+  background-position:100% 0!important;color:#000!important;border-color:var(--c-mint)!important;transform:translateY(-2px);box-shadow:0 10px 24px rgba(3,255,195,.35);
 }
 body .btn:focus-visible,body .pcard__btn:focus-visible,body #place_order:focus-visible{outline:3px solid var(--c-mint);outline-offset:3px}
 body .btn:disabled,body .pcard__btn:disabled,body #place_order:disabled{opacity:.55;transform:none;box-shadow:none;cursor:not-allowed}
@@ -36,8 +40,21 @@ body .woocommerce-checkout #place_order{padding:16px 25px;font-size:20px}
 
 /* on dark backgrounds the black pill gets a white outline so it stays visible */
 body .pagecta .btn,body .showcase__text .btn,body .ftr .btn{border-color:#fff!important}
-body .pagecta .btn:hover,body .showcase__text .btn:hover,body .ftr .btn:hover{background:#fff!important;color:#000!important}
 
 /* The "to checkout" button in the added-to-cart popup is the one green call to action */
-body .bm .btn--mint{background:var(--c-mint)!important;color:#000!important;border-color:var(--c-mint)!important}
-body .bm .btn--mint:hover{background:#000!important;color:#fff!important;border-color:#000!important}
+body .bm .btn--mint{background-color:var(--c-mint)!important;background-image:linear-gradient(to left,#000 50%,var(--c-mint) 50%)!important;color:#000!important;border-color:var(--c-mint)!important}
+body .bm .btn--mint:hover{background-position:100% 0!important;color:#fff!important;border-color:#000!important;box-shadow:0 10px 24px rgba(0,0,0,.28)}
+
+/* wider buttons */
+body .btn,body .btn--mint,body .btn--black{min-width:200px;padding:15px 42px;font-size:19px}
+@media (max-width:767px){body .btn,body .btn--mint,body .btn--black{min-width:min(100%,220px);padding:15px 36px}}
+body .pcard__btn,body button.pcard__btn{min-height:50px;padding:13px 28px}
+
+/* floating basket inside add-to-cart buttons */
+.btn__basket{flex:none;width:24px;height:24px;transform-origin:50% 90%;animation:basket-float 2.6s ease-in-out infinite;filter:drop-shadow(0 2px 2px rgba(0,0,0,.25))}
+body .btn:hover .btn__basket,body .pcard__btn:hover .btn__basket{animation:basket-wiggle .7s ease-in-out infinite}
+body [aria-busy="true"] .btn__basket{animation:basket-fly .9s ease-in infinite}
+@keyframes basket-float{0%,100%{transform:translateY(0) rotate(-4deg)}50%{transform:translateY(-4px) rotate(4deg)}}
+@keyframes basket-wiggle{0%,100%{transform:rotate(0) scale(1.1)}25%{transform:rotate(-14deg) scale(1.15)}75%{transform:rotate(14deg) scale(1.15)}}
+@keyframes basket-fly{0%{transform:translateY(0) scale(1);opacity:1}70%{transform:translateY(-14px) scale(.8);opacity:0}71%{transform:translateY(8px) scale(.8);opacity:0}100%{transform:translateY(0) scale(1);opacity:1}}
+@media (prefers-reduced-motion:reduce){.btn__basket,body .btn:hover .btn__basket{animation:none!important}}
