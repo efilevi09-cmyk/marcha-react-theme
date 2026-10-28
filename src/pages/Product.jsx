@@ -65,7 +65,7 @@ export default function Product() {
         {sizeAttr && (
           <fieldset className="sizes">
             <legend>{sizeAttr.name}</legend>
-            <div>{sizeAttr.terms.map((t) => (
+            <div>{sizeAttr.terms.filter((t) => p.variations.some((v) => v.attributes.some((a) => a.value === t.slug))).map((t) => (
               <button key={t.id} type="button" className={`size${size === t.slug ? ' is-on' : ''}`} aria-pressed={size === t.slug} onClick={() => { setSize(t.slug); setError(''); }}>{t.name}</button>
             ))}</div>
           </fieldset>
