@@ -63,14 +63,15 @@
 /* --- overview tiles ------------------------------------------------------ */
 .page-body--commerce .woocommerce-order-overview {
   list-style: none;
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(148px, 1fr));
+  display: flex;
+  flex-wrap: wrap;
   gap: 12px;
   margin: 0;
   padding: 0;
   border: 0;
 }
 .page-body--commerce .woocommerce-order-overview li {
+  flex: 1 1 150px;
   display: flex;
   flex-direction: column;
   gap: 4px;
@@ -190,6 +191,7 @@
   font-weight: 400;
 }
 .page-body--commerce table.order_details tfoot th { font-weight: 400; color: #555; }
+.page-body--commerce table.order_details tfoot tr.is-discount :where(th, td) { color: #1a7f37; }
 .page-body--commerce table.order_details tfoot td { font-weight: 700; color: #000; }
 .page-body--commerce table.order_details tfoot tr:last-child :where(th, td) {
   padding-top: 16px;

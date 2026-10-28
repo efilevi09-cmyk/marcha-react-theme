@@ -153,6 +153,10 @@ export default function NativeContent() {
       host.appendChild(src);
       const found = analyse(src);
       setPage(found);
+      // Savings read as savings: colour any negative total row green, like the cart does.
+      src.querySelectorAll('.woocommerce-order-details tfoot td').forEach((td) => {
+        if (/^\s*-/.test(td.textContent || '')) td.closest('tr')?.classList.add('is-discount');
+      });
       if (found?.thanks) party = setTimeout(() => celebrate?.(), 450); // confetti for a completed order
     }
     // Checkout form arrives from WooCommerce (maybe after fragments load): bind once it exists.
