@@ -124,3 +124,7 @@ form.woocommerce-checkout #customer_details .col-1,form.woocommerce-checkout #cu
 .woocommerce-checkout-review-order-table tr.woocommerce-shipping-totals td{flex:1;text-align:start}
 .woocommerce-checkout-review-order-table tr.order-total{border-bottom:2px solid #000}
 .woocommerce-checkout-review-order-table tr.order-total th,.woocommerce-checkout-review-order-table tr.order-total td{border:0}
+.woocommerce-checkout table.shop_table{border:0!important;border-radius:0;margin:0}
+.woocommerce-checkout #order_review_heading+#order_review table.shop_table{margin-top:0}
+.woocommerce-checkout .select2-container{width:100%!important}
+.woocommerce-checkout select{appearance:none;background:#fff url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='9' viewBox='0 0 14 9'%3E%3Cpath d='M1 1l6 6 6-6' fill='none' stroke='%23000' stroke-width='2'/%3E%3C/svg%3E") no-repeat left 14px center;padding-inline-end:14px;padding-inline-start:36px}
