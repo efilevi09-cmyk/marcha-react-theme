@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useCart } from '../lib/CartContext.jsx';
 import { money } from '../lib/format.js';
 import { BagIcon, FacebookIcon, InstagramIcon, PhoneIcon, SearchIcon, StarIcon, TruckIcon } from './Icons.jsx';
+import Search from './Search.jsx';
 import '../styles/header.css';
 
 const USPS = [[StarIcon, '25,000+ לקוחות מרוצות'], [PhoneIcon, 'שירות מהיר'], [TruckIcon, 'משלוח מהיר עד הבית']];
@@ -16,6 +17,7 @@ const MENU = [
 export default function Header() {
   const { cart, count, setOpen } = useCart();
   const [menu, setMenu] = useState(false);
+  const [searching, setSearching] = useState(false);
   const base = window.MARCHA?.siteUrl || '/';
   return (
     <header className="hdr">
@@ -25,7 +27,7 @@ export default function Header() {
         <div className="hdr__side">
           <a className="hdr__icon" href="https://www.facebook.com/MarchaBallerina.Israel/" aria-label="Facebook" target="_blank" rel="noopener noreferrer"><FacebookIcon /></a>
           <a className="hdr__icon" href="https://www.instagram.com/marchaballerina/" aria-label="Instagram" target="_blank" rel="noopener noreferrer"><InstagramIcon /></a>
-          <a className="hdr__icon" href={base + '?s='} aria-label="חיפוש"><SearchIcon /></a>
+          <button className="hdr__icon hdr__search" aria-label="חיפוש" aria-haspopup="dialog" onClick={() => setSearching(true)}><SearchIcon /></button>
           <button className="hdr__burger" aria-label="תפריט" aria-expanded={menu} onClick={() => setMenu(!menu)}><span /><span /><span /></button>
         </div>
         <a className="hdr__logo" href={base} aria-label="מרשה בלרינה – דף הבית">
@@ -39,6 +41,7 @@ export default function Header() {
       <nav className={`hdr__menu${menu ? ' is-open' : ''}`} aria-label="ראשי">
         {MENU.map((m) => <a key={m.href} href={base + m.href}>{m.label}</a>)}
       </nav>
+      <Search open={searching} onClose={() => setSearching(false)} />
     </header>
   );
 }

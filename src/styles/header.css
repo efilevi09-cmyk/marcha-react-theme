@@ -24,4 +24,8 @@
 .hdr__bag svg{width:28px;height:28px}
 .hdr__bag .hdr__count{position:absolute;top:-8px;inset-inline-start:-8px;background:#d33;min-width:20px;height:20px;font-size:12px}
 .hdr__total{font-size:18px}
-@media (max-width:1024px){.hdr__side .hdr__icon:nth-child(n+3){display:none}.hdr__usps{display:flex;padding:6px 8px;gap:4px;font-size:13px;justify-content:space-between}.hdr__usps li{gap:4px}.hdr__usps svg{width:18px;height:18px}}
+@media (max-width:1024px){.hdr__usps{display:flex;padding:6px 8px;gap:4px;font-size:13px;justify-content:space-between}.hdr__usps li{gap:4px}.hdr__usps svg{width:18px;height:18px}}
+
+.hdr__search{background:none;border:0;padding:0;color:inherit;transition:transform .2s}
+.hdr__search:hover{transform:scale(1.12)}
+@media (max-width:479px){.hdr__side .hdr__icon:nth-child(-n+2){display:none}}
