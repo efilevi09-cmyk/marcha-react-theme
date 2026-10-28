@@ -11,3 +11,18 @@
 .woocommerce-checkout-review-order-table .product-quantity{white-space:nowrap}
 .mc-item__img{width:48px!important;height:48px!important}
 .woocommerce-checkout-review-order-table thead{display:none}
+
+/* Invalid / missing fields: unmistakable red outline and a short message */
+.woocommerce form .form-row.woocommerce-invalid input.input-text,
+.woocommerce form .form-row.woocommerce-invalid select,
+.woocommerce form .form-row.woocommerce-invalid textarea,
+.woocommerce form .form-row.woocommerce-invalid .select2-selection,
+.woocommerce-checkout .form-row.woocommerce-invalid input.input-text,
+.woocommerce-checkout .form-row.woocommerce-invalid select,
+.woocommerce-checkout .form-row.woocommerce-invalid .select2-selection{border:2px solid #d32f2f!important;background:#fff6f6;box-shadow:0 0 0 3px rgba(211,47,47,.16);outline:0}
+.woocommerce-checkout .form-row.woocommerce-invalid>label{color:#d32f2f;font-weight:700}
+.woocommerce-checkout .form-row.is-flagged::after{content:"נא למלא שדה זה";display:block;margin-top:4px;color:#d32f2f;font-size:14px;font-weight:700}
+.woocommerce-checkout .form-row.is-flagged.validate-email::after{content:"נא למלא כתובת אימייל תקינה"}
+.woocommerce-checkout .form-row.is-flagged.validate-phone::after{content:"נא למלא מספר טלפון תקין"}
+.woocommerce-error{border-inline-start:4px solid #d32f2f}
+.woocommerce-error li a{color:#d32f2f;text-decoration:underline;font-weight:700}

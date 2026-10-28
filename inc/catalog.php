@@ -61,3 +61,20 @@ add_action(
 		);
 	}
 );
+
+/* Checkout: no "company name" field (billing, shipping and account addresses). */
+add_filter(
+	'woocommerce_default_address_fields',
+	function ( $fields ) {
+		unset( $fields['company'] );
+		return $fields;
+	}
+);
+add_filter(
+	'woocommerce_checkout_fields',
+	function ( $fields ) {
+		unset( $fields['billing']['billing_company'], $fields['shipping']['shipping_company'] );
+		return $fields;
+	},
+	99
+);
