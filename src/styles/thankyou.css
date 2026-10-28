@@ -90,6 +90,9 @@
   text-align: start;
 }
 .page-body--commerce .woocommerce-order-overview li::marker { content: none; }
+/* the e-mail is the longest value: give it room so it does not break mid-address */
+.page-body--commerce .woocommerce-order-overview li.email { flex: 2 1 200px; }
+.page-body--commerce .woocommerce-order-overview li.email strong { font-size: 16px; }
 .page-body--commerce .woocommerce-order-overview li strong {
   font-size: 18px;
   font-weight: 700;
