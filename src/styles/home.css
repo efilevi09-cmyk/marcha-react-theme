@@ -113,3 +113,5 @@
 .cats__text{position:absolute;inset-inline:0;bottom:0;display:grid;gap:2px;justify-items:center;padding:34px 12px 14px;background:linear-gradient(to top,rgba(0,0,0,.7),rgba(0,0,0,0));color:#fff;text-shadow:0 1px 6px rgba(0,0,0,.5)}
 .cats__text b{font-size:clamp(18px,1.7vw,24px);white-space:nowrap}
 .cats__text span{font-size:clamp(14px,1.2vw,18px);opacity:.9}
+.cats a .cats__text{position:absolute;z-index:1}
+.cats a .cats__text span,.cats a .cats__text b{position:static}
