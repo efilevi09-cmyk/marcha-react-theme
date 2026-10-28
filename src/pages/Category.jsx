@@ -11,6 +11,7 @@ export default function Category({ all = false }) {
   const [cat, setCat] = useState(null);
   const [terms, setTerms] = useState([]);
   const [colors, setColors] = useState([]);
+  const [catColors, setCatColors] = useState(null);
   const [orderby, setOrderby] = useState('menu_order');
   const [items, setItems] = useState([]);
   const [meta, setMeta] = useState({ total: 0, pages: 1, page: 1 });
@@ -18,6 +19,10 @@ export default function Category({ all = false }) {
   const reqId = useRef(0);
 
   useEffect(() => { api.getColorTerms().then(setTerms).catch(() => {}); }, []);
+  useEffect(() => {
+    setCatColors(null); setColors([]);
+    if (!all && cat) api.getCategoryColorIds(cat.id).then(setCatColors).catch(() => {});
+  }, [cat, all]);
   useEffect(() => {
     setCat(null);
     if (all || !slug) return;
@@ -55,7 +60,7 @@ export default function Category({ all = false }) {
         <h2 className="filter__title">בחרו צבע מבוקש</h2>
         <div className="filter__row">
         <ul className="swatches">
-          {terms.filter((t) => COLOR_HEX[t.name.trim()]).map((t) => (
+          {terms.filter((t) => COLOR_HEX[t.name.trim()] && (all || !catColors || catColors.has(t.id))).map((t) => (
             <li key={t.id}>
               <button
                 type="button"

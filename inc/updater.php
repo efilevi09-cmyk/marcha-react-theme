@@ -40,6 +40,9 @@ function marcha_run_update() {
 	global $wp_filesystem;
 	$res = copy_dir( $dirs[0], get_template_directory() );
 	$wp_filesystem->delete( $dest, true );
+	if ( ! is_wp_error( $res ) ) {
+		marcha_purge_caches();
+	}
 	return $res;
 }
 
@@ -59,4 +62,26 @@ function marcha_update_screen() {
 	echo '<form method="post">';
 	wp_nonce_field( 'marcha_update' );
 	echo '<button class="button button-primary" name="marcha_update" value="1">עדכני עכשיו</button></form></div>';
+}
+
+
+/**
+ * Purge page/asset caches so guests see the new build immediately.
+ */
+function marcha_purge_caches() {
+	if ( function_exists( 'rocket_clean_domain' ) ) {
+		rocket_clean_domain(); // WP Rocket.
+	}
+	if ( function_exists( 'rocket_clean_minify' ) ) {
+		rocket_clean_minify();
+	}
+	if ( function_exists( 'wp_cache_clear_cache' ) ) {
+		wp_cache_clear_cache(); // WP Super Cache.
+	}
+	do_action( 'litespeed_purge_all' ); // LiteSpeed.
+	do_action( 'sg_cachepress_purge_cache' ); // SiteGround.
+	do_action( 'autoptimize_action_cachepurged' );
+	if ( function_exists( 'wp_cache_flush' ) ) {
+		wp_cache_flush();
+	}
 }
