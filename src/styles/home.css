@@ -88,3 +88,4 @@
 @media (min-width:768px){.showcase__arrow{top:50%}.showcase__dots{bottom:18px}}
 @media (max-width:767px){.showcase__arrow{width:36px;height:36px;font-size:24px}.showcase__dots{bottom:10px}}
 @media (prefers-reduced-motion:reduce){.showcase__track{transition:none}}
+@media (min-width:768px){.showcase__text{padding-inline:calc(var(--gutter) + 44px)}}
