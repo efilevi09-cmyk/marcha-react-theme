@@ -92,3 +92,24 @@ button.pcard__btn:disabled{opacity:.6}
 .pcard__sizes{display:grid;grid-template-columns:repeat(auto-fill,34px);justify-content:start;gap:5px;margin-top:0;padding:8px 10px 10px;direction:rtl}
 .pcard__sizes button{min-width:0;width:34px}
 .pcard>.pcard__btn,.pcard>button.pcard__btn{margin-top:auto}
+
+/* ===== Mobile product cards: horizontal soft card (image start, details, sizes in one scrollable row, pill button) ===== */
+@media (max-width:767px){
+  .hs__item{flex-basis:90%}
+  .hs__item--feature{flex-basis:70%}
+  .grid{grid-template-columns:1fr!important;gap:14px}
+  article.pcard{border:0;border-radius:16px;box-shadow:0 6px 24px rgba(0,0,0,.08);padding:14px;gap:10px;overflow:hidden}
+  article.pcard .pcard__link{display:grid;grid-template-columns:104px minmax(0,1fr);grid-template-areas:"img h3" "img sold" "img price";column-gap:14px;align-content:start;align-items:start}
+  article.pcard .pcard__link img{grid-area:img;width:104px;height:104px;object-fit:cover;border-radius:12px}
+  article.pcard h3{grid-area:h3;margin:0;min-height:0;font-size:16px;font-weight:700;-webkit-line-clamp:2}
+  article.pcard .pcard__sold{grid-area:sold;margin:2px 0 0;min-height:0}
+  article.pcard .pcard__sold.is-empty{display:none}
+  article.pcard .pcard__price{grid-area:price;margin:6px 0 0;align-self:end}
+  article.pcard .pcard__badge{display:none}
+  article.pcard .pcard__sizes{display:flex;flex-wrap:nowrap;gap:6px;overflow-x:auto;padding:2px 2px 6px;margin:0;scroll-snap-type:x proximity;-webkit-overflow-scrolling:touch;scrollbar-width:none}
+  article.pcard .pcard__sizes::-webkit-scrollbar{display:none}
+  article.pcard .pcard__sizes button{flex:none;width:40px;height:36px;border-radius:8px;scroll-snap-align:start}
+  article.pcard>.pcard__btn,article.pcard>button.pcard__btn{width:100%;margin:0;border-radius:99px;background:var(--c-mint);color:#000;font-weight:700;padding:13px}
+  article.pcard>.pcard__btn:hover{background:#000;color:#fff}
+  article.pcard .pcard__error{margin:0}
+}
