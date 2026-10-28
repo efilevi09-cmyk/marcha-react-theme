@@ -14,6 +14,17 @@ export default function Showcase({ slides, up }) {
   const n = slides.length;
   const go = useCallback((k) => setI(((k % n) + n) % n), [n]);
 
+  // Publish the real header height so the banner can fit the first screen exactly.
+  useEffect(() => {
+    const hdr = document.querySelector('.hdr');
+    if (!hdr) return undefined;
+    const set = () => document.documentElement.style.setProperty('--hdr-h', `${hdr.offsetHeight}px`);
+    set();
+    const ro = new ResizeObserver(set);
+    ro.observe(hdr);
+    return () => ro.disconnect();
+  }, []);
+
   useEffect(() => {
     if (paused || n < 2 || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return undefined;
     const t = setTimeout(() => go(i + 1), DELAY);
@@ -41,8 +52,11 @@ export default function Showcase({ slides, up }) {
       <div className="showcase__viewport" dir="ltr" onPointerDown={onDown} onPointerUp={onUp} onPointerCancel={() => { drag.current = null; }}>
         <div className="showcase__track" style={{ transform: `translateX(${-i * 100}%)` }}>
           {slides.map((b, k) => (
-            <article key={b.slug} dir="rtl" className={`showcase__item showcase__item--${b.side}`} role="group" aria-roledescription="slide" aria-label={`${k + 1} מתוך ${n}`} aria-hidden={k !== i}>
-              <img src={up(b.img)} alt={b.alt} width="1376" height="768" decoding="async" loading={k === 0 ? 'eager' : 'lazy'} fetchpriority={k === 0 ? 'high' : undefined} draggable="false" />
+            <article key={b.slug} dir="rtl" style={{ '--bg': `url(${up(b.img)})` }} className={`showcase__item showcase__item--${b.side}`} role="group" aria-roledescription="slide" aria-label={`${k + 1} מתוך ${n}`} aria-hidden={k !== i}>
+              <picture>
+                <source media="(max-width: 767px)" srcSet={up(b.imgM)} width="928" height="1152" />
+                <img src={up(b.img)} alt={b.alt} width="1584" height="672" decoding="async" loading={k === 0 ? 'eager' : 'lazy'} fetchPriority={k === 0 ? 'high' : undefined} draggable="false" />
+              </picture>
               <div className="showcase__text">
                 <p className="showcase__eyebrow" aria-hidden="true">{b.eyebrow}</p>
                 <h2>{b.title}</h2>

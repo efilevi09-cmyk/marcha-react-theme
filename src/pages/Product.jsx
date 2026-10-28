@@ -4,7 +4,7 @@ import * as api from '../lib/api.js';
 import { useCart } from '../lib/CartContext.jsx';
 import { BUNDLE } from '../lib/config.js';
 import { money, toMinor } from '../lib/format.js';
-import ProductCard from '../components/ProductCard.jsx';
+import ProductCard, { Sold } from '../components/ProductCard.jsx';
 import { Stars, ReviewList, ReviewForm } from '../components/Reviews.jsx';
 import { ShareIcon, TruckIcon, ReturnIcon, ShieldIcon, CardIcon, ChatIcon, ZoomIcon, WhatsAppIcon } from '../components/Icons.jsx';
 import '../styles/product.css';
@@ -135,6 +135,7 @@ export default function Product() {
             {rating?.count > 0 ? <button type="button" className="linklike" onClick={() => { setTab('reviews'); document.querySelector('.ptabs')?.scrollIntoView({ behavior: 'smooth' }); }}><Stars value={rating.average} /> <span>({rating.count} ביקורות)</span></button> : <span>(אין ביקורות עדיין)</span>}
             <b className={p.is_in_stock ? 'in' : 'out'}>{p.is_in_stock ? 'במלאי' : 'אזל מהמלאי'}</b>
           </p>
+          <Sold n={p.extensions?.marcha?.sold} />
           <p className="product__price"><s>{money(p.prices.regular_price, p.prices)}</s> <strong>{unitPrice}</strong></p>
           <div className="product__desc" dangerouslySetInnerHTML={{ __html: p.short_description || '' }} />
 

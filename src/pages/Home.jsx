@@ -1,14 +1,14 @@
 import React, { useEffect, useState } from 'react';
 import * as api from '../lib/api.js';
 import Showcase from '../components/Showcase.jsx';
-import ProductCard from '../components/ProductCard.jsx';
+import ProductSection from '../components/ProductSection.jsx';
 import { ReviewList } from '../components/Reviews.jsx';
 import '../styles/home.css';
 
 const up = (path) => encodeURI(`${window.MARCHA?.uploadsUrl || ''}/${path}`);
 const SHOWCASE = [
-  { slug: 'flats', side: 'right', img: '2026/10/marcha-hero-flats-hq.jpg', alt: 'אישה בבית קפה פריזאי נועלת נעלי בובה ורודות של מרשה בלרינה', eyebrow: 'Café de Paris', title: 'נעלי בובה לכל יום', text: '66 דגמים עגולים בצבעים שאי אפשר לבחור ביניהם – ועוד 3 זוגות ב-300 ₪.', cta: 'לנעלי הבובה', to: '/product-category/balarina-a/' },
-  { slug: 'boots', side: 'left', img: '2026/10/marcha-hero-boots-hq.jpg', alt: 'שתי נשים בפריז בגשם נועלות מגפי גומי קצרים של מרשה בלרינה', eyebrow: 'Rainy Paris', title: 'מגפי גומי לחורף', text: 'מגפי צ׳לסי קצרים ואלגנטיים – שחור מבריק, קטיפה ואפור. יוצאים לגשם בסטייל.', cta: 'למגפיים', to: '/product-category/boots/' },
+  { slug: 'flats', side: 'right', img: '2026/10/marcha-hero-flats-wide.jpg', imgM: '2026/10/marcha-hero-flats-tall.jpg', alt: 'אישה בבית קפה פריזאי נועלת נעלי בובה ורודות של מרשה בלרינה', eyebrow: 'Café de Paris', title: 'נעלי בובה לכל יום', text: '66 דגמים עגולים בצבעים שאי אפשר לבחור ביניהם – ועוד 3 זוגות ב-300 ₪.', cta: 'לנעלי הבובה', to: '/product-category/balarina-a/' },
+  { slug: 'boots', side: 'left', img: '2026/10/marcha-hero-boots-wide.jpg', imgM: '2026/10/marcha-hero-boots-tall.jpg', alt: 'שתי נשים בפריז בגשם נועלות מגפי גומי קצרים של מרשה בלרינה', eyebrow: 'Rainy Paris', title: 'מגפי גומי לחורף', text: 'מגפי צ׳לסי קצרים ואלגנטיים – שחור מבריק, קטיפה ואפור. יוצאים לגשם בסטייל.', cta: 'למגפיים', to: '/product-category/boots/' },
 ];
 const BRANCHES = [
   { name: 'סניף ירושלים', address: 'קניון רב שפע', query: 'קניון רב שפע ירושלים' },
@@ -17,29 +17,19 @@ const BRANCHES = [
 const PATTERN = up('2025/03/מרשה-בלרינה-נעלים-1.png');
 
 export default function Home() {
-  const [hot, setHot] = useState([]);
-  const [best, setBest] = useState([]);
+  const [terms, setTerms] = useState([]);
   const [ig, setIg] = useState([]);
   const base = window.MARCHA?.siteUrl || '/';
   useEffect(() => {
-    api.getProducts({ per_page: 8, orderby: 'date' }).then(setHot).catch(() => {});
-    api.getProducts({ per_page: 8, orderby: 'popularity' }).then(setBest).catch(() => {});
+    api.getColorTerms().then(setTerms).catch(() => {});
   api.getInstagram().then((f) => setIg(f.items || [])).catch(() => {});
   }, []);
   return (
     <>
       <h1 className="sr-only">מרשה בלרינה – נעלי בובה ובלרינה</h1>
       <Showcase slides={SHOWCASE} up={up} />
-      <section className="block block--pattern" style={{ '--pattern': `url(${PATTERN})` }}>
-        <div className="container">
-          <p className="script-title" aria-hidden="true">pariz</p>
-          <h2 className="section-title">הכי חם</h2>
-          <div className="grid">
-            <figure className="grid__feature"><img src={up('2026/03/נעל-תכלת.webp')} alt="נעלי בלרינה בצבע תכלת" loading="lazy" /></figure>
-            {hot.map((p) => <ProductCard key={p.id} p={p} />)}
-          </div>
-        </div>
-      </section>
+      <ProductSection id="hot-title" title="הכי חם" script="pariz" orderby="popularity" terms={terms} pattern={PATTERN}
+        feature={<figure className="grid__feature"><img src={up('2026/03/נעל-תכלת.webp')} alt="נעלי בלרינה בצבע תכלת" loading="lazy" /></figure>} />
       <section className="block container">
         <p className="script-title" aria-hidden="true">Your style</p>
         <h2 className="section-title">קטגוריות</h2>
@@ -53,13 +43,7 @@ export default function Home() {
           <img src={up('2026/04/כל-צעד-הוא-סיפור-יפה.webp')} alt="כל צעד הוא סיפור יפה" loading="lazy" />
         </a>
       </section>
-      <section className="block block--pattern" style={{ '--pattern': `url(${PATTERN})` }}>
-        <div className="container">
-          <p className="script-title" aria-hidden="true">Warm colors</p>
-          <h2 className="section-title">הכי נמכרים</h2>
-          <div className="grid">{best.map((p) => <ProductCard key={p.id} p={p} />)}</div>
-        </div>
-      </section>
+      <ProductSection id="new-title" title="חדש באתר" script="New in" orderby="date" terms={terms} pattern={PATTERN} />
       <section className="block container home-reviews" aria-labelledby="reviews-title">
         <p className="script-title" aria-hidden="true">Reviews</p>
         <h2 className="section-title" id="reviews-title">מה הלקוחות אומרות</h2>
