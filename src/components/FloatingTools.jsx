@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { useCart } from '../lib/CartContext.jsx';
 import { WHATSAPP_URL } from '../lib/config.js';
-import { AccessIcon, BagIcon, WhatsAppIcon } from './Icons.jsx';
+import { AccessIcon, BasketIcon, WhatsAppIcon } from './Icons.jsx';
 import '../styles/floating.css';
 
 const STORE_KEY = 'marcha_a11y';
@@ -58,7 +58,7 @@ export default function FloatingTools() {
       <a className="float float--wa" href={WHATSAPP_URL} target="_blank" rel="noopener noreferrer" aria-label="שירות לקוחות בוואטסאפ"><WhatsAppIcon /></a>
       {!open && (
         <button type="button" className="float float--cart" onClick={() => setOpen(true)} aria-label={`פתיחת העגלה, ${count} פריטים`}>
-          <BagIcon width="26" height="26" />
+          <BasketIcon width="32" height="32" />
           {count > 0 && <span className="float__badge">{count}</span>}
         </button>
       )}

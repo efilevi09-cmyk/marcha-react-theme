@@ -31,3 +31,7 @@ html.a11y-motion *,html.a11y-motion *::before,html.a11y-motion *::after{animatio
 .float--cart{animation-delay:.4s}.float--a11y{animation-delay:.8s}
 .float:hover{animation-play-state:paused}
 @keyframes float-breathe{0%,100%{transform:scale(1)}50%{transform:scale(1.08)}}
+
+/* Basket icon is coloured: give the floating button a light face */
+.float--cart{background:#fff;box-shadow:0 0 0 2px #000,0 6px 18px rgba(0,0,0,.28)}
+.float--cart .float__badge{top:-6px;inset-inline-end:-6px;box-shadow:0 0 0 2px #fff}

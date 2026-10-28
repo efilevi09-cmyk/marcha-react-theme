@@ -20,3 +20,7 @@
 .ig__icon{position:absolute;inset-block-start:10px;inset-inline-end:10px;width:26px;height:26px;color:#fff;filter:drop-shadow(0 1px 3px rgba(0,0,0,.5))}
 .ig__grid a:focus-visible{outline:3px solid var(--c-mint);outline-offset:-3px}
 @media(min-width:768px){.ig__grid{grid-template-columns:repeat(4,1fr)}}
+
+/* no white gap between the Instagram strip and the footer */
+.ig + .ftr{margin-top:0}
+.ig{padding-bottom:0}

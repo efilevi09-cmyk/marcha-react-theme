@@ -29,3 +29,6 @@
 .hdr__search{background:none;border:0;padding:0;color:inherit;transition:transform .2s}
 .hdr__search:hover{transform:scale(1.12)}
 @media (max-width:479px){.hdr__side .hdr__icon:nth-child(-n+2){display:none}}
+.hdr__bag{position:relative;display:inline-grid;place-items:center}
+.hdr__bag svg{width:34px;height:34px}
+.hdr__count{position:absolute;top:-6px;inset-inline-end:-8px;min-width:20px;height:20px;font-size:12px;box-shadow:0 0 0 2px #fff}

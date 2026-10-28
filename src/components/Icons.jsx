@@ -17,3 +17,13 @@ export const ChatIcon = (p) => (<svg {...base} {...p}><path d="M4 5h16v11H9l-5 4
 export const ZoomIcon = (p) => (<svg {...base} {...p} width="18" height="18"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5" /></svg>);
 export const WhatsAppIcon = (p) => (<svg viewBox="0 0 24 24" width="28" height="28" fill="currentColor" aria-hidden="true" {...p}><path d="M12 2.2a9.8 9.8 0 0 0-8.4 14.8L2.3 21.8l4.9-1.3A9.8 9.8 0 1 0 12 2.2zm0 1.8a8 8 0 1 1-4.2 14.8l-.3-.2-2.9.8.8-2.8-.2-.3A8 8 0 0 1 12 4zm-3 3.7c-.2 0-.5.1-.7.4-.3.3-1 1-1 2.4s1 2.8 1.2 3c.1.2 2 3.1 4.9 4.3 2.4 1 2.9.8 3.4.7.5 0 1.7-.7 1.9-1.4.2-.7.2-1.2.2-1.4l-.5-.3-1.8-.9c-.3-.1-.5-.1-.7.1l-.8 1c-.1.2-.3.2-.6.1-.3-.1-1.1-.4-2.1-1.3-.8-.7-1.3-1.5-1.5-1.8-.1-.3 0-.4.1-.5l.4-.5.3-.4v-.5l-.8-2c-.2-.5-.4-.5-.6-.5z"/></svg>);
 export const AccessIcon = (p) => (<svg {...base} {...p} width="28" height="28"><circle cx="12" cy="4.5" r="1.8" /><path d="M4.5 8.5 12 10l7.5-1.5M12 10v4.5m0 0-3 5.5m3-5.5 3 5.5" /></svg>);
+
+/** Wicker basket – the shop's cart icon (same basket as the "added to cart" dialog). */
+export const BasketIcon = (p) => (
+  <svg viewBox="0 0 32 32" width="28" height="28" aria-hidden="true" focusable="false" {...p}>
+    <path d="M7.5 14.5C8 8 11.5 4.5 16 4.5s8 3.5 8.5 10" fill="none" stroke="#9a5a2b" strokeWidth="2.2" strokeLinecap="round" />
+    <path d="M3 13.5h26l-2.6 13.2a2.6 2.6 0 0 1-2.5 2.1H8.1a2.6 2.6 0 0 1-2.5-2.1z" fill="#c8793a" />
+    <path d="M3 13.5h26v2.8H3z" fill="#a8602b" />
+    <path d="M7 18.8h18M7.8 22.6h16.4M12 16.3l.7 12.4M20 16.3l-.7 12.4M16 16.3v12.4" stroke="#8a4d22" strokeWidth="1.3" strokeLinecap="round" fill="none" />
+  </svg>
+);

@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useCart } from '../lib/CartContext.jsx';
 import { money } from '../lib/format.js';
-import { BagIcon, FacebookIcon, InstagramIcon, PhoneIcon, SearchIcon, StarIcon, TruckIcon } from './Icons.jsx';
+import { BasketIcon, FacebookIcon, InstagramIcon, PhoneIcon, SearchIcon, StarIcon, TruckIcon } from './Icons.jsx';
 import Search from './Search.jsx';
 import '../styles/header.css';
 
@@ -34,7 +34,7 @@ export default function Header() {
           <img src={`${window.MARCHA?.uploadsUrl || ''}/2025/03/Marchalogo-1-300x111.png`} alt="Marcha Ballerina" width="150" height="55" />
         </a>
         <button className="hdr__cart" aria-label="פתחי עגלה" onClick={() => setOpen(true)}>
-          <span className="hdr__bag"><BagIcon /><b className="hdr__count">{count}</b></span>
+          <span className="hdr__bag"><BasketIcon /><b className="hdr__count">{count}</b></span>
           <span className="hdr__total">{cart ? money(String(Number(cart.totals.total_items) + Number(cart.totals.total_fees || 0)), cart.totals) : ''}</span>
         </button>
       </div>
