@@ -30,6 +30,25 @@ async function request(path, { method = 'GET', body, headers = {}, withMeta = fa
   return withMeta ? { data, total: Number(res.headers.get('X-WP-Total') || 0), pages: Number(res.headers.get('X-WP-TotalPages') || 1) } : data;
 }
 
+export const getProducts = (params = {}) =>
+  request('wc/store/v1/products?' + new URLSearchParams({ per_page: 24, ...params }));
+/** Colour filter uses the shop's own `zeva` taxonomy (same one the old JetSmartFilters used). */
+export const getColorTerms = () => request('wp/v2/zeva?per_page=100&hide_empty=true&_fields=id,name,count');
+/** Colour term ids that actually occur in a category (so empty swatches are hidden). */
+export const getCategoryColorIds = (category) =>
+  request(`wp/v2/product?per_page=100&_fields=zeva&product_cat=${category}`).then((r) => new Set(r.flatMap((x) => x.zeva || [])));
+const productIdsByColor = (colors, category) =>
+  request(`wp/v2/product?per_page=100&_fields=id&zeva=${colors.join(',')}${category ? `&product_cat=${category}` : ''}`).then((r) => r.map((x) => x.id));
+
+export const queryProducts = async ({ colors = [], ...params } = {}) => {
+  if (colors.length) {
+    const ids = await productIdsByColor(colors, params.category);
+    if (!ids.length) return { data: [], total: 0, pages: 1 };
+    params = { ...params, include: ids.join(',') };
+    delete params.category;
+  }
+  return request('wc/store/v1/products?' + new URLSearchParams({ per_page: 24, ...params }).toString(), { withMeta: true });
+};
 /** Resolve by slug through wp/v2 (handles Hebrew slugs reliably), then load the full product from the Store API. */
 export const getProduct = async (slug) => {
   const hit = cachedProduct(slug);
