@@ -1,0 +1,20 @@
+.banner{min-height:200px;background:#444 center/cover;color:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;padding:32px var(--gutter);text-align:center;position:relative}
+.banner::before{content:"";position:absolute;inset:0;background:rgba(0,0,0,.45)}
+.banner>*{position:relative;margin:0}
+.banner h1{font-size:clamp(28px,4vw,48px)}
+.banner__desc{max-width:900px;font-size:18px}
+.shop{padding-block:24px}
+.filter__title{font-size:20px;margin:0 0 12px}
+.swatches{list-style:none;display:flex;flex-wrap:wrap;gap:12px;padding:0;margin:0 0 16px}
+.swatch{width:36px;height:36px;border:1px solid #ccc;background:var(--sw);padding:0;transition:transform .15s}
+.swatch:hover{transform:scale(1.08)}
+.swatch.is-on{outline:3px solid #000;outline-offset:2px}
+.reset{background:#fff;border:0;box-shadow:0 2px 10px rgba(0,0,0,.2);padding:12px 20px;font-size:18px}
+.reset:disabled{opacity:.5}
+.toolbar{display:flex;flex-wrap:wrap;gap:12px;justify-content:space-between;align-items:center;margin:24px 0 12px}
+.toolbar p{margin:0}
+.toolbar select{padding:12px;font:inherit;border:1px solid #333;background:#fff}
+.more{display:block;margin:24px auto 0}
+.pcard__link{display:block;position:relative}
+.pcard__price s{opacity:.6;margin-inline-end:6px}
+.pcard__btn{display:block;background:#000;color:#fff;text-align:center;padding:14px;margin:0 10px 10px}

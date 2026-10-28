@@ -3,7 +3,7 @@ const cfg = () => window.MARCHA || { restUrl: '/wp-json/', siteUrl: '/', nonce: 
 let cartToken = null;
 try { cartToken = sessionStorage.getItem('marcha_cart_token'); } catch (e) { /* storage unavailable */ }
 
-async function request(path, { method = 'GET', body, headers = {} } = {}) {
+async function request(path, { method = 'GET', body, headers = {}, withMeta = false } = {}) {
   const { restUrl, nonce } = cfg();
   const res = await fetch(restUrl.replace(/\/$/, '') + '/' + path.replace(/^\//, ''), {
     method,
@@ -16,11 +16,22 @@ async function request(path, { method = 'GET', body, headers = {} } = {}) {
   const nn = res.headers.get('Nonce');
   if (nn && window.MARCHA) window.MARCHA.nonce = nn;
   if (!res.ok) throw new Error((await res.json().catch(() => ({}))).message || res.statusText);
-  return res.json();
+  const data = await res.json();
+  return withMeta ? { data, total: Number(res.headers.get('X-WP-Total') || 0), pages: Number(res.headers.get('X-WP-TotalPages') || 1) } : data;
 }
 
 export const getProducts = (params = {}) =>
   request('wc/store/v1/products?' + new URLSearchParams({ per_page: 24, ...params }));
+export const queryProducts = ({ colors = [], ...params } = {}) => {
+  const q = new URLSearchParams({ per_page: 24, ...params });
+  colors.forEach((id, i) => {
+    q.set(`attributes[${i}][attribute]`, 'pa_color');
+    q.set(`attributes[${i}][term_id]`, id);
+  });
+  if (colors.length) q.set('attribute_relation', 'IN');
+  return request('wc/store/v1/products?' + q.toString(), { withMeta: true });
+};
+export const getColorTerms = () => request('wc/store/v1/products/attributes/2/terms?per_page=100');
 export const getProduct = (slug) => request('wc/store/v1/products?slug=' + encodeURIComponent(slug)).then((r) => r[0]);
 export const getCategories = () => request('wc/store/v1/products/categories?per_page=50');
 export const getCart = () => request('wc/store/v1/cart');
