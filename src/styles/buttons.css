@@ -1,0 +1,39 @@
+/* One button language for the whole shop: black pill, white bold text (same as the product-card button).
+   Loaded last so it wins over the per-page experiments above. */
+body .btn,
+body .btn--mint,
+body .btn--black,
+body .pcard__btn,
+body button.pcard__btn,
+body article.pcard>.pcard__btn,
+body article.pcard>button.pcard__btn,
+body .cartpage__relgrid .pcard__btn,
+body .cartpage__relgrid button.pcard__btn,
+body.woocommerce-checkout #place_order,
+body .woocommerce-checkout #place_order,
+body .checkout_coupon button.button,
+body .woocommerce .button.alt,
+body .woocommerce button.button{
+  display:inline-flex;align-items:center;justify-content:center;gap:8px;
+  background:#000!important;color:#fff!important;border:2px solid #000!important;border-radius:99px!important;
+  font-weight:700;text-align:center;text-decoration:none;cursor:pointer;
+  transition:transform .2s ease,background .2s ease,color .2s ease,box-shadow .2s ease,opacity .2s ease;
+}
+body .btn:hover,body .btn--mint:hover,body .btn--black:hover,
+body .pcard__btn:hover,body button.pcard__btn:hover,body article.pcard>.pcard__btn:hover,
+body .cartpage__relgrid .pcard__btn:hover,
+body .woocommerce-checkout #place_order:hover,
+body .checkout_coupon button.button:hover,
+body .woocommerce button.button:hover{
+  background:#262626!important;color:#fff!important;transform:translateY(-2px);box-shadow:0 8px 20px rgba(0,0,0,.22);
+}
+body .btn:focus-visible,body .pcard__btn:focus-visible,body #place_order:focus-visible{outline:3px solid var(--c-mint);outline-offset:3px}
+body .btn:disabled,body .pcard__btn:disabled,body #place_order:disabled{opacity:.55;transform:none;box-shadow:none;cursor:not-allowed}
+
+/* full-width ones keep full width */
+body .woocommerce-checkout #place_order,body article.pcard>.pcard__btn,body article.pcard>button.pcard__btn,body .cartpage__relgrid .pcard__btn,body .cartpage__sum .btn,body .sc .btn{display:flex;width:100%}
+body .woocommerce-checkout #place_order{padding:16px 25px;font-size:20px}
+
+/* on dark backgrounds the black pill gets a white outline so it stays visible */
+body .pagecta .btn,body .showcase__text .btn,body .ftr .btn{border-color:#fff!important}
+body .pagecta .btn:hover,body .showcase__text .btn:hover,body .ftr .btn:hover{background:#fff!important;color:#000!important}
