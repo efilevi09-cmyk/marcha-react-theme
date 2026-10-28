@@ -48,12 +48,12 @@ export default function Category({ all = false }) {
       <div className="container shop">
         <h2 className="filter__title">בחרו צבע מבוקש</h2>
         <ul className="swatches">
-          {terms.map((t) => (
+          {terms.filter((t) => COLOR_HEX[t.name.trim()]).map((t) => (
             <li key={t.id}>
               <button
                 type="button"
                 className={`swatch${colors.includes(t.id) ? ' is-on' : ''}`}
-                style={{ '--sw': COLOR_HEX[t.name] || '#ccc' }}
+                style={{ '--sw': COLOR_HEX[t.name.trim()] }}
                 aria-pressed={colors.includes(t.id)}
                 aria-label={t.name}
                 title={t.name}
