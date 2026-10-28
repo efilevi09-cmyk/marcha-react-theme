@@ -4,7 +4,7 @@
  */
 defined( 'ABSPATH' ) || exit;
 
-define( 'MARCHA_THEME_VERSION', '0.1.16' );
+define( 'MARCHA_THEME_VERSION', '0.1.17' );
 
 add_action( 'after_setup_theme', function () {
 	add_theme_support( 'title-tag' );
@@ -117,16 +117,3 @@ add_action( 'template_redirect', function () {
 }, PHP_INT_MAX );
 
 require_once get_template_directory() . '/inc/updater.php';
-
-
-/**
- * The HTML shell references versioned assets (?ver=filemtime). If a page cache serves an old shell,
- * guests keep the old bundle. Tell caches (WP Rocket and generic) not to store the shell for guests.
- */
-add_action( 'template_redirect', function () {
-	if ( ! defined( 'DONOTCACHEPAGE' ) ) {
-		define( 'DONOTCACHEPAGE', true );
-	}
-	nocache_headers();
-}, 0 );
-add_filter( 'do_rocket_generate_caching_files', '__return_false' );
