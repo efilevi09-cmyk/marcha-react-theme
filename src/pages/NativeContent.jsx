@@ -60,6 +60,9 @@ const norm = (t) => t.replace(/\s+/g, ' ').trim();
 
 /** Reads title / script accent out of the content and decides how to present it. */
 function analyse(src) {
+  // Checkout and "order received" keep their WooCommerce markup but get the same branded hero as content pages.
+  if (src.querySelector('form.checkout')) return { title: 'תשלום', accent: 'Checkout', rtl: true, legal: false, toc: [], commerce: true };
+  if (src.querySelector('.woocommerce-order')) return { title: 'תודה על ההזמנה', accent: 'Thank you', rtl: true, legal: false, toc: [], commerce: true };
   if (src.querySelector('.woocommerce, form.checkout, .woocommerce-MyAccount-navigation')) return null; // commerce flows keep their own layout
   const h1 = src.querySelector('h1');
   const title = norm(h1?.textContent || document.title.split(/[–|-]/)[0]);
@@ -102,23 +105,23 @@ export default function NativeContent() {
   const dir = page ? (page.rtl ? 'rtl' : 'ltr') : undefined;
   return (
     <>
-      {showOffer && <div key="offer" className="container checkout-offer"><BundleBar count={count} shopLink /></div>}
       {page && (
         <header key="hero" className="pagehero">
           <p className="pagehero__accent" aria-hidden="true">{page.accent}</p>
           <h1 className="pagehero__title">{page.title}</h1>
         </header>
       )}
-      <div key="body" className={`container native-content${page ? ` is-page${page.legal ? ' is-legal' : ''}` : ''}`}>
+      {showOffer && <div key="offer" className="container checkout-offer"><BundleBar count={count} shopLink /></div>}
+      <div key="body" className={`container native-content${page?.commerce ? ' is-commerce' : page ? ` is-page${page.legal ? ' is-legal' : ''}` : ''}`}>
         {page?.toc.length > 0 && (
           <nav className="page-toc" aria-label="תוכן עניינים" dir={dir}>
             <strong>{page.rtl ? 'תוכן עניינים' : 'Contents'}</strong>
             <ol>{page.toc.map((t) => <li key={t.id}><a href={`#${t.id}`}>{t.text}</a></li>)}</ol>
           </nav>
         )}
-        <div className="page-body" ref={ref} dir={dir} />
+        <div className={`page-body${page?.commerce ? ' page-body--commerce' : ''}`} ref={ref} dir={dir} />
       </div>
-      {page && !page.legal && (
+      {page && !page.legal && !page.commerce && (
         <section key="cta" className="container pagecta" dir={dir}>
           <p>{page.rtl ? 'מוכנה למצוא את הזוג שלך?' : 'Ready to find your pair?'}</p>
           <div>
