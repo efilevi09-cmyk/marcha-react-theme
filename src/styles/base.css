@@ -13,3 +13,4 @@ button{font:inherit;cursor:pointer}
 .script-title{font-family:var(--f-latin);font-size:clamp(40px,5vw,72px);text-align:center;line-height:1;margin:0;opacity:.18}
 .section-title{font-size:clamp(28px,4vw,48px);font-weight:700;text-align:center;margin:0}
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+.native-content__source:not(.is-mounted){position:absolute;left:-9999px;top:0;width:1px;height:1px;overflow:hidden}

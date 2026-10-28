@@ -14,7 +14,7 @@ defined( 'ABSPATH' ) || exit;
 <body <?php body_class( 'marcha-app' ); ?>>
 <?php wp_body_open(); ?>
 <div id="root"></div>
-<template id="wp-native-content">
+<div id="wp-native-content" class="native-content__source">
 <?php
 if ( marcha_is_native_route() ) {
 	while ( have_posts() ) {
@@ -23,7 +23,7 @@ if ( marcha_is_native_route() ) {
 	}
 }
 ?>
-</template>
+</div>
 <noscript>
 	<main><?php while ( have_posts() ) { the_post(); the_content(); } ?></main>
 </noscript>
