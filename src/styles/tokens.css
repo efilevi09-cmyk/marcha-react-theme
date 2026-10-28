@@ -1,0 +1,14 @@
+:root {
+  --c-black: #000;
+  --c-white: #fff;
+  --c-text: #333;
+  --c-mint: #03ffc3;
+  --c-orange: #f58220; /* announcement bar / sale badge – verify against live */
+  --c-teal: #64c8d3;
+  --c-border: #e5e5e5;
+  --f-body: "ploni", system-ui, sans-serif;
+  --f-latin: "E111Viva", "ploni", serif;
+  --gutter: clamp(16px, 5vw, 70px);
+  --radius-pill: 100px;
+  --header-h: 72px;
+}
