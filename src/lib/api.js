@@ -1,5 +1,11 @@
 const cfg = () => window.MARCHA || { restUrl: '/wp-json/', siteUrl: '/', nonce: '' };
 
+/** In-memory product cache: list responses already contain the full product, so opening one is instant. */
+const productCache = new Map();
+const key = (slug) => { try { return decodeURIComponent(slug); } catch (e) { return slug; } };
+export const cacheProducts = (list) => { (Array.isArray(list) ? list : []).forEach((p) => p?.slug && productCache.set(key(p.slug), p)); return list; };
+export const cachedProduct = (slug) => productCache.get(key(slug)) || null;
+
 let cartToken = null;
 let storeNonce = null;
 try { cartToken = sessionStorage.getItem('marcha_cart_token'); } catch (e) { /* storage unavailable */ }
@@ -20,6 +26,7 @@ async function request(path, { method = 'GET', body, headers = {}, withMeta = fa
   if (nn) storeNonce = nn;
   if (!res.ok) throw new Error((await res.json().catch(() => ({}))).message || res.statusText);
   const data = await res.json();
+  if (path.startsWith('wc/store/v1/products') && !path.includes('/categories') && !path.includes('/attributes')) cacheProducts(data);
   return withMeta ? { data, total: Number(res.headers.get('X-WP-Total') || 0), pages: Number(res.headers.get('X-WP-TotalPages') || 1) } : data;
 }
 
@@ -42,7 +49,7 @@ export const queryProducts = async ({ colors = [], ...params } = {}) => {
   }
   return request('wc/store/v1/products?' + new URLSearchParams({ per_page: 24, ...params }).toString(), { withMeta: true });
 };
-export const getProduct = (slug) => request('wc/store/v1/products?slug=' + encodeURIComponent(slug)).then((r) => r[0]);
+export const getProduct = (slug) => cachedProduct(slug) ? Promise.resolve(cachedProduct(slug)) : request('wc/store/v1/products?slug=' + encodeURIComponent(slug)).then((r) => r[0]);
 export const getCategories = () => request('wc/store/v1/products/categories?per_page=50');
 export const getCart = () => request('wc/store/v1/cart');
 export const addToCart = (id, quantity = 1, variation = []) =>

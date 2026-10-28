@@ -40,7 +40,7 @@ function Lightbox({ image, onClose }) {
 export default function Product() {
   const slug = decodeURIComponent(useParams().slug);
   const { add, busy } = useCart();
-  const [p, setP] = useState(null);
+  const [p, setP] = useState(() => api.cachedProduct(slug));
   const [active, setActive] = useState(0);
   const [size, setSize] = useState(null);
   const [qty, setQty] = useState(1);
@@ -51,19 +51,31 @@ export default function Product() {
   const [copied, setCopied] = useState(false);
 
   useEffect(() => {
-    setP(null); setSize(null); setActive(0); setError(''); setQty(1); setTab('desc');
+    setSize(null); setActive(0); setError(''); setQty(1); setTab('desc'); setRelated([]);
+    window.scrollTo(0, 0);
+    let alive = true;
     api.getProduct(slug).then((prod) => {
+      if (!alive) return;
       setP(prod);
-      if (prod?.categories?.[0]) api.getProducts({ category: prod.categories[0].id, per_page: 9 }).then((r) => setRelated(r.filter((x) => x.id !== prod.id).slice(0, 8)));
       if (prod) document.title = `${prod.name.replace(/<[^>]+>/g, '')} - Marcha Ballerina`;
+      // Related products load lazily so they never block the first paint.
+      if (prod?.categories?.[0]) api.getProducts({ category: prod.categories[0].id, per_page: 9 }).then((r) => alive && setRelated(r.filter((x) => x.id !== prod.id).slice(0, 8))).catch(() => {});
     });
+    return () => { alive = false; };
   }, [slug]);
 
   const sizeAttr = useMemo(() => p?.attributes?.find((a) => a.has_variations && /size/i.test(a.taxonomy || '')) || p?.attributes?.find((a) => a.has_variations), [p]);
   const variation = useMemo(() => p?.variations?.find((v) => v.attributes.some((a) => a.value === size)), [p, size]);
   const closeZoom = useCallback(() => setZoom(false), []);
 
-  if (!p) return <div className="container product__loading" aria-busy="true">טוענים…</div>;
+  if (!p) {
+    return (
+      <div className="product container skeleton" aria-busy="true" aria-label="טוענים">
+        <div className="skeleton__img" />
+        <div className="skeleton__lines"><i /><i /><i /><i /></div>
+      </div>
+    );
+  }
 
   const submit = async (goCheckout) => {
     if (sizeAttr && !size) { setError('נא לבחור מידה'); return; }
