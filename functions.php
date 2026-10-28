@@ -121,6 +121,7 @@ add_action( 'template_redirect', function () {
 
 require_once get_template_directory() . '/inc/updater.php';
 require_once get_template_directory() . '/inc/reviews.php';
+require_once get_template_directory() . '/inc/instagram.php';
 
 /**
  * WP Rocket: never minify/combine/delay the app bundle. It is already minified and versioned,

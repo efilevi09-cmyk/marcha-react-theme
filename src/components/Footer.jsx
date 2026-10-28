@@ -1,12 +1,38 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
+import * as api from '../lib/api.js';
 import { FacebookIcon, InstagramIcon } from './Icons.jsx';
 import '../styles/footer.css';
 
 const SITEMAP = [['דף בית', ''], ['אודות', 'אודות/'], ['החלפות והחזרות', 'החלפות-והחזרות/'], ['הצהרת נגישות', 'הצהרת-נגישות/'], ['ווישליסט', 'ווישליסט/'], ['מדיניות פרטיות', 'privacy-policy/'], ['צרי קשר', 'צרי-קשר/']];
 
+/** Instagram strip: 4x2 square grid of the latest posts (thumbnails served from our own media library). */
+function InstagramStrip() {
+  const [feed, setFeed] = useState(null);
+  useEffect(() => { api.getInstagram().then(setFeed).catch(() => {}); }, []);
+  if (!feed?.items?.length) return null;
+  return (
+    <section className="ig" aria-labelledby="ig-title">
+      <h2 id="ig-title" className="ig__title" dir="ltr">STAY UPDATED ON INSTAGRAM</h2>
+      <p className="ig__handle" dir="ltr"><a href={`https://www.instagram.com/${feed.handle}/`} target="_blank" rel="noopener noreferrer">@{feed.handle}</a></p>
+      <ul className="ig__grid">
+        {feed.items.slice(0, 8).map((it, i) => (
+          <li key={it.url}>
+            <a href={it.url} target="_blank" rel="noopener noreferrer" aria-label={`פוסט ${i + 1} באינסטגרם`}>
+              <img src={it.src} width={it.w} height={it.h} alt="" loading="lazy" />
+              <InstagramIcon className="ig__icon" />
+            </a>
+          </li>
+        ))}
+      </ul>
+    </section>
+  );
+}
+
 export default function Footer() {
   const base = window.MARCHA?.siteUrl || '/';
   return (
+    <>
+    <InstagramStrip />
     <footer className="ftr">
       <div className="container ftr__grid">
         <section><h2>מפת האתר</h2><ul>{SITEMAP.map(([l, h]) => <li key={h}><a href={base + h}>{l}</a></li>)}</ul></section>
@@ -19,5 +45,6 @@ export default function Footer() {
       </div>
       <p className="ftr__credit">אפיון עיצוב ופיתוח אפרת אסולין</p>
     </footer>
+    </>
   );
 }

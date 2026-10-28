@@ -52,3 +52,4 @@ export const removeCartItem = (key) =>
 export const getReviews = ({ product = 0, page = 1, per_page = 6 } = {}) =>
   request(`marcha/v1/reviews?${new URLSearchParams({ product, page, per_page })}`);
 export const submitReview = (data) => request('marcha/v1/reviews', { method: 'POST', body: data });
+export const getInstagram = () => request('marcha/v1/instagram');

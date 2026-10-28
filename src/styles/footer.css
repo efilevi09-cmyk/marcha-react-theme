@@ -7,3 +7,16 @@
 @media (min-width:768px){.ftr__grid{grid-template-columns:repeat(2,1fr)}}
 @media (min-width:1025px){.ftr__grid{grid-template-columns:repeat(4,1fr)}}
 .ftr__social{display:flex;gap:12px}.ftr__social svg{width:28px;height:28px}.ftr a:hover{opacity:.8}
+
+/* Instagram strip */
+.ig{background:#fff;text-align:center;padding-top:48px}
+.ig__title{font-family:var(--f-body);font-weight:300;font-size:clamp(26px,4.5vw,44px);letter-spacing:.01em;margin:0 0 8px;color:#222}
+.ig__handle{margin:0 0 24px;color:#777;font-size:clamp(16px,2vw,20px)}
+.ig__handle a{color:inherit;text-decoration:none}.ig__handle a:hover{text-decoration:underline}
+.ig__grid{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(2,1fr)}
+.ig__grid a{position:relative;display:block;aspect-ratio:1;overflow:hidden;background:#eee}
+.ig__grid img{width:100%;height:100%;object-fit:cover;transition:transform .5s cubic-bezier(.2,.8,.2,1)}
+.ig__grid a:hover img,.ig__grid a:focus-visible img{transform:scale(1.06)}
+.ig__icon{position:absolute;inset-block-start:10px;inset-inline-end:10px;width:26px;height:26px;color:#fff;filter:drop-shadow(0 1px 3px rgba(0,0,0,.5))}
+.ig__grid a:focus-visible{outline:3px solid var(--c-mint);outline-offset:-3px}
+@media(min-width:768px){.ig__grid{grid-template-columns:repeat(4,1fr)}}
