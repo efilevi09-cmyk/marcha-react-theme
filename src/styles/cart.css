@@ -9,3 +9,24 @@
 .cartpage__sum .btn{width:100%}
 .cartpage__empty{text-align:center}
 @media (min-width:768px){.cartpage__list li{grid-template-columns:auto 1fr auto auto auto}}
+
+.cartpage__list img{width:96px;height:96px;object-fit:cover;background:#fafafa}
+.cartpage__list a{color:inherit;font-weight:700}
+.cartpage__layout{display:grid;gap:32px;margin-top:16px}
+.cartpage__main{display:grid;gap:8px;align-content:start}
+.cartpage__aside{display:grid;gap:32px;align-content:start}
+.cartpage__aside h2{font-size:22px;margin:0 0 12px}
+.cartpage__aside .reviews__grid{grid-template-columns:1fr}
+.cartpage__aside .reviews__summary{justify-content:flex-start}
+.cartpage__relgrid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
+.cartpage__sum{max-width:none;margin:0}
+.cartpage__fee{color:#1a7f37}.cartpage__total{font-size:22px}
+.cartpage__sum p{margin:0;display:flex;justify-content:space-between;width:100%}
+.coupon{display:grid;gap:6px}
+.coupon form{display:flex;gap:8px}
+.coupon input{flex:1;font:inherit;padding:12px;border:1px solid #000}
+.coupon ul{list-style:none;margin:0;padding:0;display:flex;gap:8px;flex-wrap:wrap}
+.coupon li{background:#f2f2f2;padding:4px 10px}
+.coupon li button{background:none;border:0;cursor:pointer}
+.coupon__err{color:#c00;margin:0}
+@media(min-width:1000px){.cartpage__layout{grid-template-columns:minmax(0,3fr) minmax(0,2fr)}}

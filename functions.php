@@ -29,6 +29,9 @@ function marcha_is_spa_page() {
 		return false;
 	}
 	$spa = array( wc_get_page_id( 'shop' ), wc_get_page_id( 'cart' ) );
+	if ( function_exists( 'is_cart' ) && is_cart() ) {
+		return true;
+	}
 	return is_page( $spa );
 }
 
@@ -122,6 +125,7 @@ add_action( 'template_redirect', function () {
 require_once get_template_directory() . '/inc/updater.php';
 require_once get_template_directory() . '/inc/reviews.php';
 require_once get_template_directory() . '/inc/instagram.php';
+require_once get_template_directory() . '/inc/bundle.php';
 
 /**
  * WP Rocket: never minify/combine/delay the app bundle. It is already minified and versioned,

@@ -159,7 +159,7 @@ export default function Product() {
           </div>
 
           <ul className="trust">{TRUST.map(([Icon, t, d]) => <li key={t}><Icon /><b>{t}</b><span>{d}</span></li>)}</ul>
-          <a className="advice" href={WHATSAPP} target="_blank" rel="noopener noreferrer"><WhatsAppIcon /><span><b>צריכה עזרה במידה?</b> שלחי הודעה ונחזור אליך בהקדם</span><i aria-hidden="true">←</i></a>
+          <a className="advice" href={WHATSAPP} target="_blank" rel="noopener noreferrer"><WhatsAppIcon /><span><b>צריכה עזרה במידה?</b></span></a>
         </div>
       </article>
 

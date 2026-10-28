@@ -63,8 +63,9 @@
 @keyframes sk{to{background-position:-200% 0}}
 
 /* WhatsApp help button with a gentle breathing effect */
-.advice{background:#25d366;color:#fff;border-color:#25d366;font-weight:400;text-decoration:none;border-radius:999px;padding:12px 20px;animation:advice-pulse 2.2s ease-in-out infinite;transform-origin:center}
+.advice{background:#25d366;color:#fff;border-color:#25d366;font-weight:400;text-decoration:none;border-radius:999px;padding:7px 14px;font-size:14px;gap:8px;width:fit-content;max-width:100%;animation:advice-pulse 2.2s ease-in-out infinite;transform-origin:center}
 .advice b{display:block}
-.advice svg{flex:none;width:30px;height:30px}
+.advice svg{flex:none;width:22px;height:22px}
+.advice i{display:none}
 .advice:hover{animation-play-state:paused;transform:scale(1.04);background:#1ebe5b}
 @keyframes advice-pulse{0%,100%{transform:scale(1);box-shadow:0 0 0 0 rgba(37,211,102,.5)}50%{transform:scale(1.04);box-shadow:0 0 0 12px rgba(37,211,102,0)}}

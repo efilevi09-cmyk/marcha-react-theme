@@ -72,3 +72,5 @@ export const getReviews = ({ product = 0, page = 1, per_page = 6 } = {}) =>
   request(`marcha/v1/reviews?${new URLSearchParams({ product, page, per_page })}`);
 export const submitReview = (data) => request('marcha/v1/reviews', { method: 'POST', body: data });
 export const getInstagram = () => request('marcha/v1/instagram');
+export const applyCoupon = (code) => request('wc/store/v1/cart/apply-coupon', { method: 'POST', body: { code } });
+export const removeCoupon = (code) => request('wc/store/v1/cart/remove-coupon', { method: 'POST', body: { code } });
