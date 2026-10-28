@@ -26,3 +26,8 @@
 .filter__row{display:flex;flex-wrap:wrap;gap:16px;align-items:center}
 .reset{margin-inline-start:auto}
 .toolbar{border-bottom:1px solid var(--c-border);padding-bottom:12px}
+
+.filters{background:none;border:0;padding:0}
+.swatch{width:44px;height:44px}
+.filter__title{font-size:22px}
+.swatches{gap:14px}

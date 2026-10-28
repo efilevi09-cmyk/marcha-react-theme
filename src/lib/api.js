@@ -22,16 +22,20 @@ async function request(path, { method = 'GET', body, headers = {}, withMeta = fa
 
 export const getProducts = (params = {}) =>
   request('wc/store/v1/products?' + new URLSearchParams({ per_page: 24, ...params }));
-export const queryProducts = ({ colors = [], ...params } = {}) => {
-  const q = new URLSearchParams({ per_page: 24, ...params });
-  colors.forEach((id, i) => {
-    q.set(`attributes[${i}][attribute]`, 'pa_color');
-    q.set(`attributes[${i}][term_id]`, id);
-  });
-  if (colors.length) q.set('attribute_relation', 'IN');
-  return request('wc/store/v1/products?' + q.toString(), { withMeta: true });
+/** Colour filter uses the shop's own `zeva` taxonomy (same one the old JetSmartFilters used). */
+export const getColorTerms = () => request('wp/v2/zeva?per_page=100&hide_empty=true&_fields=id,name,count');
+const productIdsByColor = (colors, category) =>
+  request(`wp/v2/product?per_page=100&_fields=id&zeva=${colors.join(',')}${category ? `&product_cat=${category}` : ''}`).then((r) => r.map((x) => x.id));
+
+export const queryProducts = async ({ colors = [], ...params } = {}) => {
+  if (colors.length) {
+    const ids = await productIdsByColor(colors, params.category);
+    if (!ids.length) return { data: [], total: 0, pages: 1 };
+    params = { ...params, include: ids.join(',') };
+    delete params.category;
+  }
+  return request('wc/store/v1/products?' + new URLSearchParams({ per_page: 24, ...params }).toString(), { withMeta: true });
 };
-export const getColorTerms = () => request('wc/store/v1/products/attributes/2/terms?per_page=100');
 export const getProduct = (slug) => request('wc/store/v1/products?slug=' + encodeURIComponent(slug)).then((r) => r[0]);
 export const getCategories = () => request('wc/store/v1/products/categories?per_page=50');
 export const getCart = () => request('wc/store/v1/cart');
