@@ -5,6 +5,7 @@ import App from './App.jsx';
 import './styles/tokens.css';
 import './styles/base.css';
 import './styles/checkout.css';
+import './styles/mobile.css';
 
 try {
   window.MARCHA = JSON.parse(document.getElementById('marcha-config').textContent);
