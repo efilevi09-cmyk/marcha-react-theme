@@ -7,7 +7,7 @@ import '../styles/home.css';
 
 const up = (path) => encodeURI(`${window.MARCHA?.uploadsUrl || ''}/${path}`);
 const SHOWCASE = [
-  { slug: 'flats', side: 'right', img: '2026/10/marcha-hero-flats-wide.jpg', imgM: '2026/10/marcha-hero-flats-tall.jpg', alt: 'אישה בבית קפה פריזאי נועלת נעלי בובה ורודות של מרשה בלרינה', eyebrow: 'Café de Paris', title: 'נעלי בובה לכל יום', text: '66 דגמים עגולים בצבעים שאי אפשר לבחור ביניהם – ועוד 3 זוגות ב-300 ₪.', cta: 'לנעלי הבובה', to: '/product-category/balarina-a/' },
+  { slug: 'flats', side: 'left', img: '2026/10/marcha-hero-flats2-wide.jpg', imgM: '2026/10/marcha-hero-flats2-tall.jpg', alt: 'אישה בשמלה צנועה בבית קפה פריזאי נועלת נעלי בובה ורודות של מרשה בלרינה', eyebrow: 'Café de Paris', title: 'נעלי בובה לכל יום', text: '66 דגמים עגולים בצבעים שאי אפשר לבחור ביניהם – ועוד 3 זוגות ב-300 ₪.', cta: 'לנעלי הבובה', to: '/product-category/balarina-a/' },
   { slug: 'boots', side: 'left', img: '2026/10/marcha-hero-boots-wide.jpg', imgM: '2026/10/marcha-hero-boots-tall.jpg', alt: 'שתי נשים בפריז בגשם נועלות מגפי גומי קצרים של מרשה בלרינה', eyebrow: 'Rainy Paris', title: 'מגפי גומי לחורף', text: 'מגפי צ׳לסי קצרים ואלגנטיים – שחור מבריק, קטיפה ואפור. יוצאים לגשם בסטייל.', cta: 'למגפיים', to: '/product-category/boots/' },
 ];
 const CATS = [
@@ -33,8 +33,7 @@ export default function Home() {
     <>
       <h1 className="sr-only">מרשה בלרינה – נעלי בובה ובלרינה</h1>
       <Showcase slides={SHOWCASE} up={up} />
-      <ProductSection id="hot-title" title="הכי חם" script="pariz" orderby="popularity" terms={terms} pattern={PATTERN}
-        feature={<figure className="grid__feature"><img src={up('2026/03/נעל-תכלת.webp')} alt="נעלי בלרינה בצבע תכלת" loading="lazy" /></figure>} />
+      <ProductSection id="hot-title" title="הכי חם" script="pariz" orderby="popularity" terms={terms} pattern={PATTERN} />
       <section className="block container">
         <p className="script-title" aria-hidden="true">Your style</p>
         <h2 className="section-title">קטגוריות</h2>
