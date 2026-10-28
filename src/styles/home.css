@@ -56,8 +56,11 @@
 @media(min-width:700px){.branches__list{grid-template-columns:1fr 1fr}}
 
 /* Showcase banners: the image is never cropped on tablet/desktop (width:100%, height:auto, native 16:9). */
-.showcase{display:grid}
-.showcase__item{position:relative;background:#111;color:#fff;overflow:hidden}
+.showcase{position:relative;background:#111;overflow:hidden}
+.showcase__viewport{overflow:hidden;touch-action:pan-y;max-width:1920px;margin-inline:auto}
+.showcase__track{display:flex;transition:transform .7s cubic-bezier(.65,0,.35,1)}
+.showcase__item{flex:0 0 100%;min-width:0}
+.showcase__item{position:relative;background:#111;color:#fff;overflow:hidden;user-select:none}
 .showcase__item img{display:block;width:100%;height:auto;aspect-ratio:1376/768}
 .showcase__text{padding:24px var(--gutter) 32px;display:grid;gap:10px;justify-items:start;background:#111}
 .showcase__text h2{margin:0;font-size:clamp(28px,4vw,56px);line-height:1.1}
@@ -71,9 +74,17 @@
   .showcase__item--left .showcase__text,.showcase__item--right .showcase__text{justify-items:start}
   .showcase__item img{transition:filter .5s ease}
   .showcase__item:hover img{filter:brightness(1.06)}
-  .showcase__text>*{animation:showcaseIn .7s ease both}
 }
 @keyframes showcaseIn{from{opacity:0;transform:translateY(14px)}}
 /* On very wide monitors keep the artwork at a sensible size, centred, uncropped. */
-.showcase{background:#111}
-.showcase__item{max-width:1920px;margin-inline:auto;width:100%}
+
+.showcase__arrow{position:absolute;top:calc(min(100vw,1920px) * .2812);transform:translateY(-50%);width:44px;height:44px;border-radius:50%;border:0;background:rgba(255,255,255,.9);color:#000;font-size:28px;line-height:1;display:grid;place-items:center;transition:background .2s,transform .2s;z-index:2}
+.showcase__arrow:hover{background:var(--c-mint)}
+.showcase__arrow--prev{left:12px}
+.showcase__arrow--next{right:12px}
+.showcase__dots{position:absolute;inset-inline:0;bottom:12px;display:flex;justify-content:center;gap:10px;z-index:2}
+.showcase__dots button{width:12px;height:12px;border-radius:50%;border:2px solid #fff;background:transparent;padding:0;transition:background .2s,transform .2s}
+.showcase__dots button.is-on{background:var(--c-mint);border-color:var(--c-mint);transform:scale(1.2)}
+@media (min-width:768px){.showcase__arrow{top:50%}.showcase__dots{bottom:18px}}
+@media (max-width:767px){.showcase__arrow{width:36px;height:36px;font-size:24px}.showcase__dots{bottom:10px}}
+@media (prefers-reduced-motion:reduce){.showcase__track{transition:none}}
