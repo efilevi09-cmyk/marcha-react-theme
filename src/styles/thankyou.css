@@ -93,6 +93,8 @@
 /* the e-mail is the longest value: give it room so it does not break mid-address */
 .page-body--commerce .woocommerce-order-overview li.email { flex: 2 1 200px; }
 .page-body--commerce .woocommerce-order-overview li.email strong { font-size: 16px; }
+/* the payment method already has its own row in the order table below – no need to say it twice */
+.page-body--commerce .woocommerce-order-overview li.method { display: none; }
 .page-body--commerce .woocommerce-order-overview li strong {
   font-size: 18px;
   font-weight: 700;
