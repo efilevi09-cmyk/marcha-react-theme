@@ -1,10 +1,15 @@
 import React, { useEffect, useState } from 'react';
 import * as api from '../lib/api.js';
 import ProductCard from '../components/ProductCard.jsx';
+import { Link } from 'react-router-dom';
 import { ReviewList } from '../components/Reviews.jsx';
 import '../styles/home.css';
 
 const up = (path) => encodeURI(`${window.MARCHA?.uploadsUrl || ''}/${path}`);
+const SHOWCASE = [
+  { slug: 'boots', side: 'left', img: '2026/10/marcha-hero-boots.jpg', alt: 'שתי נשים בפריז בגשם נועלות מגפי גומי קצרים של מרשה בלרינה', eyebrow: 'Rainy Paris', title: 'מגפי גומי לחורף', text: 'מגפי צ׳לסי קצרים ואלגנטיים – שחור מבריק, קטיפה ואפור. יוצאים לגשם בסטייל.', cta: 'למגפיים', to: '/product-category/boots/' },
+  { slug: 'flats', side: 'right', img: '2026/10/marcha-hero-flats.jpg', alt: 'אישה בבית קפה פריזאי נועלת נעלי בובה ורודות של מרשה בלרינה', eyebrow: 'Café de Paris', title: 'נעלי בובה לכל יום', text: '66 דגמים עגולים בצבעים שאי אפשר לבחור ביניהם – ועוד 3 זוגות ב-300 ₪.', cta: 'לנעלי הבובה', to: '/product-category/balarina-a/' },
+];
 const BRANCHES = [
   { name: 'סניף ירושלים', address: 'קניון רב שפע', query: 'קניון רב שפע ירושלים' },
   { name: 'סניף בני ברק', address: 'רחוב ירושלים 10', query: 'ירושלים 10 בני ברק' },
@@ -30,6 +35,19 @@ export default function Home() {
           <a className="btn btn--mint" href={base + 'product-category/balarina-a/'}>נעלי בלרינה לילדות ונשים עגול</a>
           <a className="btn btn--black" href={base + 'product-category/בלרינה-שפיץ/'}>נעלי בלרינה שפיץ</a>
         </div>
+      </section>
+      <section className="showcase" aria-label="הקולקציות שלנו">
+        {SHOWCASE.map((b) => (
+          <article key={b.slug} className={`showcase__item showcase__item--${b.side}`}>
+            <img src={up(b.img)} alt={b.alt} width="1376" height="768" loading="lazy" decoding="async" />
+            <div className="showcase__text">
+              <p className="showcase__eyebrow" aria-hidden="true">{b.eyebrow}</p>
+              <h2>{b.title}</h2>
+              <p>{b.text}</p>
+              <Link className="btn btn--black" to={b.to}>{b.cta}</Link>
+            </div>
+          </article>
+        ))}
       </section>
       <section className="block block--pattern" style={{ '--pattern': `url(${PATTERN})` }}>
         <div className="container">

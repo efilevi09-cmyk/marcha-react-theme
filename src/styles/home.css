@@ -54,3 +54,26 @@
 .branches__list h3{margin:0;font-size:clamp(24px,3vw,30px)}
 .branches__list p{margin:0;font-size:20px}
 @media(min-width:700px){.branches__list{grid-template-columns:1fr 1fr}}
+
+/* Showcase banners: the image is never cropped on tablet/desktop (width:100%, height:auto, native 16:9). */
+.showcase{display:grid}
+.showcase__item{position:relative;background:#111;color:#fff;overflow:hidden}
+.showcase__item img{display:block;width:100%;height:auto;aspect-ratio:1376/768}
+.showcase__text{padding:24px var(--gutter) 32px;display:grid;gap:10px;justify-items:start;background:#111}
+.showcase__text h2{margin:0;font-size:clamp(28px,4vw,56px);line-height:1.1}
+.showcase__text p{margin:0;font-size:clamp(17px,1.4vw,22px);max-width:30ch}
+.showcase__eyebrow{font-family:var(--f-latin);font-size:clamp(34px,5vw,64px)!important;line-height:1;opacity:.85;max-width:none!important;direction:ltr}
+.showcase__text .btn{margin-top:6px;background:var(--c-mint);color:#000;font-weight:700}
+@media (min-width:768px){
+  .showcase__text{position:absolute;inset-block:0;width:min(42%,520px);padding:var(--gutter);align-content:center;background:linear-gradient(var(--dir),rgba(0,0,0,.62),rgba(0,0,0,0))}
+  .showcase__item--left .showcase__text{left:0;--dir:to right}
+  .showcase__item--right .showcase__text{right:0;--dir:to left}
+  .showcase__item--left .showcase__text,.showcase__item--right .showcase__text{justify-items:start}
+  .showcase__item img{transition:filter .5s ease}
+  .showcase__item:hover img{filter:brightness(1.06)}
+  .showcase__text>*{animation:showcaseIn .7s ease both}
+}
+@keyframes showcaseIn{from{opacity:0;transform:translateY(14px)}}
+/* On very wide monitors keep the artwork at a sensible size, centred, uncropped. */
+.showcase{background:#111}
+.showcase__item{max-width:1920px;margin-inline:auto;width:100%}
