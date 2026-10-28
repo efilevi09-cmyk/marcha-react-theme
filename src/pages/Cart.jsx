@@ -1,5 +1,6 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import * as api from '../lib/api.js';
+import { trackViewCart } from '../lib/track.js';
 import { useCart } from '../lib/CartContext.jsx';
 import { money } from '../lib/format.js';
 import BundleBar from '../components/BundleBar.jsx';
@@ -59,6 +60,8 @@ export default function Cart() {
   const items = cart?.items || [];
   const fees = cart?.fees || [];
   useEffect(() => { document.title = 'עגלת קניות - Marcha Ballerina'; }, []);
+  const viewed = useRef(false);
+  useEffect(() => { if (cart?.items?.length && !viewed.current) { viewed.current = true; trackViewCart(cart); } }, [cart]);
   return (
     <>
     <header className="pagehero">

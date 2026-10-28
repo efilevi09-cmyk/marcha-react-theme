@@ -1,6 +1,7 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import * as api from '../lib/api.js';
+import { trackViewItem } from '../lib/track.js';
 import { useCart } from '../lib/CartContext.jsx';
 import { BUNDLE } from '../lib/config.js';
 import { money, toMinor } from '../lib/format.js';
@@ -57,6 +58,7 @@ export default function Product() {
     api.getProduct(slug).then((prod) => {
       if (!alive) return;
       setP(prod);
+      trackViewItem(prod);
       if (prod) api.getReviews({ product: prod.id, per_page: 1 }).then((r) => alive && setRating(r.summary)).catch(() => {});
       if (prod) document.title = `${prod.name.replace(/<[^>]+>/g, '')} - Marcha Ballerina`;
       // Related products load lazily so they never block the first paint.
