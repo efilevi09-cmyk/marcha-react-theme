@@ -81,3 +81,14 @@ button.pcard__btn:disabled{opacity:.6}
 .hs__btn--next{left:-8px}
 @media (min-width:768px){.hs__item{flex-basis:calc((100% - 36px) / 3.2)}.hs__btn{display:grid}}
 @media (min-width:1025px){.hs__item{flex-basis:calc((100% - 48px) / 4.2)}}
+
+/* Product cards: every block above the sizes has a fixed height, so size chips start at the same line in every card,
+   and chips always flow from the right edge (start in RTL) even when some sizes are missing. */
+.pcard__link{flex:none}
+.pcard h3{min-height:calc(1.3em * 3);line-height:1.3;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+.pcard__price{margin-top:4px}
+.pcard__sold{min-height:1.5em;line-height:1.5}
+.pcard__sold.is-empty{visibility:hidden}
+.pcard__sizes{display:grid;grid-template-columns:repeat(auto-fill,34px);justify-content:start;gap:5px;margin-top:0;padding:8px 10px 10px;direction:rtl}
+.pcard__sizes button{min-width:0;width:34px}
+.pcard>.pcard__btn,.pcard>button.pcard__btn{margin-top:auto}

@@ -115,3 +115,8 @@
 .cats__text span{font-size:clamp(14px,1.2vw,18px);opacity:.9}
 .cats a .cats__text{position:absolute;z-index:1}
 .cats a .cats__text span,.cats a .cats__text b{position:static}
+
+/* About: wider lines (no forced breaks), comfortable measure */
+.about__text{max-width:62ch;font-size:clamp(18px,1.6vw,21px);line-height:1.75;gap:16px}
+.about__text p{text-wrap:pretty}
+@media (min-width:768px){.about__text{max-width:none}}

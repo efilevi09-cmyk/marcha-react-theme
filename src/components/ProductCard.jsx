@@ -20,9 +20,9 @@ export function Price({ prices, single }) {
 }
 
 /** "Sold N pairs" social proof, only shown once something has sold. */
-export function Sold({ n }) {
+export function Sold({ n, reserve = false }) {
   const sold = Number(n) || 0;
-  if (sold < 1) return null;
+  if (sold < 1) return reserve ? <p className="pcard__sold is-empty" aria-hidden="true">&nbsp;</p> : null;
   return <p className="pcard__sold"><span aria-hidden="true">🔥</span> נמכרו {sold.toLocaleString('he-IL')} {sold === 1 ? 'זוג' : 'זוגות'}</p>;
 }
 
@@ -65,7 +65,7 @@ export default function ProductCard({ p }) {
         <span className="pcard__badge">{BUNDLE.badge}</span>
         {img && <img src={img.src} srcSet={img.srcset} sizes="(min-width:1025px) 25vw, 50vw" alt={img.alt || p.name} loading="lazy" />}
         <h3 dangerouslySetInnerHTML={{ __html: p.name }} />
-        <Sold n={p.extensions?.marcha?.sold} />
+        <Sold n={p.extensions?.marcha?.sold} reserve />
         <Price prices={p.prices} />
       </Link>
       {sizes.length > 0 && (
