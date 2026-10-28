@@ -71,8 +71,9 @@
   border: 0;
 }
 .page-body--commerce .woocommerce-order-overview li {
-  flex: 1 1 140px;
+  flex: 1 1 132px;
   min-width: 0;
+  box-sizing: border-box; /* WooCommerce's small-screen sheet switches these to content-box */
   display: flex;
   flex-direction: column;
   gap: 4px;
@@ -91,7 +92,7 @@
 }
 .page-body--commerce .woocommerce-order-overview li::marker { content: none; }
 /* the e-mail is the longest value: give it room so it does not break mid-address */
-.page-body--commerce .woocommerce-order-overview li.email { flex: 2 1 200px; }
+.page-body--commerce .woocommerce-order-overview li.email { flex: 2 1 200px; box-sizing: border-box; }
 .page-body--commerce .woocommerce-order-overview li.email strong { font-size: 16px; }
 /* the payment method already has its own row in the order table below – no need to say it twice */
 .page-body--commerce .woocommerce-order-overview li.method { display: none; }
