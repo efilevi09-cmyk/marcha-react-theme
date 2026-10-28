@@ -6,3 +6,4 @@
 .ftr__credit{text-align:center;opacity:.7;margin:32px 0 0;font-size:14px}
 @media (min-width:768px){.ftr__grid{grid-template-columns:repeat(2,1fr)}}
 @media (min-width:1025px){.ftr__grid{grid-template-columns:repeat(4,1fr)}}
+.ftr__social{display:flex;gap:12px}.ftr__social svg{width:28px;height:28px}.ftr a:hover{opacity:.8}

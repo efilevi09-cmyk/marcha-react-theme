@@ -23,8 +23,8 @@ export default function Header() {
       <ul className="hdr__usps">{USPS.map(([Icon, t]) => <li key={t}><Icon width={22} height={22} />{t}</li>)}</ul>
       <div className="hdr__bar container">
         <div className="hdr__side">
-          <a className="hdr__icon" href="https://www.facebook.com/" aria-label="Facebook" target="_blank" rel="noopener noreferrer"><FacebookIcon /></a>
-          <a className="hdr__icon" href="https://www.instagram.com/" aria-label="Instagram" target="_blank" rel="noopener noreferrer"><InstagramIcon /></a>
+          <a className="hdr__icon" href="https://www.facebook.com/MarchaBallerina.Israel/" aria-label="Facebook" target="_blank" rel="noopener noreferrer"><FacebookIcon /></a>
+          <a className="hdr__icon" href="https://www.instagram.com/marchaballerina/" aria-label="Instagram" target="_blank" rel="noopener noreferrer"><InstagramIcon /></a>
           <a className="hdr__icon" href={base + '?s='} aria-label="חיפוש"><SearchIcon /></a>
           <button className="hdr__burger" aria-label="תפריט" aria-expanded={menu} onClick={() => setMenu(!menu)}><span /><span /><span /></button>
         </div>
