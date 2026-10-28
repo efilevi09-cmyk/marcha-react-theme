@@ -30,13 +30,14 @@ async function request(path, { method = 'GET', body, headers = {}, withMeta = fa
   return withMeta ? { data, total: Number(res.headers.get('X-WP-Total') || 0), pages: Number(res.headers.get('X-WP-TotalPages') || 1) } : data;
 }
 
-/** WordPress stores non-Latin slugs percent-encoded (lowercase), so try that form first, then the decoded one. */
-const bySlug = (slug) => request('wc/store/v1/products?' + new URLSearchParams({ slug }).toString()).then((r) => r[0]);
+/** Resolve by slug through wp/v2 (handles Hebrew slugs reliably), then load the full product from the Store API. */
 export const getProduct = async (slug) => {
   const hit = cachedProduct(slug);
   if (hit) return hit;
-  const decoded = key(slug);
-  return (await bySlug(encodeURIComponent(decoded).toLowerCase())) || (await bySlug(decoded)) || null;
+  const [found] = await request('wp/v2/product?' + new URLSearchParams({ slug: key(slug), _fields: 'id' }).toString());
+  if (!found) return null;
+  const [prod] = await request(`wc/store/v1/products?include=${found.id}`);
+  return prod || null;
 };
 export const getCategories = () => request('wc/store/v1/products/categories?per_page=50');
 export const getCart = () => request('wc/store/v1/cart');
