@@ -1,8 +1,10 @@
 import React, { useLayoutEffect, useRef, useState } from 'react';
 import { useCart } from '../lib/CartContext.jsx';
 import BundleBar from '../components/BundleBar.jsx';
+import { MailIcon, BoxIcon, TruckIcon, WhatsAppIcon } from '../components/Icons.jsx';
 import '../styles/bundle.css';
 import '../styles/page.css';
+import '../styles/thankyou.css';
 
 /**
  * Moves the server-rendered WordPress content (checkout, my-account, plain pages)
@@ -14,6 +16,7 @@ import '../styles/page.css';
  */
 const samePath = (a, b) => { try { return new URL(a, location.origin).pathname === new URL(b, location.origin).pathname; } catch (e) { return false; } };
 const LEGAL = /תנאי|תקנון|פרטיות|נגישות|החלפות|החזרות|terms|privacy|return|shipping|refund|policy/i;
+const WHATSAPP = 'https://api.whatsapp.com/send?phone=972559296934';
 
 /** Checkout: outline every field that blocks the order (red border + message) and bring the first one into view. */
 function bindCheckoutValidation() {
@@ -62,7 +65,13 @@ const norm = (t) => t.replace(/\s+/g, ' ').trim();
 function analyse(src) {
   // Checkout and "order received" keep their WooCommerce markup but get the same branded hero as content pages.
   if (src.querySelector('form.checkout')) return { title: 'תשלום', accent: 'Checkout', rtl: true, legal: false, toc: [], commerce: true };
-  if (src.querySelector('.woocommerce-order')) return { title: 'תודה על ההזמנה', accent: 'Thank you', rtl: true, legal: false, toc: [], commerce: true };
+  if (src.querySelector('.woocommerce-order')) {
+    // A declined payment lands on the same endpoint: no celebration, no "what happens now".
+    const failed = !!src.querySelector('.woocommerce-thankyou-order-failed');
+    return failed
+      ? { title: 'התשלום לא הושלם', accent: 'Oops', rtl: true, legal: false, toc: [], commerce: true, failed: true }
+      : { title: 'תודה על ההזמנה!', accent: 'Thank you', rtl: true, legal: false, toc: [], commerce: true, thanks: true };
+  }
   if (src.querySelector('.woocommerce, form.checkout, .woocommerce-MyAccount-navigation')) return null; // commerce flows keep their own layout
   const h1 = src.querySelector('h1');
   const title = norm(h1?.textContent || document.title.split(/[–|-]/)[0]);
@@ -83,26 +92,77 @@ function analyse(src) {
   return { title, accent, rtl, legal, toc };
 }
 
+/** Sets expectations right after an order, so the shopper does not have to ask what happens next. */
+function NextSteps() {
+  const account = window.MARCHA?.accountUrl;
+  return (
+    <section className="container thanks-next" aria-labelledby="thanks-next-title">
+      <h2 id="thanks-next-title">מה קורה עכשיו?</h2>
+      <ol>
+        <li>
+          <span className="thanks-next__icon" aria-hidden="true"><MailIcon /></span>
+          <strong>אישור במייל</strong>
+          <p>המייל עם מספר ההזמנה וכל הפרטים נשלח אליך. אם הוא לא הגיע, כדאי להציץ בתיקיית הקידומים או הספאם.</p>
+        </li>
+        <li>
+          <span className="thanks-next__icon" aria-hidden="true"><BoxIcon /></span>
+          <strong>אריזה ובדיקה</strong>
+          <p>כל זוג נבדק ונארז אצלנו בקפידה לפני שהוא יוצא לדרך אליך.</p>
+        </li>
+        <li>
+          <span className="thanks-next__icon" aria-hidden="true"><TruckIcon /></span>
+          <strong>יוצא לדרך</strong>
+          <p>
+            כשההזמנה נמסרת לשליח נעדכן אותך
+            {window.MARCHA?.isLoggedIn && account ? <>, ואפשר לעקוב אחרי מצב ההזמנה גם <a href={account}>בחשבון שלך</a></> : null}.
+          </p>
+        </li>
+      </ol>
+    </section>
+  );
+}
+
+/** Declined payment: say what to do instead of leaving the shopper on a dead end. */
+function PaymentHelp() {
+  return (
+    <section className="container thanks-help" aria-labelledby="thanks-help-title">
+      <div className="thanks-help__box">
+        <h2 id="thanks-help-title" className="sr-only">מה עושים עכשיו</h2>
+        <p>התשלום לא עבר, וההזמנה לא נשלחה לטיפול. לרוב זה קורה בגלל פרטי כרטיס או הגבלה של חברת האשראי, ואפשר פשוט לנסות שוב. אם זה חוזר, אנחנו כאן בוואטסאפ ונשמח לסייע.</p>
+        <div>
+          <a className="btn btn--mint" href={window.MARCHA?.cartUrl || '/'}>חזרה לעגלה</a>
+          <a className="btn btn--black" href={WHATSAPP} target="_blank" rel="noopener noreferrer"><WhatsAppIcon /> דברי איתנו בוואטסאפ</a>
+        </div>
+      </div>
+    </section>
+  );
+}
+
 export default function NativeContent() {
   const ref = useRef(null);
-  const { count } = useCart();
+  const { count, celebrate } = useCart();
   const [page, setPage] = useState(null);
   // On checkout, nudge shoppers who have 1-2 pairs towards the 3 for 300 offer.
   const showOffer = samePath(location.href, window.MARCHA?.checkoutUrl || '') && !/order-received|order-pay/.test(location.pathname + location.search) && count > 0 && count % 3 !== 0;
   useLayoutEffect(() => {
     const src = document.getElementById('wp-native-content');
     const host = ref.current;
+    let party;
     if (src && host) {
       src.classList.add('is-mounted');
       host.appendChild(src);
-      setPage(analyse(src));
+      const found = analyse(src);
+      setPage(found);
+      if (found?.thanks) party = setTimeout(() => celebrate?.(), 450); // confetti for a completed order
     }
     // Checkout form arrives from WooCommerce (maybe after fragments load): bind once it exists.
     let off = bindCheckoutValidation();
     const t = setTimeout(() => { off(); off = bindCheckoutValidation(); }, 1500);
-    return () => { clearTimeout(t); off(); };
+    return () => { clearTimeout(t); clearTimeout(party); off(); };
   }, []);
   const dir = page ? (page.rtl ? 'rtl' : 'ltr') : undefined;
+  const commerceClass = page?.commerce ? ` is-commerce${page.thanks || page.failed ? ' is-thanks' : ''}` : '';
+  const pageClass = page && !page.commerce ? ` is-page${page.legal ? ' is-legal' : ''}` : '';
   return (
     <>
       {page && (
@@ -112,7 +172,7 @@ export default function NativeContent() {
         </header>
       )}
       {showOffer && <div key="offer" className="container checkout-offer"><BundleBar count={count} shopLink /></div>}
-      <div key="body" className={`container native-content${page?.commerce ? ' is-commerce' : page ? ` is-page${page.legal ? ' is-legal' : ''}` : ''}`}>
+      <div key="body" className={`container native-content${commerceClass}${pageClass}`}>
         {page?.toc.length > 0 && (
           <nav className="page-toc" aria-label="תוכן עניינים" dir={dir}>
             <strong>{page.rtl ? 'תוכן עניינים' : 'Contents'}</strong>
@@ -121,12 +181,14 @@ export default function NativeContent() {
         )}
         <div className={`page-body${page?.commerce ? ' page-body--commerce' : ''}`} ref={ref} dir={dir} />
       </div>
-      {page && !page.legal && !page.commerce && (
+      {page?.thanks && <NextSteps key="next" />}
+      {page?.failed && <PaymentHelp key="help" />}
+      {page && !page.legal && (!page.commerce || page.thanks) && (
         <section key="cta" className="container pagecta" dir={dir}>
-          <p>{page.rtl ? 'מוכנה למצוא את הזוג שלך?' : 'Ready to find your pair?'}</p>
+          <p>{page.thanks ? 'נשמח לראות אותך שוב' : page.rtl ? 'מוכנה למצוא את הזוג שלך?' : 'Ready to find your pair?'}</p>
           <div>
             <a className="btn btn--mint" href={window.MARCHA?.shopUrl || '/'}>{page.rtl ? 'לכל הנעליים' : 'Shop all shoes'}</a>
-            <a className="btn btn--black" href="https://api.whatsapp.com/send?phone=972559296934" target="_blank" rel="noopener noreferrer">{page.rtl ? 'שירות לקוחות בוואטסאפ' : 'WhatsApp support'}</a>
+            <a className="btn btn--black" href={WHATSAPP} target="_blank" rel="noopener noreferrer">{page.rtl ? 'שירות לקוחות בוואטסאפ' : 'WhatsApp support'}</a>
           </div>
         </section>
       )}

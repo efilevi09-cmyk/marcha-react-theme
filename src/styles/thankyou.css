@@ -1,0 +1,336 @@
+/* ===== "תודה על ההזמנה" (order received) =====================================
+   The markup comes from WooCommerce (checkout/thankyou.php + order-details.php +
+   customer-details.php), so everything here is styling on top of it:
+   .woocommerce-thankyou-order-received  → success card
+   .woocommerce-order-overview           → tiles (order no. / date / total / method)
+   .woocommerce-order-details            → items card (real table, semantics kept)
+   .woocommerce-customer-details         → address cards
+   Plus the React extras: .thanks-next (what happens now) and .thanks-help (failed payment).
+   ---------------------------------------------------------------------------- */
+
+.is-commerce.is-thanks { max-width: calc(920px + var(--gutter) * 2); }
+.page-body--commerce .woocommerce-order { display: grid; gap: clamp(16px, 3vw, 24px); }
+.page-body--commerce .woocommerce-order > * { max-width: none; }
+
+/* --- success card -------------------------------------------------------- */
+.page-body--commerce .woocommerce-thankyou-order-received {
+  margin: 0;
+  padding: clamp(26px, 5vw, 40px) clamp(20px, 4vw, 36px);
+  text-align: center;
+  font-size: clamp(19px, 2.4vw, 26px);
+  font-weight: 700;
+  line-height: 1.4;
+  color: #000;
+  background: linear-gradient(180deg, #f1fffb 0%, #fff 100%);
+  border: 0;
+  border-radius: 24px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, .08);
+}
+.page-body--commerce .woocommerce-thankyou-order-received::before {
+  content: "";
+  display: block;
+  width: 74px;
+  height: 74px;
+  margin: 0 auto 20px;
+  border-radius: 50%;
+  background: var(--c-mint) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2.6' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m5 12.5 4.5 4.5L19 7.5'/%3E%3C/svg%3E") no-repeat center / 38px 38px;
+  box-shadow: 0 0 0 10px rgba(3, 255, 195, .2);
+  animation: thanks-pop .65s cubic-bezier(.2, 1.4, .4, 1) both;
+}
+.page-body--commerce .woocommerce-notice--error.woocommerce-thankyou-order-failed {
+  background: linear-gradient(180deg, #fff5f5 0%, #fff 100%);
+}
+.page-body--commerce .woocommerce-notice--error.woocommerce-thankyou-order-failed::before {
+  background: #d32f2f url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23fff' stroke-width='2.6' stroke-linecap='round'%3E%3Cpath d='M7 7l10 10M17 7 7 17'/%3E%3C/svg%3E") no-repeat center / 34px 34px;
+  box-shadow: 0 0 0 10px rgba(211, 47, 47, .14);
+}
+.page-body--commerce .woocommerce-thankyou-order-failed-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  justify-content: center;
+  margin: 0;
+}
+@keyframes thanks-pop {
+  0%   { transform: scale(.2); opacity: 0; }
+  60%  { transform: scale(1.09); }
+  100% { transform: scale(1); opacity: 1; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .page-body--commerce .woocommerce-thankyou-order-received::before { animation: none; }
+}
+
+/* --- overview tiles ------------------------------------------------------ */
+.page-body--commerce .woocommerce-order-overview {
+  list-style: none;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(148px, 1fr));
+  gap: 12px;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+.page-body--commerce .woocommerce-order-overview li {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  float: none;
+  margin: 0;
+  padding: 16px 18px;
+  background: #fff;
+  border: 0;
+  border-radius: 16px;
+  box-shadow: 0 6px 24px rgba(0, 0, 0, .07);
+  font-size: 14px;
+  line-height: 1.4;
+  color: #6b6b6b;
+  text-transform: none;
+  text-align: start;
+}
+.page-body--commerce .woocommerce-order-overview li::marker { content: none; }
+.page-body--commerce .woocommerce-order-overview li strong {
+  font-size: 18px;
+  font-weight: 700;
+  line-height: 1.3;
+  color: #000;
+  unicode-bidi: plaintext;
+  overflow-wrap: anywhere;
+}
+
+/* --- cards: items + addresses ------------------------------------------- */
+.page-body--commerce .woocommerce-order-details,
+.page-body--commerce .woocommerce-customer-details .woocommerce-column {
+  margin: 0;
+  padding: clamp(18px, 3vw, 28px);
+  background: #fff;
+  border-radius: 20px;
+  box-shadow: 0 6px 24px rgba(0, 0, 0, .07);
+}
+.page-body--commerce .woocommerce-order-details__title,
+.page-body--commerce .woocommerce-column__title {
+  position: relative;
+  margin: 0 0 16px;
+  padding: 0 0 10px;
+  border: 0;
+  font-size: clamp(19px, 2vw, 23px);
+  font-weight: 700;
+  line-height: 1.25;
+  color: #000;
+}
+.page-body--commerce .woocommerce-order-details__title::after,
+.page-body--commerce .woocommerce-column__title::after {
+  content: "";
+  position: absolute;
+  inset-inline-start: 0;
+  bottom: 0;
+  width: 44px;
+  height: 4px;
+  border-radius: 4px;
+  background: var(--c-mint);
+}
+
+/* items table – left as a real table so the column headers keep their meaning */
+.page-body--commerce table.order_details {
+  width: 100%;
+  margin: 0;
+  border: 0;
+  border-collapse: collapse;
+  font-size: 16px;
+}
+.page-body--commerce table.order_details :where(th, td) {
+  padding: 14px 0;
+  border: 0;
+  border-bottom: 1px solid #eee;
+  background: none;
+  text-align: start;
+  vertical-align: top;
+}
+.page-body--commerce table.order_details thead th {
+  padding-top: 0;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: .04em;
+  color: #9a9a9a;
+}
+.page-body--commerce table.order_details :where(thead th, td).product-total,
+.page-body--commerce table.order_details tfoot td {
+  text-align: end;
+  white-space: nowrap;
+}
+.page-body--commerce table.order_details td.product-name a {
+  color: #000;
+  font-weight: 700;
+  line-height: 1.35;
+  text-decoration: none;
+}
+.page-body--commerce table.order_details td.product-name a:hover {
+  text-decoration: underline;
+  text-decoration-color: var(--c-mint);
+  text-decoration-thickness: 3px;
+  text-underline-offset: 3px;
+}
+.page-body--commerce table.order_details .product-quantity {
+  display: inline-block;
+  margin-inline-start: 6px;
+  font-weight: 400;
+  color: #6b6b6b;
+}
+.page-body--commerce table.order_details td.product-total { font-weight: 700; }
+.page-body--commerce table.order_details .wc-item-meta {
+  list-style: none;
+  margin: 6px 0 0;
+  padding: 0;
+  font-size: 14px;
+  color: #6b6b6b;
+}
+.page-body--commerce table.order_details .wc-item-meta li { margin: 0; }
+.page-body--commerce table.order_details .wc-item-meta :where(strong, p) {
+  display: inline;
+  margin: 0;
+  font-weight: 400;
+}
+.page-body--commerce table.order_details tfoot th { font-weight: 400; color: #555; }
+.page-body--commerce table.order_details tfoot td { font-weight: 700; color: #000; }
+.page-body--commerce table.order_details tfoot tr:last-child :where(th, td) {
+  padding-top: 16px;
+  padding-bottom: 0;
+  border-top: 2px solid #000;
+  border-bottom: 0;
+  font-size: 20px;
+  font-weight: 700;
+  color: #000;
+}
+.page-body--commerce table.order_details small.shipped_via {
+  display: block;
+  font-size: 13px;
+  font-weight: 400;
+  color: #6b6b6b;
+}
+
+/* addresses */
+.page-body--commerce .woocommerce-customer-details { margin: 0; }
+.page-body--commerce .woocommerce-customer-details .woocommerce-columns--addresses {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: clamp(14px, 2vw, 20px);
+  margin: 0;
+}
+.page-body--commerce .woocommerce-customer-details .woocommerce-column { float: none; width: auto; }
+.page-body--commerce .woocommerce-customer-details address {
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  font-style: normal;
+  line-height: 1.8;
+  color: #333;
+}
+.page-body--commerce .woocommerce-customer-details--phone,
+.page-body--commerce .woocommerce-customer-details--email {
+  position: relative;
+  margin: 10px 0 0;
+  padding-inline-start: 26px;
+  color: #000;
+  unicode-bidi: plaintext;
+  overflow-wrap: anywhere;
+}
+.page-body--commerce .woocommerce-customer-details--phone::before,
+.page-body--commerce .woocommerce-customer-details--email::before {
+  content: "";
+  position: absolute;
+  inset-inline-start: 0;
+  top: .3em;
+  width: 18px;
+  height: 18px;
+  background: no-repeat center / contain;
+}
+.page-body--commerce .woocommerce-customer-details--phone::before {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='1.8' stroke-linejoin='round'%3E%3Cpath d='M5 3.5h3.2l1.6 4-2 1.3a11 11 0 0 0 5.4 5.4l1.3-2 4 1.6V17a2.5 2.5 0 0 1-2.7 2.5A15.5 15.5 0 0 1 3 6.2 2.5 2.5 0 0 1 5 3.5z'/%3E%3C/svg%3E");
+}
+.page-body--commerce .woocommerce-customer-details--email::before {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='1.8' stroke-linejoin='round'%3E%3Crect x='3' y='5.5' width='18' height='13' rx='2'/%3E%3Cpath d='m3.5 7 8.5 6 8.5-6'/%3E%3C/svg%3E");
+}
+
+/* --- "what happens now" (React) ----------------------------------------- */
+.thanks-next {
+  padding-block: clamp(10px, 2vw, 16px) clamp(32px, 5vw, 56px);
+  max-width: calc(920px + var(--gutter) * 2);
+}
+.thanks-next h2 {
+  position: relative;
+  margin: 0 0 20px;
+  padding-bottom: 10px;
+  font-size: clamp(21px, 2.4vw, 27px);
+  font-weight: 700;
+  color: #000;
+}
+.thanks-next h2::after {
+  content: "";
+  position: absolute;
+  inset-inline-start: 0;
+  bottom: 0;
+  width: 44px;
+  height: 4px;
+  border-radius: 4px;
+  background: var(--c-mint);
+}
+.thanks-next ol {
+  list-style: none;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+  gap: clamp(12px, 2vw, 18px);
+  margin: 0;
+  padding: 0;
+  counter-reset: step;
+}
+.thanks-next li {
+  position: relative;
+  margin: 0;
+  padding: clamp(20px, 3vw, 26px) clamp(18px, 2.5vw, 22px);
+  background: #fff;
+  border-radius: 20px;
+  box-shadow: 0 6px 24px rgba(0, 0, 0, .07);
+}
+.thanks-next__icon {
+  display: grid;
+  place-items: center;
+  width: 46px;
+  height: 46px;
+  margin-bottom: 14px;
+  border-radius: 50%;
+  background: #f1fffb;
+  color: #000;
+}
+.thanks-next__icon svg { width: 24px; height: 24px; }
+.thanks-next li strong { display: block; margin-bottom: 6px; font-size: 17px; color: #000; }
+.thanks-next li p { margin: 0; font-size: 15px; line-height: 1.6; color: #5f5f5f; }
+.thanks-next li::after {
+  counter-increment: step;
+  content: counter(step);
+  position: absolute;
+  top: 18px;
+  inset-inline-end: 20px;
+  font-family: var(--f-latin);
+  font-size: 34px;
+  line-height: 1;
+  color: var(--c-mint);
+  pointer-events: none;
+}
+
+/* --- failed payment helper ---------------------------------------------- */
+.thanks-help {
+  max-width: calc(920px + var(--gutter) * 2);
+  padding-block: clamp(10px, 2vw, 16px) clamp(32px, 5vw, 56px);
+}
+.thanks-help__box {
+  padding: clamp(20px, 3vw, 28px);
+  background: #fff;
+  border-radius: 20px;
+  border-inline-start: 6px solid #d32f2f;
+  box-shadow: 0 6px 24px rgba(0, 0, 0, .07);
+}
+.thanks-help__box p { margin: 0 0 16px; font-size: 16px; line-height: 1.7; color: #333; }
+.thanks-help__box div { display: flex; flex-wrap: wrap; gap: 12px; }
+
+@media (max-width: 767px) {
+  .thanks-help__box div .btn { width: 100%; }
+}
