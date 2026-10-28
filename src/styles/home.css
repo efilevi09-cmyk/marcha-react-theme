@@ -120,3 +120,11 @@
 .about__text{max-width:62ch;font-size:clamp(18px,1.6vw,21px);line-height:1.75;gap:16px}
 .about__text p{text-wrap:pretty}
 @media (min-width:768px){.about__text{max-width:none}}
+
+/* Mobile hero: text panel under the picture is centred and compact */
+@media (max-width:767px){
+  .showcase__text{justify-items:center;text-align:center;gap:6px;padding:20px var(--gutter) 40px}
+  .showcase__eyebrow{text-align:center}
+  .showcase__text p:not(.showcase__eyebrow){max-width:26ch;font-size:16px;line-height:1.5;opacity:.9}
+  .showcase__text .btn{margin-top:12px;min-width:180px}
+}
