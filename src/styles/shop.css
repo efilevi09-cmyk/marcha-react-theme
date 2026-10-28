@@ -18,3 +18,11 @@
 .pcard__link{display:block;position:relative}
 .pcard__price s{opacity:.6;margin-inline-end:6px}
 .pcard__btn{display:block;background:#000;color:#fff;text-align:center;padding:14px;margin:0 10px 10px}
+
+.shop{max-width:1440px;margin-inline:auto}
+.banner{min-height:260px}
+.banner h1,.banner__desc{max-width:960px}
+.filters{display:grid;gap:12px;padding:20px;background:#fafafa;border:1px solid var(--c-border);margin-bottom:8px}
+.filter__row{display:flex;flex-wrap:wrap;gap:16px;align-items:center}
+.reset{margin-inline-start:auto}
+.toolbar{border-bottom:1px solid var(--c-border);padding-bottom:12px}

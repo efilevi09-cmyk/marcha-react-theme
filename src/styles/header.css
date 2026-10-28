@@ -1,6 +1,7 @@
 .hdr{position:sticky;top:0;z-index:50;background:#fff}
 .hdr__promo{background:var(--c-orange);color:#fff;text-align:center;padding:6px 12px;font-weight:700;font-size:16px}
 .hdr__usps{display:none;list-style:none;margin:0;padding:10px var(--gutter);background:#000;color:#fff;justify-content:space-around;gap:16px}
+.hdr__usps li{display:flex;align-items:center;gap:8px}
 .hdr__bar{display:flex;align-items:center;justify-content:space-between;height:var(--header-h)}
 .hdr__logo img{height:55px;width:auto}
 .hdr__burger{background:none;border:0;display:grid;gap:5px;padding:8px}
@@ -16,3 +17,11 @@
   .hdr__menu,.hdr__menu.is-open{display:flex;flex-direction:row;justify-content:center;gap:32px;border:0}
   .hdr__menu a{border:0;padding:8px 0}
 }
+
+.hdr__side{display:flex;align-items:center;gap:6px}
+.hdr__icon{display:grid;place-items:center;width:36px;height:36px}
+.hdr__bag{position:relative;display:inline-grid}
+.hdr__bag svg{width:28px;height:28px}
+.hdr__bag .hdr__count{position:absolute;top:-8px;inset-inline-start:-8px;background:#d33;min-width:20px;height:20px;font-size:12px}
+.hdr__total{font-size:18px}
+@media (max-width:1024px){.hdr__side .hdr__icon:nth-child(n+3){display:none}.hdr__usps{display:flex;padding:6px 8px;gap:4px;font-size:13px;justify-content:space-between}.hdr__usps li{gap:4px}.hdr__usps svg{width:18px;height:18px}}

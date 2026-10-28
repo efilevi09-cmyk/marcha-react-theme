@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
 import { useCart } from '../lib/CartContext.jsx';
 import { money } from '../lib/format.js';
+import { BagIcon, FacebookIcon, InstagramIcon, PhoneIcon, SearchIcon, StarIcon, TruckIcon } from './Icons.jsx';
 import '../styles/header.css';
 
-const USPS = ['25,000+ לקוחות מרוצות', 'שירות מהיר', 'משלוח מהיר עד הבית'];
+const USPS = [[StarIcon, '25,000+ לקוחות מרוצות'], [PhoneIcon, 'שירות מהיר'], [TruckIcon, 'משלוח מהיר עד הבית']];
 const MENU = [
   { label: 'בלרינה עגול לנשים וילדות', href: 'product-category/balarina-a/' },
   { label: 'בלרינה שפיץ', href: 'product-category/בלרינה-שפיץ/' },
@@ -19,15 +20,20 @@ export default function Header() {
   return (
     <header className="hdr">
       <div className="hdr__promo">מבצע! 3 נעלי בובה ב300 ₪</div>
-      <ul className="hdr__usps">{USPS.map((u) => <li key={u}>{u}</li>)}</ul>
+      <ul className="hdr__usps">{USPS.map(([Icon, t]) => <li key={t}><Icon width={22} height={22} />{t}</li>)}</ul>
       <div className="hdr__bar container">
-        <button className="hdr__burger" aria-label="תפריט" aria-expanded={menu} onClick={() => setMenu(!menu)}><span /><span /><span /></button>
+        <div className="hdr__side">
+          <a className="hdr__icon" href="https://www.facebook.com/" aria-label="Facebook" target="_blank" rel="noopener noreferrer"><FacebookIcon /></a>
+          <a className="hdr__icon" href="https://www.instagram.com/" aria-label="Instagram" target="_blank" rel="noopener noreferrer"><InstagramIcon /></a>
+          <a className="hdr__icon" href={base + '?s='} aria-label="חיפוש"><SearchIcon /></a>
+          <button className="hdr__burger" aria-label="תפריט" aria-expanded={menu} onClick={() => setMenu(!menu)}><span /><span /><span /></button>
+        </div>
         <a className="hdr__logo" href={base} aria-label="מרשה בלרינה – דף הבית">
           <img src={`${window.MARCHA?.uploadsUrl || ''}/2025/03/Marchalogo-1-300x111.png`} alt="Marcha Ballerina" width="150" height="55" />
         </a>
         <button className="hdr__cart" aria-label="פתחי עגלה" onClick={() => setOpen(true)}>
-          <span>{cart ? money(cart.totals.total_items, cart.totals) : ''}</span>
-          <b className="hdr__count">{count}</b>
+          <span className="hdr__bag"><BagIcon /><b className="hdr__count">{count}</b></span>
+          <span className="hdr__total">{cart ? money(cart.totals.total_items, cart.totals) : ''}</span>
         </button>
       </div>
       <nav className={`hdr__menu${menu ? ' is-open' : ''}`} aria-label="ראשי">

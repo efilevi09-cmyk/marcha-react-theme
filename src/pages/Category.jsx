@@ -46,7 +46,9 @@ export default function Category({ all = false }) {
         {cat?.description && <div className="banner__desc" dangerouslySetInnerHTML={{ __html: cat.description }} />}
       </section>
       <div className="container shop">
+        <div className="filters">
         <h2 className="filter__title">בחרו צבע מבוקש</h2>
+        <div className="filter__row">
         <ul className="swatches">
           {terms.filter((t) => COLOR_HEX[t.name.trim()]).map((t) => (
             <li key={t.id}>
@@ -63,6 +65,8 @@ export default function Category({ all = false }) {
           ))}
         </ul>
         <button type="button" className="reset" onClick={() => setColors([])} disabled={!colors.length}>איפוס הסינון</button>
+        </div>
+        </div>
         <div className="toolbar">
           <p aria-live="polite">מציגים את כל {meta.total} התוצאות</p>
           <select value={orderby} onChange={(e) => setOrderby(e.target.value)} aria-label="מיון">
