@@ -118,12 +118,58 @@ function marcha_rest_submit_review( WP_REST_Request $req ) {
 	return $id ? new WP_REST_Response( array( 'ok' => true ) ) : new WP_Error( 'fail', 'לא הצלחנו לשמור את הביקורת.', array( 'status' => 500 ) );
 }
 
-/** Admin-only import: [{id,pid,name,text,stars,date,verified,images}] */
+/**
+ * Reads data/reviews.csv shipped with the theme (the export from the old shop).
+ *
+ * Columns: ID, Product ID, Order ID, Email, Name, Username, Review, Stars, Images, Videos,
+ * Status, Verified, Type, Created At. "Rejected" rows are left out; "Pending" rows arrive
+ * unapproved so they stay in moderation exactly as they were.
+ */
+function marcha_reviews_from_file() {
+	$file = get_template_directory() . '/data/reviews.csv';
+	if ( ! file_exists( $file ) ) {
+		return array();
+	}
+	$fh = fopen( $file, 'r' ); // phpcs:ignore WordPress.WP.AlternativeFunctions
+	if ( ! $fh ) {
+		return array();
+	}
+	$head = fgetcsv( $fh );
+	$idx  = is_array( $head ) ? array_flip( array_map( 'trim', $head ) ) : array();
+	$get  = function ( $row, $key ) use ( $idx ) {
+		return isset( $idx[ $key ], $row[ $idx[ $key ] ] ) ? trim( (string) $row[ $idx[ $key ] ] ) : '';
+	};
+	$rows = array();
+	while ( false !== ( $row = fgetcsv( $fh ) ) ) {
+		if ( ! is_array( $row ) || count( $row ) < 3 ) {
+			continue;
+		}
+		$status = strtolower( $get( $row, 'Status' ) );
+		if ( 'rejected' === $status ) {
+			continue;
+		}
+		$rows[] = array(
+			'id'       => (int) $get( $row, 'ID' ),
+			'pid'      => (int) $get( $row, 'Product ID' ),
+			'name'     => $get( $row, 'Name' ),
+			'text'     => $get( $row, 'Review' ),
+			'stars'    => (int) $get( $row, 'Stars' ),
+			'date'     => $get( $row, 'Created At' ),
+			'verified' => 'yes' === strtolower( $get( $row, 'Verified' ) ),
+			'images'   => $get( $row, 'Images' ),
+			'approved' => 'published' === $status ? 1 : 0,
+		);
+	}
+	fclose( $fh ); // phpcs:ignore WordPress.WP.AlternativeFunctions
+	return $rows;
+}
+
+/** Admin-only import: POST {rows:[{id,pid,name,text,stars,date,verified,images,approved}]}, or no body to read data/reviews.csv. */
 function marcha_rest_import_reviews( WP_REST_Request $req ) {
-	$rows     = $req->get_json_params();
-	$rows     = isset( $rows['rows'] ) ? $rows['rows'] : array();
+	$body     = $req->get_json_params();
+	$rows     = isset( $body['rows'] ) && $body['rows'] ? $body['rows'] : marcha_reviews_from_file();
 	$fallback = marcha_reviews_fallback_post();
-	$out      = array( 'imported' => 0, 'mapped' => 0, 'general' => 0, 'skipped' => 0 );
+	$out      = array( 'imported' => 0, 'approved' => 0, 'pending' => 0, 'mapped' => 0, 'general' => 0, 'skipped' => 0 );
 	$touched  = array();
 	foreach ( $rows as $r ) {
 		$csv_id = (int) $r['id'];
@@ -145,20 +191,22 @@ function marcha_rest_import_reviews( WP_REST_Request $req ) {
 		if ( $imgs ) {
 			$meta['marcha_images'] = array_values( $imgs );
 		}
+		$approved = array_key_exists( 'approved', $r ) ? (int) $r['approved'] : 1;
 		wp_insert_comment(
 			array(
 				'comment_post_ID'  => $pid,
 				'comment_author'   => sanitize_text_field( $r['name'] ),
 				'comment_content'  => sanitize_textarea_field( $r['text'] ),
 				'comment_type'     => 'review',
-				'comment_approved' => 1,
+				'comment_approved' => $approved,
 				'comment_date'     => get_date_from_gmt( $date ),
 				'comment_date_gmt' => $date,
 				'comment_meta'     => $meta,
 			)
 		);
 		++$out['imported'];
-		if ( ! $gen ) {
+		$approved ? ++$out['approved'] : ++$out['pending'];
+		if ( ! $gen && $approved ) {
 			$touched[ $pid ] = true;
 		}
 		$gen ? ++$out['general'] : ++$out['mapped'];
