@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import * as api from '../lib/api.js';
 import { trackViewItem } from '../lib/track.js';
@@ -47,11 +47,13 @@ export default function Product() {
   const [zoom, setZoom] = useState(false);
   const [copied, setCopied] = useState(false);
   const [rating, setRating] = useState(null);
+  const [needSize, setNeedSize] = useState(false); // set when someone tries to buy before picking a size
+  const sizesRef = useRef(null);
 
   useEffect(() => { document.body.classList.add('is-product'); return () => document.body.classList.remove('is-product'); }, []);
 
   useEffect(() => {
-    setSize(null); setActive(0); setError(''); setQty(1); setTab('desc'); setRelated([]);
+    setSize(null); setActive(0); setError(''); setQty(1); setTab('desc'); setRelated([]); setNeedSize(false);
     window.scrollTo(0, 0);
     setRating(null);
     let alive = true;
@@ -81,7 +83,12 @@ export default function Product() {
   }
 
   const submit = async (goCheckout) => {
-    if (sizeAttr && !size) { setError('נא לבחור מידה'); return; }
+    if (sizeAttr && !size) {
+      setNeedSize(true);
+      setError('');
+      sizesRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      return;
+    }
     setError('');
     try {
       const item = { name: p.name, image: p.images?.[0]?.thumbnail || p.images?.[0]?.src, size: sizeAttr?.terms.find((t) => t.slug === size)?.name };
@@ -142,11 +149,12 @@ export default function Product() {
           <div className="product__desc" dangerouslySetInnerHTML={{ __html: p.short_description || '' }} />
 
           {sizeAttr && (
-            <fieldset className="sizes">
+            <fieldset className={`sizes${needSize ? ' is-missing' : ''}`} ref={sizesRef}>
               <legend>{sizeAttr.name}{size && <em>: {sizeAttr.terms.find((t) => t.slug === size)?.name}</em>}</legend>
               <div>{sizeAttr.terms.filter((t) => p.variations.some((v) => v.attributes.some((a) => a.value === t.slug))).map((t) => (
-                <button key={t.id} type="button" className={`size${size === t.slug ? ' is-on' : ''}`} aria-pressed={size === t.slug} onClick={() => { setSize(t.slug); setError(''); }}>{t.name}</button>
+                <button key={t.id} type="button" className={`size${size === t.slug ? ' is-on' : ''}`} aria-pressed={size === t.slug} onClick={() => { setSize(t.slug); setError(''); setNeedSize(false); }}>{t.name}</button>
               ))}</div>
+              {needSize && <p className="sizes__hint" role="alert">יש לבחור מידה</p>}
             </fieldset>
           )}
           {error && <p role="alert" className="product__error">{error}</p>}
