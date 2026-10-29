@@ -110,6 +110,7 @@ export default function Product() {
           {img && (
             <div className="product__stage">
               <img className="product__main" src={img.src} srcSet={img.srcset} sizes="(min-width:1025px) 50vw, 100vw" alt={img.alt || p.name} />
+              <span className="product__badge">{BUNDLE.bar}</span>
               <button type="button" className="product__zoom" onClick={() => setZoom(true)}><ZoomIcon /> הגדלה</button>
             </div>
           )}
@@ -127,7 +128,6 @@ export default function Product() {
             <Link to="/">בית</Link> / {p.categories?.[0] && <><Link to={`/product-category/${p.categories[0].slug}/`} dangerouslySetInnerHTML={{ __html: p.categories[0].name }} /> / </>}
             <span dangerouslySetInnerHTML={{ __html: p.name }} />
           </nav>
-          <p className="product__bar">{BUNDLE.bar}</p>
           <div className="product__head">
             {p.categories?.[0] && <p className="product__cat" dangerouslySetInnerHTML={{ __html: p.categories[0].name }} />}
             <button type="button" className="product__share" onClick={share} aria-label="שיתוף המוצר"><ShareIcon /><span>{copied ? 'הקישור הועתק' : 'שיתוף'}</span></button>

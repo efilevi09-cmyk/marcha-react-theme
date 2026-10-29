@@ -223,6 +223,68 @@ function marcha_rest_import_reviews( WP_REST_Request $req ) {
 	return $out;
 }
 
+
+/**
+ * Copies review photos that still sit on the old external CDN into the media library,
+ * so they keep working when that service goes away. Runs in batches; call until done is true.
+ */
+function marcha_rest_localize_review_images( WP_REST_Request $req ) {
+	require_once ABSPATH . 'wp-admin/includes/file.php';
+	require_once ABSPATH . 'wp-admin/includes/media.php';
+	require_once ABSPATH . 'wp-admin/includes/image.php';
+
+	$limit  = min( 20, max( 1, (int) ( $req->get_param( 'limit' ) ?: 8 ) ) );
+	$base   = wp_get_upload_dir()['baseurl'];
+	$done   = 0;
+	$copied = 0;
+	$failed = array();
+	$left   = 0;
+
+	$comments = get_comments( array( 'type' => 'review', 'status' => 'all', 'meta_key' => 'marcha_images', 'number' => 500 ) ); // phpcs:ignore WordPress.DB.SlowDBQuery
+	foreach ( $comments as $c ) {
+		$imgs = get_comment_meta( $c->comment_ID, 'marcha_images', true );
+		if ( ! is_array( $imgs ) || ! $imgs ) {
+			continue;
+		}
+		$external = array_filter( $imgs, function ( $u ) use ( $base ) {
+			return 0 !== strpos( (string) $u, $base );
+		} );
+		if ( ! $external ) {
+			continue;
+		}
+		if ( $done >= $limit ) {
+			++$left;
+			continue;
+		}
+		$next = array();
+		foreach ( $imgs as $url ) {
+			if ( 0 === strpos( (string) $url, $base ) ) {
+				$next[] = $url;
+				continue;
+			}
+			$tmp = download_url( $url, 45 );
+			if ( is_wp_error( $tmp ) ) {
+				$failed[] = $url;
+				$next[]   = $url;
+				continue;
+			}
+			$name = 'review-' . (int) $c->comment_ID . '-' . substr( md5( $url ), 0, 6 ) . '.jpg';
+			$id   = media_handle_sideload( array( 'name' => $name, 'tmp_name' => $tmp ), 0, 'Review photo' );
+			if ( is_wp_error( $id ) ) {
+				wp_delete_file( $tmp );
+				$failed[] = $url;
+				$next[]   = $url;
+				continue;
+			}
+			$next[] = wp_get_attachment_url( $id );
+			++$copied;
+		}
+		update_comment_meta( $c->comment_ID, 'marcha_images', array_values( $next ) );
+		++$done;
+	}
+	return array( 'reviews' => $done, 'copied' => $copied, 'remaining' => $left, 'failed' => array_values( array_unique( $failed ) ), 'done' => 0 === $left );
+}
+
 add_action(
 	'rest_api_init',
 	function () {
@@ -235,6 +297,13 @@ add_action(
 			'callback'            => 'marcha_rest_import_reviews',
 			'permission_callback' => function () {
 				return current_user_can( 'manage_options' );
+			},
+		) );
+		register_rest_route( 'marcha/v1', '/reviews/localize-images', array(
+			'methods'             => 'POST',
+			'callback'            => 'marcha_rest_localize_review_images',
+			'permission_callback' => function () {
+				return current_user_can( 'upload_files' );
 			},
 		) );
 	}

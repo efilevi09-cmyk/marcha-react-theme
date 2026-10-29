@@ -41,9 +41,11 @@ body .woocommerce-checkout #place_order{padding:16px 25px;font-size:20px}
 /* on dark backgrounds the black pill gets a white outline so it stays visible */
 body .pagecta .btn,body .showcase__text .btn,body .ftr .btn{border-color:#fff!important}
 
-/* The "to checkout" button in the added-to-cart popup is the one green call to action */
-body .bm .btn--mint{background-color:var(--c-mint)!important;background-image:linear-gradient(to left,#000 50%,var(--c-mint) 50%)!important;color:#000!important;border-color:var(--c-mint)!important}
-body .bm .btn--mint:hover{background-position:100% 0!important;color:#fff!important;border-color:#000!important;box-shadow:0 10px 24px rgba(0,0,0,.28)}
+/* Mint call-to-action: the popup's checkout button and the Waze buttons on the branches block */
+body .bm .btn--mint,
+body .branches .btn--mint{background-color:var(--c-mint)!important;background-image:linear-gradient(to left,#000 50%,var(--c-mint) 50%)!important;color:#000!important;border-color:var(--c-mint)!important}
+body .bm .btn--mint:hover,
+body .branches .btn--mint:hover{background-position:100% 0!important;color:#fff!important;border-color:#000!important;box-shadow:0 10px 24px rgba(0,0,0,.28)}
 
 /* wider buttons */
 body .btn,body .btn--mint,body .btn--black{min-width:200px;padding:15px 42px;font-size:19px}
