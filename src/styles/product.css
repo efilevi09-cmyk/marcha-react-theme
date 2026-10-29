@@ -53,6 +53,11 @@
   .trust{grid-template-columns:repeat(4,1fr)}
 }
 @media (max-width:767px){
+  /* On a phone the three controls cannot share a row without squashing the pills. */
+  .product__buy{grid-template-columns:1fr;gap:12px;max-width:none}
+  .product__buy .qty{justify-self:stretch;justify-content:center;min-height:50px}
+  .product__buy .qty button{width:56px}
+  .product__buy .btn{width:100%}
   .stickybuy{display:flex;position:fixed;inset-inline:0;bottom:0;z-index:60;background:#fff;border-top:1px solid var(--c-border);padding:10px var(--gutter);justify-content:space-between;align-items:center;font-size:20px;font-weight:700}
   .stickybuy .btn{padding:12px 28px}
   body{padding-bottom:70px}
