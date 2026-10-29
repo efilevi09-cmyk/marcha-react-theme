@@ -35,7 +35,10 @@ body .btn:focus-visible,body .pcard__btn:focus-visible,body #place_order:focus-v
 body .btn:disabled,body .pcard__btn:disabled,body #place_order:disabled{opacity:.55;transform:none;box-shadow:none;cursor:not-allowed}
 
 /* full-width ones keep full width */
-body .woocommerce-checkout #place_order,body article.pcard>.pcard__btn,body article.pcard>button.pcard__btn,body .cartpage__relgrid .pcard__btn,body .cartpage__sum .btn,body .sc .btn{display:flex;width:100%}
+body .woocommerce-checkout #place_order,body .cartpage__relgrid .pcard__btn,body .cartpage__sum .btn,body .sc .btn{display:flex;width:100%}
+/* The card button keeps the 10px side margins it has on desktop, so it stretches to the
+   card's content box instead of being forced to 100% width (which pushed it outside). */
+body article.pcard>.pcard__btn,body article.pcard>button.pcard__btn{display:flex;width:auto;align-self:stretch}
 body .woocommerce-checkout #place_order{padding:16px 25px;font-size:20px}
 
 /* on dark backgrounds the black pill gets a white outline so it stays visible */
