@@ -62,19 +62,49 @@ add_action(
 	}
 );
 
-/* Checkout: no "company name" field (billing, shipping and account addresses). */
+/* Checkout: no "company name" and no postcode (billing, shipping and account addresses). */
 add_filter(
 	'woocommerce_default_address_fields',
 	function ( $fields ) {
-		unset( $fields['company'] );
+		unset( $fields['company'], $fields['postcode'] );
 		return $fields;
 	}
 );
 add_filter(
 	'woocommerce_checkout_fields',
 	function ( $fields ) {
-		unset( $fields['billing']['billing_company'], $fields['shipping']['shipping_company'] );
+		unset(
+			$fields['billing']['billing_company'],
+			$fields['shipping']['shipping_company'],
+			$fields['billing']['billing_postcode'],
+			$fields['shipping']['shipping_postcode']
+		);
 		return $fields;
 	},
 	99
+);
+/* Nothing asks for a postcode any more, so it must not hold an order up either. */
+add_filter( 'woocommerce_billing_fields', function ( $fields ) {
+	unset( $fields['billing_postcode'] );
+	return $fields;
+}, 99 );
+add_filter( 'woocommerce_shipping_fields', function ( $fields ) {
+	unset( $fields['shipping_postcode'] );
+	return $fields;
+}, 99 );
+
+/**
+ * Local pickup costs nothing, and WooCommerce prints no price for a free method,
+ * so shoppers could not tell. Say it in words next to the option.
+ */
+add_filter(
+	'woocommerce_cart_shipping_method_full_label',
+	function ( $label, $method ) {
+		if ( 'local_pickup' === $method->get_method_id() && 0.0 === (float) $method->get_cost() ) {
+			$label .= ' <span class="mc-free">ללא עלות</span>';
+		}
+		return $label;
+	},
+	10,
+	2
 );

@@ -24,9 +24,10 @@ if ( marcha_is_native_route() ) {
 }
 ?>
 </div>
-<noscript>
-	<main><?php while ( have_posts() ) { the_post(); the_content(); } ?></main>
-</noscript>
+<?php // Without JavaScript the server-rendered content above is simply unhidden.
+      // It must never be printed a second time inside <noscript>: WooCommerce's own
+      // <noscript> button closes ours early, and the copy spills out below the footer. ?>
+<noscript><style>.native-content__source{position:static!important;width:auto!important;height:auto!important;overflow:visible!important;clip-path:none!important;pointer-events:auto!important}</style></noscript>
 <?php wp_footer(); ?>
 </body>
 </html>
