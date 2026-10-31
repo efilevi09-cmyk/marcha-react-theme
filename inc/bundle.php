@@ -41,7 +41,9 @@ add_action(
 		$covered  = array_sum( array_slice( $prices, 0, $groups * MARCHA_BUNDLE_QTY ) );
 		$discount = $covered - $groups * MARCHA_BUNDLE_TOTAL;
 		if ( $discount > 0 ) {
-			$cart->add_fee( sprintf( 'הנחת מבצע: %d נעליים ב-%d ₪', MARCHA_BUNDLE_QTY, MARCHA_BUNDLE_TOTAL ), -$discount, false );
+			// No colon in the name: WooCommerce appends one when it prints this as a
+			// totals row in the order emails, and two colons read badly.
+			$cart->add_fee( sprintf( 'הנחת מבצע %d נעליים ב-%d ₪', MARCHA_BUNDLE_QTY, MARCHA_BUNDLE_TOTAL ), -$discount, false );
 		}
 	}
 );
