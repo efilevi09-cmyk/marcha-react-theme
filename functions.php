@@ -136,8 +136,11 @@ function marcha_shabbat_closed() {
  * Safety net: some plugins (Elementor Pro theme builder, Canvas templates) replace
  * the template after our template_include filter. Render the shell directly instead.
  *
- * The template chain is resolved here rather than hard-coding the shell, so a plugin
- * that legitimately takes the page over - the Shabbat block above all - still does.
+ * Only ever renders our own shell. When the resolved template belongs to someone
+ * else - the Shabbat block above all - this bails out and lets WordPress load it a
+ * moment later: wp-includes/template-loader.php includes it at global scope, and
+ * plugin templates rely on that (Shamor's block page reads a bare $shamor, which
+ * would be undefined inside this closure and take the page down with a fatal).
  */
 add_action( 'template_redirect', function () {
 	if ( is_feed() || is_embed() || is_robots() || is_trackback() || is_favicon() ) {
@@ -146,11 +149,15 @@ add_action( 'template_redirect', function () {
 	if ( 'GET' !== ( $_SERVER['REQUEST_METHOD'] ?? 'GET' ) && 'HEAD' !== $_SERVER['REQUEST_METHOD'] ) {
 		return;
 	}
-	if ( function_exists( 'is_wc_endpoint_url' ) && is_wc_endpoint_url( 'order-received' ) ) {
-		// Fall through to the same shell; handled inside the template.
-	}
+
+	$shell = get_template_directory() . '/index.php';
+
 	/** This filter is what WordPress itself would apply a moment later. */
-	include apply_filters( 'template_include', get_template_directory() . '/index.php' );
+	if ( apply_filters( 'template_include', $shell ) !== $shell ) {
+		return;
+	}
+
+	include $shell;
 	exit;
 }, PHP_INT_MAX );
 
