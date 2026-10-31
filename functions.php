@@ -121,8 +121,14 @@ function marcha_shabbat_closed() {
 		return $closed;
 	}
 	global $shamor;
-	$closed = is_object( $shamor ) && method_exists( $shamor, 'move_out_of_site' )
+
+	// WP Shamor needs the PHP calendar extension; without it its constructor bails out
+	// and move_out_of_site() would fatal on gregoriantojd(). Never call it blindly.
+	$closed = extension_loaded( 'calendar' )
+		&& is_object( $shamor )
+		&& method_exists( $shamor, 'move_out_of_site' )
 		&& false !== $shamor->move_out_of_site( false );
+
 	return $closed;
 }
 
