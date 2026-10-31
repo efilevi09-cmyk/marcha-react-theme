@@ -99,14 +99,39 @@ add_action( 'wp_enqueue_scripts', function () {
 /**
  * Always render through the React shell, even while Elementor / Elementor Pro
  * theme-builder templates or page templates are still installed.
+ *
+ * Priority 1000 on purpose: the Shabbat plugin (Shamor) swaps in its own block
+ * template through this same filter at 9999, and it has to win.
  */
 add_filter( 'template_include', function () {
 	return get_template_directory() . '/index.php';
-}, PHP_INT_MAX );
+}, 1000 );
+
+/**
+ * Is the Shabbat plugin closing the shop for this visitor right now?
+ *
+ * Shamor decides per visitor (it geolocates the IP for local candle-lighting and
+ * havdalah times) inside move_out_of_site(): it hands back a template path while
+ * the site is closed and the value it was given while it is open. The answer is
+ * cached for the request because asking also sends the 503 headers.
+ */
+function marcha_shabbat_closed() {
+	static $closed = null;
+	if ( null !== $closed ) {
+		return $closed;
+	}
+	global $shamor;
+	$closed = is_object( $shamor ) && method_exists( $shamor, 'move_out_of_site' )
+		&& false !== $shamor->move_out_of_site( false );
+	return $closed;
+}
 
 /**
  * Safety net: some plugins (Elementor Pro theme builder, Canvas templates) replace
  * the template after our template_include filter. Render the shell directly instead.
+ *
+ * The template chain is resolved here rather than hard-coding the shell, so a plugin
+ * that legitimately takes the page over - the Shabbat block above all - still does.
  */
 add_action( 'template_redirect', function () {
 	if ( is_feed() || is_embed() || is_robots() || is_trackback() || is_favicon() ) {
@@ -118,9 +143,34 @@ add_action( 'template_redirect', function () {
 	if ( function_exists( 'is_wc_endpoint_url' ) && is_wc_endpoint_url( 'order-received' ) ) {
 		// Fall through to the same shell; handled inside the template.
 	}
-	include get_template_directory() . '/index.php';
+	/** This filter is what WordPress itself would apply a moment later. */
+	include apply_filters( 'template_include', get_template_directory() . '/index.php' );
 	exit;
 }, PHP_INT_MAX );
+
+/**
+ * The shop front is a single-page app, so blocking the HTML alone would still leave
+ * the Store API open to a tab that was already loaded. Cart changes and checkout are
+ * refused while the shop is closed; reading the catalogue stays allowed.
+ */
+add_filter(
+	'rest_pre_dispatch',
+	function ( $result, $server, $request ) {
+		if ( 'GET' === $request->get_method() || 0 !== strpos( $request->get_route(), '/wc/store/' ) ) {
+			return $result;
+		}
+		if ( ! marcha_shabbat_closed() ) {
+			return $result;
+		}
+		return new WP_Error(
+			'marcha_shabbat',
+			'החנות סגורה בשבת ובחג. נשמח לראותך במוצאי שבת.',
+			array( 'status' => 503 )
+		);
+	},
+	10,
+	3
+);
 
 require_once get_template_directory() . '/inc/updater.php';
 require_once get_template_directory() . '/inc/reviews.php';
