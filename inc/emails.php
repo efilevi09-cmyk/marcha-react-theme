@@ -15,6 +15,45 @@
 defined( 'ABSPATH' ) || exit;
 
 /**
+ * Render the admin notification for one order on screen, without sending anything.
+ *
+ * wp-admin/?marcha_email_preview=<order id>
+ */
+add_action(
+	'admin_init',
+	function () {
+		$order_id = isset( $_GET['marcha_email_preview'] ) ? absint( $_GET['marcha_email_preview'] ) : 0; // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- read-only preview behind a capability check.
+		if ( ! $order_id || ! current_user_can( 'manage_woocommerce' ) || ! function_exists( 'WC' ) ) {
+			return;
+		}
+
+		$order = wc_get_order( $order_id );
+		if ( ! $order ) {
+			wp_die( 'הזמנה לא נמצאה' );
+		}
+
+		$emails = WC()->mailer()->get_emails();
+		$email  = isset( $emails['WC_Email_New_Order'] ) ? $emails['WC_Email_New_Order'] : null;
+		if ( ! $email ) {
+			wp_die( 'תבנית המייל לא נמצאה' );
+		}
+
+		$email->object                          = $order;
+		$email->placeholders['{order_date}']    = wc_format_datetime( $order->get_date_created() );
+		$email->placeholders['{order_number}']  = $order->get_order_number();
+
+		$html = $email->get_content();
+		if ( method_exists( $email, 'style_inline' ) ) {
+			$html = $email->style_inline( $html );
+		}
+
+		header( 'Content-Type: text/html; charset=utf-8' );
+		echo $html; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- rendered email template.
+		exit;
+	}
+);
+
+/**
  * Every negative fee on the order, as label => formatted amount.
  *
  * @param WC_Order $order Order.
