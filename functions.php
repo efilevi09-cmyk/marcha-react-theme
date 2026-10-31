@@ -108,6 +108,27 @@ add_filter( 'template_include', function () {
 }, 1000 );
 
 /**
+ * Dress the Shabbat block page in the shop's own design.
+ *
+ * Shamor keeps deciding when to close and still sends its 503 headers; only the
+ * markup changes. Its own block_template.php renders [elementor-template], which
+ * stopped resolving when Elementor was dropped and printed the raw shortcode.
+ *
+ * Priority 10000: one past Shamor's 9999, so this sees what it chose.
+ */
+add_filter( 'template_include', function ( $template ) {
+	if ( ! is_string( $template ) || 'block_template.php' !== basename( $template ) ) {
+		return $template;
+	}
+	if ( false === stripos( $template, 'shamor' ) ) {
+		return $template;
+	}
+	$own = get_template_directory() . '/shabbat.php';
+
+	return file_exists( $own ) ? $own : $template;
+}, 10000 );
+
+/**
  * Is the Shabbat plugin closing the shop for this visitor right now?
  *
  * Shamor decides per visitor (it geolocates the IP for local candle-lighting and
