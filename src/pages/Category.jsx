@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import * as api from '../lib/api.js';
-import { COLOR_HEX, SORTS } from '../lib/config.js';
+import { CAT_ART, CAT_ART_FALLBACK, COLOR_HEX, SORTS } from '../lib/config.js';
 import ProductCard from '../components/ProductCard.jsx';
 import '../styles/shop.css';
 
@@ -48,10 +48,17 @@ export default function Category({ all = false }) {
 
   const toggle = (id) => setColors((c) => (c.includes(id) ? c.filter((x) => x !== id) : [...c, id]));
   const title = all ? 'כל הנעליים' : cat?.name;
+  const art = (!all && slug && CAT_ART[slug]) || CAT_ART_FALLBACK;
 
   return (
     <>
-      <section className="banner" style={{ backgroundImage: `url(${window.MARCHA?.uploadsUrl}/2025/03/279.webp)` }}>
+      <section
+        className="banner"
+        style={{
+          backgroundImage: `url(${window.MARCHA?.uploadsUrl}/${art.img})`,
+          backgroundPosition: art.pos,
+        }}
+      >
         <h1 dangerouslySetInnerHTML={{ __html: title || '' }} />
         {cat?.description && <div className="banner__desc" dangerouslySetInnerHTML={{ __html: cat.description }} />}
       </section>

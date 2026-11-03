@@ -14,3 +14,22 @@ export const SORTS = [
 
 /** Customer-service WhatsApp (same number the old site used). */
 export const WHATSAPP_URL = 'https://api.whatsapp.com/send?phone=972559296934';
+
+/**
+ * Category page banner art, keyed by category slug.
+ *
+ * Deliberately the same files the home page tiles use: arriving from the home page
+ * the picture is already decoded in the browser, so the banner costs nothing and the
+ * two screens read as one place. `pos` is the background-position - these are tall
+ * street scenes and the banner is a short strip, so each one is pulled up to keep the
+ * model's head in frame rather than centring on her waist.
+ */
+export const CAT_ART = {
+  'balarina-a': { img: '2026/10/marcha-cat-round.jpg', pos: '50% 28%' },
+  'בלרינה-שפיץ': { img: '2026/10/marcha-cat-pointed.jpg', pos: '50% 30%' },
+  boots: { img: '2026/10/marcha-cat-boots.jpg', pos: '50% 32%' },
+  winter: { img: '2026/10/marcha-cat-boots.jpg', pos: '50% 32%' },
+};
+
+/** Shown on "all shoes" and on any category without art of its own. */
+export const CAT_ART_FALLBACK = { img: '2026/10/marcha-cat-round.jpg', pos: '50% 28%' };
