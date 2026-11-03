@@ -54,7 +54,7 @@ export default function Showcase({ slides, up }) {
           {slides.map((b, k) => (
             <article key={b.slug} dir="rtl" style={{ '--bg': `url(${up(b.img)})` }} className={`showcase__item showcase__item--${b.side}`} role="group" aria-roledescription="slide" aria-label={`${k + 1} מתוך ${n}`} aria-hidden={k !== i}>
               <picture>
-                <source media="(max-width: 767px)" srcSet={up(b.imgM)} width="928" height="1152" />
+                <source media="(max-width: 767px)" srcSet={up(b.imgM)} width="928" height="1300" />
                 <img src={up(b.img)} alt={b.alt} width="1584" height="672" decoding="async" loading={k === 0 ? 'eager' : 'lazy'} fetchPriority={k === 0 ? 'high' : undefined} draggable="false" />
               </picture>
               <div className="showcase__text">

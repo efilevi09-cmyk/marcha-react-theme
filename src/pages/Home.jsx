@@ -7,7 +7,7 @@ import '../styles/home.css';
 
 const up = (path) => encodeURI(`${window.MARCHA?.uploadsUrl || ''}/${path}`);
 const SHOWCASE = [
-  { slug: 'flats', side: 'right', img: '2026/10/marcha-hero-flats3-wide.jpg', imgM: '2026/10/marcha-hero-flats2-tall.jpg', alt: 'אישה בשמלה צנועה בבית קפה פריזאי נועלת נעלי בובה ורודות של מרשה בלרינה', eyebrow: 'Café de Paris', title: 'נעלי בובה לכל יום', text: '66 דגמים עגולים בצבעים שאי אפשר לבחור ביניהם – ועוד 3 זוגות ב-300 ₪.', cta: 'לנעלי הבובה', to: '/product-category/balarina-a/' },
+  { slug: 'flats', side: 'right', img: '2026/11/marcha-hero-flats4-wide.jpg', imgM: '2026/11/marcha-hero-flats4-tall.jpg', alt: 'אישה בשמלה צנועה קוראת ספר בבית קפה פריזאי ונועלת נעלי בובה בגוון קוניאק של מרשה בלרינה', eyebrow: 'Café de Paris', title: 'נעלי בובה לכל יום', text: '66 דגמים עגולים בצבעים שאי אפשר לבחור ביניהם – ועוד 3 זוגות ב-300 ₪.', cta: 'לנעלי הבובה', to: '/product-category/balarina-a/' },
   { slug: 'boots', side: 'right', img: '2026/10/marcha-hero-boots2-wide.jpg', imgM: '2026/10/marcha-hero-boots-tall.jpg', alt: 'שתי נשים בפריז בגשם נועלות מגפי גומי קצרים של מרשה בלרינה', eyebrow: 'Rainy Paris', title: 'מגפי גומי לחורף', text: 'מגפי צ׳לסי קצרים ואלגנטיים – שחור מבריק, קטיפה ואפור. יוצאים לגשם בסטייל.', cta: 'למגפיים', to: '/product-category/boots/' },
 ];
 const CATS = [
