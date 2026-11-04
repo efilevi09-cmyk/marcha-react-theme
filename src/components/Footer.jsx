@@ -40,7 +40,7 @@ export default function Footer() {
           <li><a href={base + 'product-category/balarina-a/'}>בלרינה עגול לנשים וילדות</a><small> מידות - 22-43</small></li>
           <li><a href={base + 'product-category/בלרינה-שפיץ/'}>בלרינה שפיץ לנשים</a><small> מידות - 35-43</small></li>
         </ul></section>
-        <section><h2>הסניפים שלנו</h2><ul><li>סניף ירושלים – קניון רב שפע</li><li>סניף בני ברק – רחוב ירושלים 10</li></ul></section>
+        <section><h2>הסניף שלנו</h2><ul><li>סניף ירושלים – קניון רב שפע</li></ul></section>
         <section><h2>עקבי אחרינו</h2><p className="ftr__social"><a href="https://www.facebook.com/MarchaBallerina.Israel/" aria-label="Facebook" target="_blank" rel="noopener noreferrer"><FacebookIcon /></a><a href="https://www.instagram.com/marchaballerina/" aria-label="Instagram" target="_blank" rel="noopener noreferrer"><InstagramIcon /></a></p><p>תשלום מאובטח באשראי ובביט</p><p>שירות אישי ינתן באהבה <a href="https://api.whatsapp.com/send?phone=0559296934" target="_blank" rel="noopener noreferrer">בווצאפ</a></p></section>
       </div>
       <p className="ftr__credit">אפיון עיצוב ופיתוח אפרת אסולין</p>

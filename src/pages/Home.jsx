@@ -15,19 +15,25 @@ const CATS = [
   { href: 'product-category/בלרינה-שפיץ/', img: '2026/10/marcha-cat-pointed.jpg', alt: 'אישה בבית קפה פריזאי נועלת נעלי בלרינה שפיץ בז׳', title: 'בלרינה שפיץ לנשים', sizes: 'מידות 35-43' },
   { href: 'product-category/boots/', img: '2026/10/marcha-cat-boots.jpg', alt: 'אישה בגשם בפריז נועלת מגפי גומי שחורים', title: 'מגפי גומי', sizes: 'חורף 2026' },
 ];
+/**
+ * About block artwork: stills from the shop's own Instagram, chosen by hand because
+ * they carry the mood without a model in them. The first is the large image.
+ */
+const ABOUT_MEDIA = [
+  { img: '2026/10/instagram-CrsPzR1oxpX-1-768x768.jpg', alt: 'נעלי בלרינה של מרשה בצבעים שונים לצד תפוזים חתוכים' },
+  { img: '2026/10/instagram-CX7_sa2KTzK-1-768x941.jpg', alt: 'חזית בניין פריזאי עם בלונים אדומים במרפסת' },
+  { img: '2026/10/instagram-CsxxRTrKakx-3-768x768.jpg', alt: 'נעלי בלרינה ורודות מונחות על דלת כחולה' },
+];
 const BRANCHES = [
   { name: 'סניף ירושלים', address: 'קניון רב שפע', query: 'קניון רב שפע ירושלים' },
-  { name: 'סניף בני ברק', address: 'רחוב ירושלים 10', query: 'ירושלים 10 בני ברק' },
 ];
 const PATTERN = up('2025/03/מרשה-בלרינה-נעלים-1.png');
 
 export default function Home() {
   const [terms, setTerms] = useState([]);
-  const [ig, setIg] = useState([]);
   const base = window.MARCHA?.siteUrl || '/';
   useEffect(() => {
     api.getColorTerms().then(setTerms).catch(() => {});
-  api.getInstagram().then((f) => setIg(f.items || [])).catch(() => {});
   }, []);
   return (
     <>
@@ -57,15 +63,22 @@ export default function Home() {
         <h2 className="section-title" id="about-title">מרשה מותג בין לאומי מאז 2005</h2>
         <div className="about__text">
           <p className="about__lead">נעלי בלרינה עם נשמה פריזאית.</p>
-          <p>מרשה בלרינה נולדה מאהבה לסטייל, לנשיות ולנוחות. התחלנו כדוכנים וחנויות בהשראה פריזאית, והיום אנחנו מקבלות אתכן בשני סניפים בישראל – בירושלים ובבני ברק – ושולחות לכל מקום בעולם.</p>
+          <p>מרשה בלרינה נולדה מאהבה לסטייל, לנשיות ולנוחות. התחלנו כדוכנים וחנויות בהשראה פריזאית, והיום אנחנו מקבלות אתכן בסניף בירושלים – ושולחות לכל מקום בעולם.</p>
           <p>היום הקסם הזה מגיע ישר אלייך הביתה – נעליים לכל אישה, נערה וילדה, במידות 22 עד 42, בצבעים וסגנונות לכל טעם.</p>
           <p>אלגנטיות, נוחות ואיכות ללא פשרות.</p>
           <p className="about__quote">כל צעד הוא ריקוד קטן של שמחה.</p>
           <a className="btn btn--black" href={base + 'אודות/'}>עוד עלינו</a>
         </div>
         <div className="about__media">
-          <img className="about__img" src={up('2025/03/אודות-מרשה.png')} alt="מרשה בלרינה" loading="lazy" />
-          {ig.slice(0, 2).map((it) => <img key={it.src} className="about__thumb" src={it.src} alt="" loading="lazy" />)}
+          {ABOUT_MEDIA.map((m, i) => (
+            <img
+              key={m.img}
+              className={i === 0 ? 'about__img' : 'about__thumb'}
+              src={up(m.img)}
+              alt={m.alt}
+              loading="lazy"
+            />
+          ))}
         </div>
         <ul className="about__stats">
           <li><b>2005</b><span>שנת הקמה</span></li>
@@ -77,7 +90,7 @@ export default function Home() {
       <section className="branches" aria-labelledby="branches-title" style={{ '--branches-d': `url(${up('2026/03/מרשה-1.webp')})`, '--branches-m': `url(${up('2026/03/נעלי-בלרינה-עגולות-מרשה.webp')})` }}>
         <div className="branches__inner">
           <p className="script-title" aria-hidden="true">Visit us</p>
-          <h2 className="section-title" id="branches-title">הסניפים שלנו</h2>
+          <h2 className="section-title" id="branches-title">{BRANCHES.length > 1 ? 'הסניפים שלנו' : 'הסניף שלנו'}</h2>
           <ul className="branches__list">
             {BRANCHES.map((b) => (
               <li key={b.name}>

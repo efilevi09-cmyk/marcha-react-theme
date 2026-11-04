@@ -60,7 +60,12 @@ export const getProduct = async (slug) => {
   const [prod] = await request(`wc/store/v1/products?include=${found.id}`);
   return prod || null;
 };
-export const getCategories = () => request('wc/store/v1/products/categories?per_page=50');
+/**
+ * hide_empty=false on purpose: the category page reads its heading and description
+ * from here, and the Store API drops a category with no products in stock. A seasonal
+ * one like מגפיים would otherwise open as an untitled, undescribed page out of season.
+ */
+export const getCategories = () => request('wc/store/v1/products/categories?per_page=50&hide_empty=false');
 export const getCart = () => request('wc/store/v1/cart');
 export const addToCart = (id, quantity = 1, variation = []) =>
   request('wc/store/v1/cart/add-item', { method: 'POST', body: { id, quantity, variation } });
