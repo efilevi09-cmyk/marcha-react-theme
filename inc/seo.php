@@ -207,3 +207,84 @@ add_action(
 		);
 	}
 );
+
+/**
+ * Meta titles and descriptions for the buying guides.
+ *
+ * Yoast does not expose these fields over the REST API, so the copy lives here instead of
+ * being typed into the editor. The map is keyed by page slug, and each filter steps aside
+ * the moment a value is saved in the Yoast box — so anything written there still wins.
+ */
+function marcha_guide_meta() {
+	return array(
+		'מדריך-מידות'         => array(
+			'title' => 'מדריך מידות לנעלי בלרינה – טבלת מידות מלאה | מרשה',
+			'desc'  => 'איך מודדים כף רגל נכון, טבלת מידות מלאה EU/US/UK, מה עושים בין שתי מידות ולמה בנעלי שפיץ המידה עובדת אחרת.',
+		),
+		'נעלי-כלה-שטוחות'     => array(
+			'title' => 'נעלי כלה שטוחות – מדריך לבחירת נעלי בלרינה לחתונה | מרשה',
+			'desc'  => 'איזה גוון, איזו גזרה ואיך לא לטעות במידה. מדריך לכלות שרוצות נעל שטוחה שמחזיקה מהחופה ועד סוף הריקודים.',
+		),
+		'נעלי-בובה-לילדות'    => array(
+			'title' => 'נעלי בובה לילדות – מדריך מידות, חומרים ודגמים | מרשה',
+			'desc'  => 'למה לא קונים "לגדול לתוכן", מה המרווח הנכון בין כף הרגל לנעל, ואיזה חומר מחזיק מעמד אצל ילדות. מידות 22 עד 43.',
+		),
+		'איך-לבחור-נעלי-בובה' => array(
+			'title' => 'איך לבחור נעלי בובה שנוח ללכת בהן כל היום | מרשה',
+			'desc'  => 'שבעה דברים שקובעים אם זוג נעלי בובה יישאר בארון או ייצא כל יום: מידה, רוחב הרגל, חומר, גזרה וצבע.',
+		),
+	);
+}
+
+/** The guide entry for the page being viewed, or null. */
+function marcha_current_guide_meta() {
+	if ( is_admin() || ! is_page() ) {
+		return null;
+	}
+	$page = get_queried_object();
+	if ( ! $page instanceof WP_Post ) {
+		return null;
+	}
+	$map  = marcha_guide_meta();
+	$slug = urldecode( $page->post_name );
+	return isset( $map[ $slug ] ) ? $map[ $slug ] + array( 'id' => $page->ID ) : null;
+}
+
+add_filter(
+	'wpseo_title',
+	function ( $title ) {
+		$guide = marcha_current_guide_meta();
+		if ( ! $guide || get_post_meta( $guide['id'], '_yoast_wpseo_title', true ) ) {
+			return $title; // a title typed in the Yoast box wins
+		}
+		return $guide['title'];
+	},
+	20
+);
+
+add_filter(
+	'wpseo_metadesc',
+	function ( $desc ) {
+		$guide = marcha_current_guide_meta();
+		if ( ! $guide || get_post_meta( $guide['id'], '_yoast_wpseo_metadesc', true ) ) {
+			return $desc;
+		}
+		return $guide['desc'];
+	},
+	20
+);
+
+/** Without Yoast the same copy still reaches the head. */
+add_action(
+	'wp_head',
+	function () {
+		if ( defined( 'WPSEO_VERSION' ) ) {
+			return;
+		}
+		$guide = marcha_current_guide_meta();
+		if ( $guide ) {
+			printf( '<meta name="description" content="%s" />' . "\n", esc_attr( $guide['desc'] ) );
+		}
+	},
+	1
+);

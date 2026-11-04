@@ -155,6 +155,9 @@ export default function Product() {
                 <button key={t.id} type="button" className={`size${size === t.slug ? ' is-on' : ''}`} aria-pressed={size === t.slug} onClick={() => { setSize(t.slug); setError(''); setNeedSize(false); }}>{t.name}</button>
               ))}</div>
               {needSize && <p className="sizes__hint" role="alert">יש לבחור מידה</p>}
+              {/* The single biggest cause of an exchange is the wrong size, so the guide sits
+                  right where the choice is made rather than buried in the footer. */}
+              <p className="sizes__guide"><a href={`${window.MARCHA?.siteUrl || '/'}מדריך-מידות/`}>לא בטוחה במידה? למדריך המידות ולטבלה המלאה</a></p>
             </fieldset>
           )}
           {error && <p role="alert" className="product__error">{error}</p>}
