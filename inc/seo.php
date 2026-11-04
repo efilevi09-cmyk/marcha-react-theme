@@ -113,3 +113,32 @@ function marcha_seo_fallback_html() {
 	// Visually hidden but present in the DOM; replaced by React on mount.
 	return '<div id="seo-fallback" style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap">' . $html . '</div>';
 }
+
+/**
+ * Product structured data.
+ *
+ * WooCommerce builds its Product JSON-LD from hooks that fire inside the single-product
+ * template, and the React shell replaces that template, so product pages were going out
+ * with no price, availability or rating for Google to read - no rich result, no stars,
+ * no price in the listing. Asking WooCommerce to generate its own data here keeps the
+ * markup identical to a stock shop; its existing wp_footer printer still emits it.
+ *
+ * Yoast owns the rest of the graph (WebSite, Organization, BreadcrumbList) and does not
+ * emit Product without its paid WooCommerce add-on, so nothing is duplicated.
+ */
+add_action(
+	'wp',
+	function () {
+		if ( is_admin() || ! function_exists( 'is_product' ) || ! is_product() ) {
+			return;
+		}
+		if ( ! function_exists( 'WC' ) || ! isset( WC()->structured_data ) || ! WC()->structured_data ) {
+			return;
+		}
+		$product = wc_get_product( get_queried_object_id() );
+		if ( $product instanceof WC_Product ) {
+			WC()->structured_data->generate_product_data( $product );
+		}
+	},
+	20
+);
