@@ -212,6 +212,7 @@ require_once get_template_directory() . '/inc/instagram.php';
 require_once get_template_directory() . '/inc/bundle.php';
 require_once get_template_directory() . '/inc/catalog.php';
 require_once get_template_directory() . '/inc/seo.php';
+require_once get_template_directory() . '/inc/redirects.php';
 require_once get_template_directory() . '/inc/media.php';
 require_once get_template_directory() . '/inc/emails.php';
 require_once get_template_directory() . '/inc/analytics.php';
