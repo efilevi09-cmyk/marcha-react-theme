@@ -20,16 +20,22 @@ export const WHATSAPP_URL = 'https://api.whatsapp.com/send?phone=972559296934';
  *
  * Deliberately the same files the home page tiles use: arriving from the home page
  * the picture is already decoded in the browser, so the banner costs nothing and the
- * two screens read as one place. `pos` is the background-position - these are tall
- * street scenes and the banner is a short strip, so each one is pulled up to keep the
- * model's head in frame rather than centring on her waist.
+ * two screens read as one place.
+ *
+ * `pos` is the background-position, measured per image rather than guessed. These
+ * are full-length street scenes and the banner is a wide band, so the shoes - the
+ * thing being sold - fall outside it unless each crop is aimed at them. Measured as
+ * a fraction of image height, the model runs 25-82% in the bakery shot, 15-80% in
+ * the rainy one and 12-92% in the Cafe Flore one. The first two fit whole; the third
+ * cannot at any sane banner height, so it is framed from the waist down with the
+ * shoes in clear view rather than cropped mid-body with the shoes lost.
  */
 export const CAT_ART = {
-  'balarina-a': { img: '2026/10/marcha-cat-round.jpg', pos: '50% 28%' },
-  'בלרינה-שפיץ': { img: '2026/10/marcha-cat-pointed.jpg', pos: '50% 30%' },
-  boots: { img: '2026/10/marcha-cat-boots.jpg', pos: '50% 32%' },
-  winter: { img: '2026/10/marcha-cat-boots.jpg', pos: '50% 32%' },
+  'balarina-a': { img: '2026/10/marcha-cat-round.jpg', pos: '50% 58%' },
+  'בלרינה-שפיץ': { img: '2026/10/marcha-cat-pointed.jpg', pos: '50% 84%' },
+  boots: { img: '2026/10/marcha-cat-boots.jpg', pos: '50% 54%' },
+  winter: { img: '2026/10/marcha-cat-boots.jpg', pos: '50% 54%' },
 };
 
 /** Shown on "all shoes" and on any category without art of its own. */
-export const CAT_ART_FALLBACK = { img: '2026/10/marcha-cat-round.jpg', pos: '50% 28%' };
+export const CAT_ART_FALLBACK = { img: '2026/10/marcha-cat-round.jpg', pos: '50% 58%' };
