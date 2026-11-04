@@ -88,7 +88,10 @@ function analyse(src) {
   const rtl = he >= latin;
   const legal = LEGAL.test(title) || text.length > 6000;
   const heads = [...src.querySelectorAll('h2, h3')].filter((h) => norm(h.textContent).length > 2);
-  const toc = legal && heads.length >= 3 ? heads.map((h, i) => { h.id = h.id || `sec-${i + 1}`; return { id: h.id, text: norm(h.textContent) }; }) : [];
+  // Any page with enough sections gets a table of contents, not just the legal ones:
+  // the buying guides are long reads too, and shoppers arrive looking for one section.
+  const tocHeads = legal ? heads : [...src.querySelectorAll('h2')].filter((h) => norm(h.textContent).length > 2);
+  const toc = tocHeads.length >= 4 ? tocHeads.map((h, i) => { h.id = h.id || `sec-${i + 1}`; return { id: h.id, text: norm(h.textContent) }; }) : [];
   return { title, accent, rtl, legal, toc };
 }
 
