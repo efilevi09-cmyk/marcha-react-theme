@@ -66,6 +66,22 @@ export const getProduct = async (slug) => {
  * one like מגפיים would otherwise open as an untitled, undescribed page out of season.
  */
 export const getCategories = () => request('wc/store/v1/products/categories?per_page=50&hide_empty=false');
+
+/**
+ * Buying guidance stored as term meta on a product category.
+ *
+ * Read from wp/v2 rather than the Store API: the Store API's category schema is not
+ * extendable in this WooCommerce version, and this endpoint serves the meta publicly.
+ */
+export const getCategoryGuide = async (slug) => {
+  if (!slug) return '';
+  try {
+    const r = await request(`wp/v2/product_cat?slug=${encodeURIComponent(slug)}&_fields=meta`);
+    return r?.[0]?.meta?.marcha_seo_content || '';
+  } catch (e) {
+    return '';
+  }
+};
 export const getCart = () => request('wc/store/v1/cart');
 export const addToCart = (id, quantity = 1, variation = []) =>
   request('wc/store/v1/cart/add-item', { method: 'POST', body: { id, quantity, variation } });

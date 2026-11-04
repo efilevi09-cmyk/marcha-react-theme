@@ -9,6 +9,7 @@ export default function Category({ all = false }) {
   const { slug: rawSlug } = useParams();
   const slug = rawSlug ? decodeURIComponent(rawSlug) : null;
   const [cat, setCat] = useState(null);
+  const [guide, setGuide] = useState('');
   const [terms, setTerms] = useState([]);
   const [colors, setColors] = useState([]);
   const [catColors, setCatColors] = useState(null);
@@ -19,6 +20,10 @@ export default function Category({ all = false }) {
   const reqId = useRef(0);
 
   useEffect(() => { api.getColorTerms().then(setTerms).catch(() => {}); }, []);
+  useEffect(() => {
+    setGuide('');
+    if (!all && slug) api.getCategoryGuide(slug).then(setGuide).catch(() => {});
+  }, [slug, all]);
   useEffect(() => {
     setCatColors(null); setColors([]);
     if (!all && cat) api.getCategoryColorIds(cat.id).then(setCatColors).catch(() => {});
@@ -49,7 +54,7 @@ export default function Category({ all = false }) {
   const toggle = (id) => setColors((c) => (c.includes(id) ? c.filter((x) => x !== id) : [...c, id]));
   const title = all ? 'כל הנעליים' : cat?.name;
   const art = (!all && slug && CAT_ART[slug]) || CAT_ART_FALLBACK;
-  const seoContent = all ? '' : (cat?.extensions?.marcha?.seo_content || '');
+
 
   return (
     <>
@@ -95,9 +100,9 @@ export default function Category({ all = false }) {
         {meta.page < meta.pages && (
           <button className="btn btn--black more" disabled={loading} onClick={() => load(meta.page + 1, true)}>טעני עוד</button>
         )}
-        {seoContent && (
+        {guide && (
           /* Buying guidance, kept under the grid so shoppers reach the products first. */
-          <section className="cat-guide" dangerouslySetInnerHTML={{ __html: seoContent }} />
+          <section className="cat-guide" dangerouslySetInnerHTML={{ __html: guide }} />
         )}
       </div>
     </>
