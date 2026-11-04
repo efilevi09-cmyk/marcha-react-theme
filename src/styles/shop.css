@@ -20,11 +20,11 @@
 .pcard__btn{display:block;background:#000;color:#fff;text-align:center;padding:14px;margin:0 10px 10px}
 
 .shop{max-width:1440px;margin-inline:auto}
-/* 32vw keeps the same slice of the artwork at every desktop width, because the art is
+/* 34vw keeps the same slice of the artwork at every desktop width, because the art is
    16:9 and full-bleed, so image height tracks viewport width too. Below ~750px the
    240px floor takes over and the picture is cropped side to side instead, which shows
    the model full length. */
-.banner{min-height:clamp(240px,32vw,600px)}
+.banner{min-height:clamp(240px,34vw,640px)}
 .banner h1,.banner__desc{max-width:960px}
 .filters{display:grid;gap:12px;padding:20px;background:#fafafa;border:1px solid var(--c-border);margin-bottom:8px}
 .filter__row{display:flex;flex-wrap:wrap;gap:16px;align-items:center}

@@ -31,11 +31,11 @@ export const WHATSAPP_URL = 'https://api.whatsapp.com/send?phone=972559296934';
  * shoes in clear view rather than cropped mid-body with the shoes lost.
  */
 export const CAT_ART = {
-  'balarina-a': { img: '2026/10/marcha-cat-round.jpg', pos: '50% 58%' },
+  'balarina-a': { img: '2026/10/marcha-cat-round.jpg', pos: '50% 64%' },
   'בלרינה-שפיץ': { img: '2026/10/marcha-cat-pointed.jpg', pos: '50% 84%' },
-  boots: { img: '2026/10/marcha-cat-boots.jpg', pos: '50% 54%' },
-  winter: { img: '2026/10/marcha-cat-boots.jpg', pos: '50% 54%' },
+  boots: { img: '2026/10/marcha-cat-boots.jpg', pos: '50% 52%' },
+  winter: { img: '2026/10/marcha-cat-boots.jpg', pos: '50% 52%' },
 };
 
 /** Shown on "all shoes" and on any category without art of its own. */
-export const CAT_ART_FALLBACK = { img: '2026/10/marcha-cat-round.jpg', pos: '50% 58%' };
+export const CAT_ART_FALLBACK = { img: '2026/10/marcha-cat-round.jpg', pos: '50% 64%' };
