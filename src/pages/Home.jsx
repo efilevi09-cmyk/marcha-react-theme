@@ -87,7 +87,9 @@ export default function Home() {
           <li><b><bdi dir="ltr">25,000+</bdi></b><span>לקוחות מרוצות</span></li>
         </ul>
       </section>
-      <section className="branches" aria-labelledby="branches-title" style={{ '--branches-d': `url(${up('2026/03/מרשה-1.webp')})`, '--branches-m': `url(${up('2026/03/נעלי-בלרינה-עגולות-מרשה.webp')})` }}>
+      {/* Backdrop: one people-free Instagram still of a Paris facade, served at two
+          resolutions. It sits under a 62% black wash, so it reads as texture. */}
+      <section className="branches" aria-labelledby="branches-title" style={{ '--branches-d': `url(${up('2026/10/instagram-CX7_sa2KTzK-1-1254x1536.jpg')})`, '--branches-m': `url(${up('2026/10/instagram-CX7_sa2KTzK-1-836x1024.jpg')})` }}>
         <div className="branches__inner">
           <p className="script-title" aria-hidden="true">Visit us</p>
           <h2 className="section-title" id="branches-title">{BRANCHES.length > 1 ? 'הסניפים שלנו' : 'הסניף שלנו'}</h2>

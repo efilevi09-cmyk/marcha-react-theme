@@ -45,7 +45,7 @@
   .about__stats{grid-template-columns:repeat(4,1fr)}
 }
 /* Branches: sharp full-bleed photo with a translucent black layer so the text stays readable */
-.branches{position:relative;isolation:isolate;color:#fff;text-align:center;padding:clamp(56px,9vw,120px) var(--gutter);background:var(--branches-m) center/cover no-repeat}
+.branches{position:relative;isolation:isolate;color:#fff;text-align:center;padding:clamp(56px,9vw,120px) var(--gutter);background:var(--branches-m) center 30%/cover no-repeat}
 .branches::before{content:"";position:absolute;inset:0;background:rgba(0,0,0,.62);z-index:-1}
 @media(min-width:768px){.branches{background-image:var(--branches-d)}}
 .branches__inner{max-width:900px;margin-inline:auto}
