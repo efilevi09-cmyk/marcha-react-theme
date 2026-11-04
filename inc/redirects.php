@@ -30,7 +30,9 @@ function marcha_legacy_redirects() {
 		101512 => 102939, // return-policy      -> החלפות והחזרות
 		101520 => 102939, // shipping (empty)   -> החלפות והחזרות
 		311    => 128580, // terms-conditions   -> תנאי שימוש
-		101426 => 'cart',    // orphan Cart page    -> the live WooCommerce cart
+		// The live cart is 128595 (/cart-2/) — WooCommerce's own cart page, which is why Yoast
+		// marks it noindex while this stale copy of the cart shortcode stays indexable.
+		101426 => 128595,
 		115    => 'account', // orphan account page -> the live WooCommerce account page
 	);
 }
@@ -46,9 +48,6 @@ function marcha_noindex_pages() {
 
 /** Resolves a redirect target to a URL, or an empty string when it cannot be resolved. */
 function marcha_redirect_target( $target ) {
-	if ( 'cart' === $target ) {
-		return function_exists( 'wc_get_cart_url' ) ? wc_get_cart_url() : '';
-	}
 	if ( 'account' === $target ) {
 		return function_exists( 'wc_get_page_permalink' ) ? (string) wc_get_page_permalink( 'myaccount' ) : '';
 	}
