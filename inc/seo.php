@@ -103,6 +103,9 @@ function marcha_seo_fallback_html() {
 			}
 		}
 		$html .= marcha_seo_products_list( $items );
+		if ( $term instanceof WP_Term ) {
+			$html .= wp_kses_post( (string) get_term_meta( $term->term_id, 'marcha_seo_content', true ) );
+		}
 	} elseif ( function_exists( 'is_cart' ) && is_cart() ) {
 		$html .= '<h1>עגלת קניות</h1>';
 	}
@@ -141,4 +144,66 @@ add_action(
 		}
 	},
 	20
+);
+
+/**
+ * Long-form buying guidance under a category's product grid.
+ *
+ * The category pages are what compete for the broad searches ("נעלי בובה",
+ * "נעלי בלרינה"), and a grid of thumbnails gives a search engine almost nothing to
+ * read. This holds real guidance - sizing, materials, how to choose - as term meta,
+ * editable from the category screen and through the REST API.
+ *
+ * It renders inside the React page rather than only in the crawler fallback, so what
+ * Google indexes is what a shopper sees.
+ */
+add_action(
+	'init',
+	function () {
+		register_term_meta(
+			'product_cat',
+			'marcha_seo_content',
+			array(
+				'type'              => 'string',
+				'single'            => true,
+				'show_in_rest'      => true,
+				'description'       => 'Buying guidance shown under the product grid.',
+				'sanitize_callback' => 'wp_kses_post',
+				'auth_callback'     => function () {
+					return current_user_can( 'manage_categories' );
+				},
+			)
+		);
+	}
+);
+
+/** Hand it to the shop front alongside the category's name and description. */
+add_action(
+	'woocommerce_init',
+	function () {
+		if ( ! function_exists( 'woocommerce_store_api_register_endpoint_data' )
+			|| ! class_exists( '\Automattic\WooCommerce\StoreApi\Schemas\V1\ProductCategorySchema' ) ) {
+			return;
+		}
+		woocommerce_store_api_register_endpoint_data(
+			array(
+				'endpoint'        => \Automattic\WooCommerce\StoreApi\Schemas\V1\ProductCategorySchema::IDENTIFIER,
+				'namespace'       => 'marcha',
+				'data_callback'   => function ( $term ) {
+					$id = is_object( $term ) && isset( $term->term_id ) ? (int) $term->term_id : (int) $term;
+					return array( 'seo_content' => (string) get_term_meta( $id, 'marcha_seo_content', true ) );
+				},
+				'schema_callback' => function () {
+					return array(
+						'seo_content' => array(
+							'description' => 'Buying guidance shown under the product grid.',
+							'type'        => 'string',
+							'readonly'    => true,
+						),
+					);
+				},
+				'schema_type'     => ARRAY_A,
+			)
+		);
+	}
 );

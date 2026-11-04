@@ -49,6 +49,7 @@ export default function Category({ all = false }) {
   const toggle = (id) => setColors((c) => (c.includes(id) ? c.filter((x) => x !== id) : [...c, id]));
   const title = all ? 'כל הנעליים' : cat?.name;
   const art = (!all && slug && CAT_ART[slug]) || CAT_ART_FALLBACK;
+  const seoContent = all ? '' : (cat?.extensions?.marcha?.seo_content || '');
 
   return (
     <>
@@ -93,6 +94,10 @@ export default function Category({ all = false }) {
         <div className="grid" aria-busy={loading}>{items.map((p) => <ProductCard key={p.id} p={p} />)}</div>
         {meta.page < meta.pages && (
           <button className="btn btn--black more" disabled={loading} onClick={() => load(meta.page + 1, true)}>טעני עוד</button>
+        )}
+        {seoContent && (
+          /* Buying guidance, kept under the grid so shoppers reach the products first. */
+          <section className="cat-guide" dangerouslySetInnerHTML={{ __html: seoContent }} />
         )}
       </div>
     </>
