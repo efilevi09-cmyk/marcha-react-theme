@@ -16,3 +16,17 @@ export function bundleMessage(count) {
   if (count === 0) return { done: false, text: `קונה ${BUNDLE.qty} נעליים? משלמת רק ${BUNDLE.total} ₪` };
   return { done: false, text: `הוסיפי עוד ${pairsWord(remaining)} וקבלי ${BUNDLE.qty} נעליים ב-${BUNDLE.total} ₪`, unlocked };
 }
+
+/**
+ * Pairs in the cart that the offer actually covers.
+ *
+ * The server marks each line (extensions.marcha.bundle); boots are excluded, so they
+ * must not move the progress bar or set off the confetti. Lines from before the flag
+ * existed count, which keeps older carts behaving as they did.
+ */
+export function bundleCount(cart) {
+  return (cart?.items || []).reduce(
+    (n, i) => n + (i.extensions?.marcha?.bundle === false ? 0 : (i.quantity || 0)),
+    0,
+  );
+}

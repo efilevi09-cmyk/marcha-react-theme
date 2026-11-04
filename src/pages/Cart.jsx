@@ -56,7 +56,7 @@ function Related({ items }) {
 }
 
 export default function Cart() {
-  const { cart, update, remove, busy, count } = useCart();
+  const { cart, update, remove, busy, bundleCount } = useCart();
   const items = cart?.items || [];
   const fees = cart?.fees || [];
   useEffect(() => { document.title = 'עגלת קניות - Marcha Ballerina'; }, []);
@@ -73,7 +73,7 @@ export default function Cart() {
       {items.length > 0 && (
         <div className="cartpage__layout">
           <div className="cartpage__main">
-            <BundleBar count={count} shopLink />
+            <BundleBar count={bundleCount} shopLink />
             <ul className="cartpage__list">
               {items.map((i) => (
                 <li key={i.key}>

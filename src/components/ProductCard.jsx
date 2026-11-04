@@ -65,7 +65,7 @@ export default function ProductCard({ p }) {
   return (
     <article className="pcard">
       <Link to={path} className="pcard__link">
-        <span className="pcard__badge">{BUNDLE.badge}</span>
+        {p.extensions?.marcha?.bundle !== false && <span className="pcard__badge">{BUNDLE.badge}</span>}
         {img && <img src={img.src} srcSet={img.srcset} sizes="(min-width:1025px) 25vw, 50vw" alt={img.alt || p.name} loading="lazy" />}
         <h3 dangerouslySetInnerHTML={{ __html: p.name }} />
         <Sold n={p.extensions?.marcha?.sold} reserve />

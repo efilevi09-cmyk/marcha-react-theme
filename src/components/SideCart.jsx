@@ -5,7 +5,7 @@ import BundleBar from './BundleBar.jsx';
 import '../styles/sidecart.css';
 
 export default function SideCart() {
-  const { cart, open, setOpen, update, remove, busy, count } = useCart();
+  const { cart, open, setOpen, update, remove, busy, bundleCount } = useCart();
   if (!open) return null;
   const fees = cart?.fees || [];
   return (
@@ -13,7 +13,7 @@ export default function SideCart() {
       <button className="sc__overlay" aria-label="סגרי" onClick={() => setOpen(false)} />
       <aside className="sc__panel" aria-busy={busy}>
         <button className="sc__close" onClick={() => setOpen(false)} aria-label="סגרי">×</button>
-        <BundleBar count={count} />
+        <BundleBar count={bundleCount} />
         {cart && !cart.items.length && <p>העגלה ריקה.</p>}
         <ul className="sc__list">
           {(cart?.items || []).map((i) => (

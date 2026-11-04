@@ -45,13 +45,21 @@ add_action(
 				'endpoint'        => \Automattic\WooCommerce\StoreApi\Schemas\V1\ProductSchema::IDENTIFIER,
 				'namespace'       => 'marcha',
 				'data_callback'   => function ( $product ) {
-					return array( 'sold' => (int) $product->get_total_sales() );
+					return array(
+						'sold'   => (int) $product->get_total_sales(),
+						'bundle' => marcha_product_in_bundle( $product ),
+					);
 				},
 				'schema_callback' => function () {
 					return array(
-						'sold' => array(
+						'sold'   => array(
 							'description' => 'Units sold of this product.',
 							'type'        => 'integer',
+							'readonly'    => true,
+						),
+						'bundle' => array(
+							'description' => 'Whether this product is covered by the 3-for-300 offer.',
+							'type'        => 'boolean',
 							'readonly'    => true,
 						),
 					);
