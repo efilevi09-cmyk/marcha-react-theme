@@ -61,7 +61,7 @@ export default function Search({ open, onClose }) {
                 <Link to={toPath(p.permalink)} onClick={onClose}>
                   {p.images?.[0] && <img src={p.images[0].thumbnail || p.images[0].src} alt="" width="64" height="64" loading="lazy" />}
                   <span className="srch__name" dangerouslySetInnerHTML={{ __html: p.name }} />
-                  <Price prices={p.prices} single />
+                  <Price prices={p.prices} bundle={p.extensions?.marcha?.bundle !== false} />
                 </Link>
               </li>
             ))}

@@ -7,15 +7,31 @@ import { BasketIcon } from './Icons.jsx';
 
 const toPath = (url) => { try { return new URL(url).pathname; } catch (e) { return url; } };
 
-export function Price({ prices, single }) {
+/**
+ * Price on a card.
+ *
+ * `bundle` is false for anything outside the 3-for-300 offer (boots, winter). Those must show
+ * their own price: quoting the bundle unit price on a product the cart will charge in full is
+ * a promise the checkout breaks.
+ */
+export function Price({ prices, bundle = true }) {
   const range = prices.price_range;
   const regular = range
     ? `${money(range.min_amount, prices)} – ${money(range.max_amount, prices)}`
     : money(prices.regular_price || prices.price, prices);
+  if (!bundle) {
+    const onSale = !range && prices.regular_price !== prices.price;
+    return (
+      <p className="pcard__price">
+        {onSale && <s>{regular}</s>}
+        <strong>{range ? regular : money(prices.price, prices)}</strong>
+      </p>
+    );
+  }
   return (
     <p className="pcard__price">
       <s>{regular}</s>
-      <strong>{single ? money(toMinor(BUNDLE.unit, prices), prices) : money(toMinor(BUNDLE.unit, prices), prices)}</strong>
+      <strong>{money(toMinor(BUNDLE.unit, prices), prices)}</strong>
     </p>
   );
 }
@@ -69,7 +85,7 @@ export default function ProductCard({ p }) {
         {img && <img src={img.src} srcSet={img.srcset} sizes="(min-width:1025px) 25vw, 50vw" alt={img.alt || p.name} loading="lazy" />}
         <h3 dangerouslySetInnerHTML={{ __html: p.name }} />
         <Sold n={p.extensions?.marcha?.sold} reserve />
-        <Price prices={p.prices} />
+        <Price prices={p.prices} bundle={p.extensions?.marcha?.bundle !== false} />
       </Link>
       {sizes.length > 0 && (
         <div className={`pcard__sizes${hint ? ' is-hint' : ''}`} role="group" aria-label="בחירת מידה">

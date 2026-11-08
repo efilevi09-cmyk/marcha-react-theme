@@ -108,7 +108,12 @@ export default function Product() {
 
   const img = p.images[active];
   const extraAttrs = (p.attributes || []).filter((a) => a.terms?.length);
-  const unitPrice = money(toMinor(BUNDLE.unit, p.prices), p.prices);
+  // Boots and winter stock are outside the 3-for-300 offer, so they must never show the
+  // bundle unit price or the bundle badge — a shopper seeing ₪100 on a ₪329 boot is being
+  // quoted a price the cart will not honour.
+  const inBundle = p.extensions?.marcha?.bundle !== false;
+  const unitPrice = inBundle ? money(toMinor(BUNDLE.unit, p.prices), p.prices) : money(p.prices.price, p.prices);
+  const onSale = !inBundle && p.prices.regular_price !== p.prices.price;
 
   return (
     <>
@@ -117,7 +122,7 @@ export default function Product() {
           {img && (
             <div className="product__stage">
               <img className="product__main" src={img.src} srcSet={img.srcset} sizes="(min-width:1025px) 50vw, 100vw" alt={img.alt || p.name} />
-              <span className="product__badge">{BUNDLE.bar}</span>
+              {inBundle && <span className="product__badge">{BUNDLE.bar}</span>}
               <button type="button" className="product__zoom" onClick={() => setZoom(true)}><ZoomIcon /> הגדלה</button>
             </div>
           )}
@@ -145,7 +150,7 @@ export default function Product() {
             <b className={p.is_in_stock ? 'in' : 'out'}>{p.is_in_stock ? 'במלאי' : 'אזל מהמלאי'}</b>
           </p>
           <Sold n={p.extensions?.marcha?.sold} />
-          <p className="product__price"><s>{money(p.prices.regular_price, p.prices)}</s> <strong>{unitPrice}</strong></p>
+          <p className="product__price">{(inBundle || onSale) && <s>{money(p.prices.regular_price, p.prices)}</s>} <strong>{unitPrice}</strong></p>
           <div className="product__desc" dangerouslySetInnerHTML={{ __html: p.short_description || '' }} />
 
           {sizeAttr && (
