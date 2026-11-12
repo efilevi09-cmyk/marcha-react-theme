@@ -490,3 +490,73 @@ add_filter(
 	10,
 	2
 );
+
+/**
+ * Titles and snippets for the colour collections.
+ *
+ * These categories exist for one reason: a woman who searches for black flats should land on
+ * a page of black flats, not on the home page, which is what Google had been showing her —
+ * alongside a thumbnail of a beige shoe. Nothing in the shop links to them, so the only copy
+ * they will ever have is this.
+ *
+ * Yoast fills a category it was given nothing for from a template ("… Archives" and "הגעתם ל…"),
+ * and its taxonomy fields are not reachable over the REST API, so the copy lives here instead.
+ *
+ * @return array<string, array{title: string, desc: string}> Keyed by category slug.
+ */
+function marcha_category_meta() {
+	return array(
+		'נעלי-בובה-שחורות' => array(
+			'title' => 'נעלי בובה שחורות שטוחות – קטיפה, לק וג׳ינס, מידות 22–43 | מרשה בלרינה',
+			'desc'  => 'נעלי בובה שחורות שטוחות בקטיפה, לק מבריק, ג׳ינס ונצנצים כסופים – בחרטום עגול ובשפיץ, מידות 22–43. משלוח מהיר לכל הארץ ואיסוף מירושלים.',
+		),
+	);
+}
+
+/** The copy for the category being viewed, or null anywhere else. */
+function marcha_current_category_meta() {
+	if ( ! function_exists( 'is_product_category' ) || ! is_product_category() ) {
+		return null;
+	}
+	$term = get_queried_object();
+	if ( ! $term instanceof WP_Term ) {
+		return null;
+	}
+	$map  = marcha_category_meta();
+	$slug = urldecode( $term->slug );
+
+	return isset( $map[ $slug ] ) ? $map[ $slug ] : null;
+}
+
+add_filter(
+	'wpseo_title',
+	function ( $title ) {
+		$meta = marcha_current_category_meta();
+		return $meta ? $meta['title'] : $title;
+	},
+	20
+);
+
+add_filter(
+	'wpseo_metadesc',
+	function ( $desc ) {
+		$meta = marcha_current_category_meta();
+		return $meta ? $meta['desc'] : $desc;
+	},
+	20
+);
+
+/** Without Yoast the same copy still reaches the head. */
+add_action(
+	'wp_head',
+	function () {
+		if ( defined( 'WPSEO_VERSION' ) ) {
+			return;
+		}
+		$meta = marcha_current_category_meta();
+		if ( $meta ) {
+			printf( '<meta name="description" content="%s" />' . "\n", esc_attr( $meta['desc'] ) );
+		}
+	},
+	1
+);
