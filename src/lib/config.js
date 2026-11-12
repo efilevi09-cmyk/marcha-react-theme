@@ -39,3 +39,20 @@ export const CAT_ART = {
 
 /** Shown on "all shoes" and on any category without art of its own. */
 export const CAT_ART_FALLBACK = { img: '2026/10/marcha-cat-round.jpg', pos: '50% 64%' };
+
+/**
+ * The categories the shop is actually organised by: shape and season.
+ *
+ * Colour categories exist alongside these so a search for black flats lands on a page of
+ * black flats rather than on the home page, but they are not part of how the shop is
+ * structured. Nothing links to them, and a product that sits in one must still show its
+ * shape in the breadcrumb — a velvet flat belongs under "בלרינה עגול", not under "שחורות".
+ */
+export const STRUCTURAL_CATS = ['balarina-a', 'בלרינה-שפיץ', 'boots', 'winter'];
+
+/** The category a product is filed under for breadcrumbs and related items. */
+export const primaryCat = (product) => {
+  const cats = product?.categories || [];
+  const slug = (c) => decodeURIComponent(c.slug || '');
+  return cats.find((c) => STRUCTURAL_CATS.includes(slug(c))) || cats[0] || null;
+};

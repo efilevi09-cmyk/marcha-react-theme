@@ -3,7 +3,7 @@ import { Link, useParams } from 'react-router-dom';
 import * as api from '../lib/api.js';
 import { trackViewItem } from '../lib/track.js';
 import { useCart } from '../lib/CartContext.jsx';
-import { BUNDLE } from '../lib/config.js';
+import { BUNDLE, primaryCat } from '../lib/config.js';
 import { money, toMinor } from '../lib/format.js';
 import ProductCard, { Sold } from '../components/ProductCard.jsx';
 import { Stars, ReviewList, ReviewForm } from '../components/Reviews.jsx';
@@ -64,7 +64,8 @@ export default function Product() {
       if (prod) api.getReviews({ product: prod.id, per_page: 1 }).then((r) => alive && setRating(r.summary)).catch(() => {});
       if (prod) document.title = `${prod.name.replace(/<[^>]+>/g, '')} - Marcha Ballerina`;
       // Related products load lazily so they never block the first paint.
-      if (prod?.categories?.[0]) api.getProducts({ category: prod.categories[0].id, per_page: 9 }).then((r) => alive && setRelated(r.filter((x) => x.id !== prod.id).slice(0, 8))).catch(() => {});
+      const shelf = primaryCat(prod);
+      if (shelf) api.getProducts({ category: shelf.id, per_page: 9 }).then((r) => alive && setRelated(r.filter((x) => x.id !== prod.id).slice(0, 8))).catch(() => {});
     });
     return () => { alive = false; };
   }, [slug]);
@@ -137,11 +138,11 @@ export default function Product() {
 
         <div className="product__info">
           <nav className="crumbs" aria-label="פירורי לחם">
-            <Link to="/">בית</Link> / {p.categories?.[0] && <><Link to={`/product-category/${p.categories[0].slug}/`} dangerouslySetInnerHTML={{ __html: p.categories[0].name }} /> / </>}
+            <Link to="/">בית</Link> / {primaryCat(p) && <><Link to={`/product-category/${primaryCat(p).slug}/`} dangerouslySetInnerHTML={{ __html: primaryCat(p).name }} /> / </>}
             <span dangerouslySetInnerHTML={{ __html: p.name }} />
           </nav>
           <div className="product__head">
-            {p.categories?.[0] && <p className="product__cat" dangerouslySetInnerHTML={{ __html: p.categories[0].name }} />}
+            {primaryCat(p) && <p className="product__cat" dangerouslySetInnerHTML={{ __html: primaryCat(p).name }} />}
             <button type="button" className="product__share" onClick={share} aria-label="שיתוף המוצר"><ShareIcon /><span>{copied ? 'הקישור הועתק' : 'שיתוף'}</span></button>
           </div>
           <h1 dangerouslySetInnerHTML={{ __html: p.name }} />

@@ -3,6 +3,7 @@ import * as api from '../lib/api.js';
 import { trackViewCart } from '../lib/track.js';
 import { useCart } from '../lib/CartContext.jsx';
 import { money } from '../lib/format.js';
+import { primaryCat } from '../lib/config.js';
 import BundleBar from '../components/BundleBar.jsx';
 import ProductCard from '../components/ProductCard.jsx';
 import { ReviewList } from '../components/Reviews.jsx';
@@ -40,7 +41,7 @@ function Related({ items }) {
     let alive = true;
     (async () => {
       const first = slug ? await api.getProduct(slug).catch(() => null) : null;
-      const catId = first?.categories?.[0]?.id;
+      const catId = primaryCat(first)?.id;
       const r = await api.getProducts({ per_page: 12, ...(catId ? { category: catId } : { orderby: 'popularity' }) });
       if (alive) setList(r.filter((p) => !inCart.has(p.id) && !p.variations?.some((v) => inCart.has(v.id))).slice(0, 4));
     })().catch(() => {});
