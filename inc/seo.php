@@ -288,3 +288,177 @@ add_action(
 	},
 	1
 );
+
+/**
+ * Search snippets for product pages.
+ *
+ * Yoast shipped every product the same sentence — the product's name, then "במרשה בלרינה
+ * תמצאו מבחר עצום של נעלי בלרינה מכל הסוגים הגדלים והצבעים" — so a shopper searching for
+ * black flats read a line that never mentioned black, or flats, or a price, and clicked the
+ * result below instead. Google quotes this line verbatim under the link, and it is the only
+ * thing she has to go on, so it is built here from the product's own facts.
+ */
+
+/** Smallest and largest size the product actually sells, or null when it has no size axis. */
+function marcha_product_size_range( $product ) {
+	if ( ! $product instanceof WC_Product ) {
+		return null;
+	}
+	foreach ( $product->get_attributes() as $attribute ) {
+		if ( ! $attribute instanceof WC_Product_Attribute || ! $attribute->get_variation() ) {
+			continue;
+		}
+		$labels = $attribute->is_taxonomy()
+			? wp_list_pluck( (array) wc_get_product_terms( $product->get_id(), $attribute->get_name(), array( 'fields' => 'all' ) ), 'name' )
+			: (array) $attribute->get_options();
+		// Sizes are numbers; a colour or material attribute drops out here on its own.
+		$sizes = array_filter( array_map( 'intval', $labels ) );
+		if ( count( $sizes ) >= 2 ) {
+			return array( min( $sizes ), max( $sizes ) );
+		}
+	}
+
+	return null;
+}
+
+/** "119 ₪" or "119–139 ₪", with no trailing zeros. */
+function marcha_product_price_text( $product ) {
+	if ( ! $product instanceof WC_Product ) {
+		return '';
+	}
+	if ( $product->is_type( 'variable' ) ) {
+		$min = (float) $product->get_variation_price( 'min', true );
+		$max = (float) $product->get_variation_price( 'max', true );
+	} else {
+		$min = (float) wc_get_price_to_display( $product );
+		$max = $min;
+	}
+	if ( $min <= 0 ) {
+		return '';
+	}
+	$tidy = static function ( $n ) {
+		return rtrim( rtrim( number_format( (float) $n, 2, '.', '' ), '0' ), '.' );
+	};
+
+	return $min === $max ? $tidy( $min ) . ' ₪' : $tidy( $min ) . '–' . $tidy( $max ) . ' ₪';
+}
+
+/**
+ * The line Google prints under the link.
+ *
+ * Kept under 160 characters, because Google cuts the rest off mid-word.
+ */
+function marcha_product_metadesc( $product ) {
+	if ( ! $product instanceof WC_Product ) {
+		return '';
+	}
+	$facts = array();
+	$sizes = marcha_product_size_range( $product );
+	if ( $sizes ) {
+		$facts[] = sprintf( 'מידות %d–%d', $sizes[0], $sizes[1] );
+	}
+	$price = marcha_product_price_text( $product );
+	if ( $price ) {
+		$facts[] = $price;
+	}
+	$tail = '. משלוח מהיר לכל הארץ ואיסוף מירושלים.';
+	$name = trim( wp_strip_all_tags( html_entity_decode( $product->get_name(), ENT_QUOTES, 'UTF-8' ) ) );
+	$name = trim( preg_replace( '/\s+/u', ' ', $name ) );
+	$lead = $facts ? $name . ' – ' . implode( ', ', $facts ) : $name;
+
+	// Trim the product name rather than the facts: the sizes and the price are what win the click.
+	$over = mb_strlen( $lead . $tail, 'UTF-8' ) - 160;
+	if ( $over > 0 && mb_strlen( $name, 'UTF-8' ) > $over + 12 ) {
+		$name = rtrim( mb_substr( $name, 0, mb_strlen( $name, 'UTF-8' ) - $over - 1, 'UTF-8' ) ) . '…';
+		$lead = $facts ? $name . ' – ' . implode( ', ', $facts ) : $name;
+	}
+
+	return $lead . $tail;
+}
+
+/** The product currently being viewed, or null anywhere else. */
+function marcha_current_product() {
+	if ( ! function_exists( 'is_product' ) || ! is_product() ) {
+		return null;
+	}
+	$product = wc_get_product( get_queried_object_id() );
+
+	return $product instanceof WC_Product ? $product : null;
+}
+
+add_filter(
+	'wpseo_metadesc',
+	function ( $desc ) {
+		$product = marcha_current_product();
+		if ( ! $product || get_post_meta( $product->get_id(), '_yoast_wpseo_metadesc', true ) ) {
+			return $desc; // a description typed into the Yoast box wins
+		}
+		return marcha_product_metadesc( $product );
+	},
+	20
+);
+
+/** Hebrew brand suffix: the queries that reach these pages are Hebrew, and so is the shop. */
+add_filter(
+	'wpseo_title',
+	function ( $title ) {
+		if ( ! marcha_current_product() ) {
+			return $title;
+		}
+		return preg_replace( '/\s*[-–|]\s*Marcha Ballerina\s*$/u', ' | מרשה בלרינה', $title );
+	},
+	20
+);
+
+/** Without Yoast the same line still reaches the head. */
+add_action(
+	'wp_head',
+	function () {
+		if ( defined( 'WPSEO_VERSION' ) ) {
+			return;
+		}
+		$product = marcha_current_product();
+		if ( $product ) {
+			printf( '<meta name="description" content="%s" />' . "\n", esc_attr( marcha_product_metadesc( $product ) ) );
+		}
+	},
+	1
+);
+
+/**
+ * Fill out the product's structured data.
+ *
+ * WooCommerce already sends the price, the stock state and the rating. It sends no brand, and
+ * only the single featured image — which is why a search for black flats showed a beige shoe
+ * and two rubber boots beside the listing. Handing Google the whole gallery lets it pick the
+ * picture that matches what was typed.
+ */
+add_filter(
+	'woocommerce_structured_data_product',
+	function ( $markup, $product ) {
+		if ( ! $product instanceof WC_Product ) {
+			return $markup;
+		}
+		if ( empty( $markup['brand'] ) ) {
+			$markup['brand'] = array(
+				'@type' => 'Brand',
+				'name'  => 'מרשה בלרינה',
+			);
+		}
+		$ids    = array_merge( array( $product->get_image_id() ), $product->get_gallery_image_ids() );
+		$images = array();
+		foreach ( array_unique( array_filter( array_map( 'intval', $ids ) ) ) as $id ) {
+			$url = wp_get_attachment_image_url( $id, 'full' );
+			if ( $url ) {
+				$images[] = $url;
+			}
+		}
+		if ( count( $images ) > 1 ) {
+			$markup['image'] = array_slice( $images, 0, 8 );
+		}
+
+		return $markup;
+	},
+	10,
+	2
+);
