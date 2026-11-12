@@ -215,6 +215,38 @@ add_action(
 	}
 );
 
+/**
+ * A switch on WooCommerce → Settings → Emails, so this is visible and reversible from the
+ * admin rather than being a setting only the developer knows about.
+ */
+add_filter(
+	'woocommerce_email_settings',
+	function ( $settings ) {
+		if ( ! is_array( $settings ) ) {
+			return $settings;
+		}
+		$settings[] = array(
+			'title' => 'בקשת ביקורת',
+			'type'  => 'title',
+			'desc'  => 'מייל אחד ללקוחה, ' . marcha_review_request_delay() . ' ימים אחרי שההזמנה סומנה "הושלמה", עם קישור לכתיבת ביקורת על מה שקנתה. כל הזמנה נשאלת פעם אחת בלבד.',
+			'id'    => 'marcha_review_request_options',
+		);
+		$settings[] = array(
+			'title'   => 'שליחה אוטומטית',
+			'desc'    => 'לשלוח ללקוחות בקשת ביקורת',
+			'id'      => MARCHA_REVIEW_OPTION,
+			'type'    => 'checkbox',
+			'default' => 'no',
+		);
+		$settings[] = array(
+			'type' => 'sectionend',
+			'id'   => 'marcha_review_request_options',
+		);
+
+		return $settings;
+	}
+);
+
 /** Nothing left queued if the feature is switched off mid-flight. */
 add_action(
 	'update_option_' . MARCHA_REVIEW_OPTION,
