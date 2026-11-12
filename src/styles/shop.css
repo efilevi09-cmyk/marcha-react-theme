@@ -1,5 +1,10 @@
 .banner{min-height:240px;background:#444 center/cover;color:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;padding:32px var(--gutter);text-align:center;position:relative}
 .banner::before{content:"";position:absolute;inset:0;background:rgba(0,0,0,.45)}
+/* Colour collections have no photograph of their own, and borrowing one means a page of
+   black flats headed by a picture of orange ones. A typographic band says the same thing
+   and never contradicts the shoes underneath it. */
+.banner--plain{background:linear-gradient(170deg,#1b1917,#2e2a26 60%,#1b1917);min-height:200px}
+.banner--plain::before{background:none}
 .banner>*{position:relative;margin:0}
 .banner h1{font-size:clamp(28px,4vw,48px)}
 .banner__desc{max-width:900px;font-size:18px}

@@ -53,17 +53,20 @@ export default function Category({ all = false }) {
 
   const toggle = (id) => setColors((c) => (c.includes(id) ? c.filter((x) => x !== id) : [...c, id]));
   const title = all ? 'כל הנעליים' : cat?.name;
-  const art = (!all && slug && CAT_ART[slug]) || CAT_ART_FALLBACK;
+  // A category with art of its own gets it; "all shoes" falls back to the round-toe shot.
+  // Anything else — the colour collections — gets a plain band rather than a borrowed
+  // photograph that shows the wrong shoes.
+  const art = (!all && slug && CAT_ART[slug]) || (all ? CAT_ART_FALLBACK : null);
 
 
   return (
     <>
       <section
-        className="banner"
-        style={{
+        className={`banner${art ? '' : ' banner--plain'}`}
+        style={art ? {
           backgroundImage: `url(${window.MARCHA?.uploadsUrl}/${art.img})`,
           backgroundPosition: art.pos,
-        }}
+        } : undefined}
       >
         <h1 dangerouslySetInnerHTML={{ __html: title || '' }} />
         {cat?.description && <div className="banner__desc" dangerouslySetInnerHTML={{ __html: cat.description }} />}
