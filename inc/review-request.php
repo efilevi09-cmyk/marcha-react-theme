@@ -34,6 +34,17 @@ function marcha_review_request_delay() {
 	return (int) apply_filters( 'marcha_review_request_delay', 10 );
 }
 
+/**
+ * Mailbox a customer's reply reaches.
+ *
+ * WooCommerce sends from no-reply@, which is right for a receipt and wrong for a question.
+ * This email asks her to reply if something did not fit, and to reply "הסר" to be left
+ * alone, so both have to arrive somewhere a person reads.
+ */
+function marcha_review_request_reply_to() {
+	return (string) apply_filters( 'marcha_review_request_reply_to', 'support@marchaballerina.com' );
+}
+
 /** Products from the order that can actually be reviewed, keyed by product ID. */
 function marcha_review_request_products( $order ) {
 	$products = array();
@@ -177,11 +188,19 @@ add_action(
 		if ( '' === $html ) {
 			return;
 		}
+		$headers = array( 'Content-Type: text/html; charset=UTF-8' );
+		// The shop sends from no-reply@, and this email asks twice for an answer — "reply and
+		// we'll sort it", "reply הסר". Without this, both land nowhere and a woman whose shoes
+		// did not fit believes she was ignored.
+		$reply_to = marcha_review_request_reply_to();
+		if ( is_email( $reply_to ) ) {
+			$headers[] = 'Reply-To: ' . $reply_to;
+		}
 		$sent = WC()->mailer()->send(
 			$to,
 			'איך הנעליים? נשמח לשמוע',
 			$html,
-			array( 'Content-Type: text/html; charset=UTF-8' )
+			$headers
 		);
 		// Written whatever the outcome: a mail server that refused once will refuse again,
 		// and a customer must never be asked twice for the same order.
