@@ -299,26 +299,54 @@ add_action(
  * thing she has to go on, so it is built here from the product's own facts.
  */
 
-/** Smallest and largest size the product actually sells, or null when it has no size axis. */
+/**
+ * Smallest and largest size the product actually sells, or null when it has no size axis.
+ *
+ * Read from the variations rather than from the size attribute. A product routinely carries
+ * the shop's whole 22–43 ladder on the attribute while only some of those sizes were ever
+ * built as variations, so the attribute would advertise a range the product does not stock.
+ */
 function marcha_product_size_range( $product ) {
 	if ( ! $product instanceof WC_Product ) {
 		return null;
 	}
-	foreach ( $product->get_attributes() as $attribute ) {
-		if ( ! $attribute instanceof WC_Product_Attribute || ! $attribute->get_variation() ) {
-			continue;
-		}
-		$labels = $attribute->is_taxonomy()
-			? wp_list_pluck( (array) wc_get_product_terms( $product->get_id(), $attribute->get_name(), array( 'fields' => 'all' ) ), 'name' )
-			: (array) $attribute->get_options();
-		// Sizes are numbers; a colour or material attribute drops out here on its own.
-		$sizes = array_filter( array_map( 'intval', $labels ) );
-		if ( count( $sizes ) >= 2 ) {
-			return array( min( $sizes ), max( $sizes ) );
+	$sizes = array();
+
+	if ( $product->is_type( 'variable' ) ) {
+		foreach ( $product->get_visible_children() as $child_id ) {
+			$child = wc_get_product( $child_id );
+			if ( ! $child instanceof WC_Product_Variation ) {
+				continue;
+			}
+			foreach ( $child->get_attributes() as $taxonomy => $value ) {
+				if ( ! preg_match( '/size|mida|מידה/iu', (string) $taxonomy ) ) {
+					continue;
+				}
+				// Sizes are numbers; a colour or material value drops out here on its own.
+				$n = (int) preg_replace( '/\D+/', '', (string) $value );
+				if ( $n > 0 ) {
+					$sizes[] = $n;
+				}
+			}
 		}
 	}
 
-	return null;
+	if ( ! $sizes ) {
+		foreach ( $product->get_attributes() as $attribute ) {
+			if ( ! $attribute instanceof WC_Product_Attribute || ! $attribute->get_variation() ) {
+				continue;
+			}
+			$labels = $attribute->is_taxonomy()
+				? wp_list_pluck( (array) wc_get_product_terms( $product->get_id(), $attribute->get_name(), array( 'fields' => 'all' ) ), 'name' )
+				: (array) $attribute->get_options();
+			$sizes  = array_filter( array_map( 'intval', $labels ) );
+			if ( $sizes ) {
+				break;
+			}
+		}
+	}
+
+	return count( $sizes ) >= 2 ? array( min( $sizes ), max( $sizes ) ) : null;
 }
 
 /** "119 ₪" or "119–139 ₪", with no trailing zeros. */
