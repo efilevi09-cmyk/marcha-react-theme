@@ -125,7 +125,14 @@ function marcha_review_request_body( $order ) {
 	return (string) ob_get_clean();
 }
 
-/** Builds the full HTML document, header and footer included. */
+/**
+ * Builds the full HTML document, header and footer included.
+ *
+ * WooCommerce's email stylesheet lives in a <style> block that most mail clients ignore;
+ * every WC_Email folds it into inline attributes before sending. This email is assembled by
+ * hand rather than by a WC_Email subclass, so it has to borrow that step — without it the
+ * shop's wrapper arrives as unstyled text on white.
+ */
 function marcha_review_request_html( $order ) {
 	$body = marcha_review_request_body( $order );
 	if ( '' === $body || ! function_exists( 'WC' ) ) {
@@ -138,8 +145,18 @@ function marcha_review_request_html( $order ) {
 	$mailer->email_header( $heading );
 	echo $body; // phpcs:ignore WordPress.Security.EscapingOutput.OutputNotEscaped -- built above, already escaped.
 	$mailer->email_footer();
+	$html = (string) ob_get_clean();
 
-	return (string) ob_get_clean();
+	$emails = $mailer->get_emails();
+	$any    = is_array( $emails ) ? reset( $emails ) : null;
+	if ( $any instanceof WC_Email && is_callable( array( $any, 'style_inline' ) ) ) {
+		$inlined = $any->style_inline( $html );
+		if ( is_string( $inlined ) && '' !== $inlined ) {
+			$html = $inlined;
+		}
+	}
+
+	return $html;
 }
 
 add_action(
