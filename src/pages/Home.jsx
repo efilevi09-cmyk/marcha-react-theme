@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import * as api from '../lib/api.js';
 import Showcase from '../components/Showcase.jsx';
+import ColorCollections from '../components/ColorCollections.jsx';
 import ProductSection from '../components/ProductSection.jsx';
 import { ReviewList } from '../components/Reviews.jsx';
 import '../styles/home.css';
@@ -51,6 +52,10 @@ export default function Home() {
             </a>
           ))}
         </div>
+        {/* Under the shape tiles, the same shop cut by colour. The home page is the
+            strongest page on the site, so a link from here is what lets these
+            collections rank for their own colour terms instead of the home page. */}
+        <ColorCollections />
       </section>
       <ProductSection id="new-title" title="חדש באתר" script="New in" orderby="date" terms={terms} pattern={PATTERN} />
       <section className="block container home-reviews" aria-labelledby="reviews-title">
