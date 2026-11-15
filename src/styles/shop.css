@@ -140,3 +140,14 @@ button.pcard__btn:disabled{opacity:.6}
 .cat-guide table{width:100%;border-collapse:collapse;margin:0 0 18px;font-size:16px}
 .cat-guide th,.cat-guide td{border:1px solid var(--c-border);padding:9px 12px;text-align:start}
 .cat-guide th{background:#fafafa;font-weight:700}
+
+/* Colour collections — quiet pill links under the grid. They carry real navigation
+   value for a shopper who already knows the colour, and they are the internal links
+   that let these pages rank for their own term. */
+.collections{margin:clamp(40px,7vw,72px) 0 0;padding-block-start:clamp(26px,4.5vw,40px);border-block-start:1px solid var(--c-border);max-width:76ch;margin-inline:auto}
+.collections__title{font-size:clamp(17px,2.2vw,20px);font-weight:600;margin:0 0 16px;letter-spacing:-.01em;color:#3a3632}
+.collections ul{display:flex;flex-wrap:wrap;gap:10px;margin:0;padding:0;list-style:none}
+.collections a{display:inline-block;padding:9px 16px;border:1px solid var(--c-border);border-radius:999px;font-size:15px;line-height:1.3;color:#1b1917;text-decoration:none;background:#fff;transition:background .22s ease,border-color .22s ease,transform .22s ease}
+.collections a:hover{background:#1b1917;border-color:#1b1917;color:#fff;transform:translateY(-1px)}
+.collections a:focus-visible{outline:2px solid #0a6b53;outline-offset:2px}
+@media (prefers-reduced-motion:reduce){.collections a{transition:none}.collections a:hover{transform:none}}

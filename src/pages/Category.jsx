@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
-import { useParams } from 'react-router-dom';
+import { Link, useParams } from 'react-router-dom';
 import * as api from '../lib/api.js';
-import { CAT_ART, CAT_ART_FALLBACK, COLOR_HEX, SORTS } from '../lib/config.js';
+import { CAT_ART, CAT_ART_FALLBACK, COLOR_COLLECTIONS, COLOR_HEX, SORTS } from '../lib/config.js';
 import ProductCard from '../components/ProductCard.jsx';
 import '../styles/shop.css';
 
@@ -107,6 +107,18 @@ export default function Category({ all = false }) {
           /* Buying guidance, kept under the grid so shoppers reach the products first. */
           <section className="cat-guide" dangerouslySetInnerHTML={{ __html: guide }} />
         )}
+        {/* The colour collections. Shoppers who know the colour they want get there in one
+            tap, and the links are what let Google treat these pages as part of the shop. */}
+        <nav className="collections" aria-label="אוספים לפי צבע">
+          <h2 className="collections__title">אוספים לפי צבע</h2>
+          <ul>
+            {COLOR_COLLECTIONS.filter((c) => c.slug !== slug).map((c) => (
+              <li key={c.slug}>
+                <Link to={`/product-category/${c.slug}/`}>{c.label}</Link>
+              </li>
+            ))}
+          </ul>
+        </nav>
       </div>
     </>
   );

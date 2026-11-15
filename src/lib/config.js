@@ -50,6 +50,19 @@ export const CAT_ART_FALLBACK = { img: '2026/10/marcha-cat-round.jpg', pos: '50%
  */
 export const STRUCTURAL_CATS = ['balarina-a', 'בלרינה-שפיץ', 'boots', 'winter'];
 
+/**
+ * Landing pages for the colour searches people actually type ("נעלי בובה שחורות").
+ * They stay out of the main navigation, but they are linked from the foot of every
+ * category page: a page nothing links to reads to Google as a page that does not matter,
+ * and it will never outrank the home page for its own term.
+ */
+export const COLOR_COLLECTIONS = [
+  { slug: 'נעלי-בובה-שחורות', label: 'נעלי בובה שחורות' },
+  { slug: 'נעלי-בובה-חומות', label: 'נעלי בובה חומות' },
+  { slug: 'נעלי-בובה-אדומות', label: 'נעלי בובה אדומות' },
+  { slug: 'נעלי-בובה-לבנות', label: 'נעלי בובה לבנות' },
+];
+
 /** The category a product is filed under for breadcrumbs and related items. */
 export const primaryCat = (product) => {
   const cats = product?.categories || [];
