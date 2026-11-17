@@ -2,8 +2,8 @@
 /**
  * Plugin Name:       מרשה בלרינה – ליקוט ותעודות משלוח
  * Plugin URI:        https://marchaballerina.com/
- * Description:       מוסיפה למסך ההזמנות שתי פעולות קבוצתיות: רשימת ליקוט מאוחדת לכמה הזמנות יחד, ותעודת משלוח לכל הזמנה. הכל בעברית תקינה — HTML שמודפס מהדפדפן, בלי מנוע PDF שלא תומך ב-RTL.
- * Version:           1.1.0
+ * Description:       מוסיפה למסך ההזמנות רשימת ליקוט מאוחדת, תעודת משלוח ומדבקת כתובת למשלוח — כפעולות קבוצתיות וככפתורים בכל שורה. הכל בעברית תקינה: HTML שמודפס מהדפדפן, בלי מנוע PDF שלא תומך ב-RTL.
+ * Version:           1.2.0
  * Requires at least: 6.0
  * Requires PHP:      7.4
  * Author:            Marcha Ballerina
@@ -16,9 +16,10 @@ namespace Marcha\PickList;
 
 defined( 'ABSPATH' ) || exit;
 
-const VERSION      = '1.1.0';
+const VERSION      = '1.2.0';
 const ACTION_PICK  = 'marcha_pick_list';
 const ACTION_SLIP  = 'marcha_packing_slip';
+const ACTION_LABEL = 'marcha_address_label';
 const NONCE        = 'marcha_docs_render';
 const QUERY_FLAG   = 'marcha_doc';
 const CAPABILITY   = 'manage_woocommerce';
@@ -68,7 +69,8 @@ function add_bulk_actions( $actions ) {
 
 	if ( current_user_can( CAPABILITY ) ) {
 		$actions[ ACTION_PICK ] = __( 'רשימת ליקוט למחסן', 'marcha-pick-list' );
-		$actions[ ACTION_SLIP ] = __( 'תעודת משלוח להדפסה', 'marcha-pick-list' );
+		$actions[ ACTION_SLIP ]  = __( 'תעודת משלוח להדפסה', 'marcha-pick-list' );
+		$actions[ ACTION_LABEL ] = __( 'מדבקת משלוח להדפסה', 'marcha-pick-list' );
 	}
 
 	return $actions;
@@ -84,7 +86,7 @@ function add_bulk_actions( $actions ) {
  * @return string
  */
 function handle_bulk_action( $redirect_to, $action, $order_ids ) {
-	if ( ! in_array( $action, array( ACTION_PICK, ACTION_SLIP ), true ) || ! current_user_can( CAPABILITY ) ) {
+	if ( ! in_array( $action, array( ACTION_PICK, ACTION_SLIP, ACTION_LABEL ), true ) || ! current_user_can( CAPABILITY ) ) {
 		return $redirect_to;
 	}
 
@@ -94,11 +96,17 @@ function handle_bulk_action( $redirect_to, $action, $order_ids ) {
 		return $redirect_to;
 	}
 
-	return document_url( ACTION_PICK === $action ? 'pick' : 'slip', $order_ids );
+	$map = array(
+		ACTION_PICK  => 'pick',
+		ACTION_SLIP  => 'slip',
+		ACTION_LABEL => 'label',
+	);
+
+	return document_url( $map[ $action ], $order_ids );
 }
 
 /**
- * A single-order shortcut on each row of the orders table.
+ * Single-order shortcuts on each row of the orders table.
  *
  * @param \WC_Order $order
  */
@@ -107,12 +115,31 @@ function row_action( $order ) {
 		return;
 	}
 
-	printf(
-		'<a class="button tips marcha-slip" href="%1$s" target="_blank" rel="noopener" data-tip="%2$s" aria-label="%2$s" style="background-position:center;background-repeat:no-repeat">%3$s</a>',
-		esc_url( document_url( 'slip', array( $order->get_id() ) ) ),
-		esc_attr__( 'תעודת משלוח', 'marcha-pick-list' ),
-		esc_html__( 'ת. משלוח', 'marcha-pick-list' )
+	$buttons = array(
+		array(
+			'doc'   => 'slip',
+			'label' => __( 'ת. משלוח', 'marcha-pick-list' ),
+			'tip'   => __( 'תעודת משלוח', 'marcha-pick-list' ),
+			'style' => '',
+		),
+		array(
+			'doc'   => 'label',
+			'label' => __( 'מדבקה', 'marcha-pick-list' ),
+			'tip'   => __( 'מדבקת כתובת למשלוח', 'marcha-pick-list' ),
+			'style' => 'background:#ea580c;border-color:#c2410c;color:#fff;text-shadow:none;box-shadow:0 1px 0 #9a3412;',
+		),
 	);
+
+	foreach ( $buttons as $button ) {
+		printf(
+			'<a class="button marcha-doc-btn marcha-doc-%1$s" href="%2$s" target="_blank" rel="noopener" title="%3$s" aria-label="%3$s" style="%4$s">%5$s</a> ',
+			esc_attr( $button['doc'] ),
+			esc_url( document_url( $button['doc'], array( $order->get_id() ) ) ),
+			esc_attr( $button['tip'] ),
+			esc_attr( $button['style'] ),
+			esc_html( $button['label'] )
+		);
+	}
 }
 
 /**
@@ -162,7 +189,9 @@ function maybe_render() {
 	nocache_headers();
 	header( 'Content-Type: text/html; charset=utf-8' );
 
-	if ( 'slip' === $doc ) {
+	if ( 'label' === $doc ) {
+		render_labels( $order_ids );
+	} elseif ( 'slip' === $doc ) {
 		render_packing_slips( $order_ids );
 	} else {
 		render_pick_list( collect_lines( $order_ids ), $order_ids );
@@ -332,8 +361,9 @@ function line_category( $parent_id ) {
 
 /**
  * @param string $title
+ * @param string $page_rule CSS @page rule for this document.
  */
-function print_head( $title ) {
+function print_head( $title, $page_rule = 'size:A4;margin:12mm', $page_class = '' ) {
 	?>
 <!DOCTYPE html>
 <html lang="he" dir="rtl">
@@ -385,7 +415,7 @@ td.check span{display:inline-block;width:20px;height:20px;border:2px solid #9ca3
 	thead{display:table-header-group}
 	tr{break-inside:avoid}
 	td.thumb img,td.thumb .placeholder{width:40px;height:40px}
-	@page{size:A4;margin:12mm}
+	@page{<?php echo esc_html( $page_rule ); ?>}
 }
 /* pick list */
 header.masthead{display:flex;flex-wrap:wrap;gap:12px 24px;align-items:baseline;justify-content:space-between;border-bottom:2px solid var(--ink);padding-bottom:14px;margin-bottom:22px}
@@ -408,9 +438,28 @@ footer.orders-included{margin-top:28px;padding-top:14px;border-top:1px solid var
 .panel .body strong{font-size:15px}
 .note{margin-top:18px;padding:12px 14px;border-inline-start:3px solid var(--accent);background:#f0fdfa;border-radius:0 6px 6px 0;font-size:14px}
 .slip-foot{margin-top:26px;padding-top:12px;border-top:1px solid var(--line);color:var(--muted);font-size:12.5px;display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap}
+
+/* address label */
+body.labels{background:#f6f7f8;padding:24px}
+.label-sheet{width:100mm;min-height:150mm;margin:0 auto 20px;background:#fff;border-radius:6px;box-shadow:0 1px 3px rgba(0,0,0,.08);padding:10mm;display:flex;flex-direction:column;gap:6mm}
+.label-sheet .to{flex:1}
+.label-sheet .eyebrow{font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);font-weight:700;margin-bottom:3mm}
+.label-sheet .to-name{font-size:25px;font-weight:700;line-height:1.2;margin-bottom:2mm}
+.label-sheet .to-address{font-size:19px;line-height:1.45}
+.label-sheet .to-phone{margin-top:3mm;font-size:21px;font-weight:700;font-variant-numeric:tabular-nums}
+.label-sheet .order{border-top:2px solid var(--ink);border-bottom:2px solid var(--ink);padding:3mm 0;display:flex;justify-content:space-between;align-items:baseline;gap:8px}
+.label-sheet .order .num{font-size:27px;font-weight:700;font-variant-numeric:tabular-nums;letter-spacing:-.01em}
+.label-sheet .order .units{font-size:15px;color:var(--muted)}
+.label-sheet .from{font-size:13px;line-height:1.5;color:var(--muted)}
+.label-sheet .from b{color:var(--ink);font-size:14px;display:block}
+@media print{
+	body.labels{background:#fff;padding:0}
+	.label-sheet{width:auto;min-height:0;margin:0;border-radius:0;box-shadow:none;padding:0;height:100%}
+	.label-sheet + .label-sheet{break-before:page}
+}
 </style>
 </head>
-<body>
+<body<?php echo 'labels' === $page_class ? ' class="labels"' : ''; ?>>
 	<?php
 }
 
@@ -678,6 +727,114 @@ function render_packing_slip( $order, $store_name, $store_line ) {
 		<span dir="ltr"><?php echo esc_html( wp_parse_url( home_url(), PHP_URL_HOST ) ); ?></span>
 	</div>
 </main>
+	<?php
+}
+
+
+/* =========================================================================
+ * Address labels
+ * ====================================================================== */
+
+/**
+ * One 100x150mm shipping label per order, the size a thermal label printer
+ * and a standard A6 sticker both take.
+ *
+ * @param int[] $order_ids
+ */
+function render_labels( $order_ids ) {
+	print_head( __( 'מדבקות משלוח', 'marcha-pick-list' ), 'size:100mm 150mm;margin:6mm', 'labels' );
+	print_toolbar();
+
+	$store_name = get_bloginfo( 'name' );
+	$store_line = store_address_line();
+	$printed    = 0;
+
+	foreach ( $order_ids as $order_id ) {
+		$order = wc_get_order( $order_id );
+
+		if ( ! $order ) {
+			continue;
+		}
+
+		++$printed;
+		render_label( $order, $store_name, $store_line );
+	}
+
+	if ( 0 === $printed ) {
+		echo '<div class="label-sheet"><p class="empty">' . esc_html__( 'לא נמצאו הזמנות.', 'marcha-pick-list' ) . '</p></div>';
+	}
+
+	print_foot();
+}
+
+/**
+ * @param \WC_Order $order
+ * @param string    $store_name
+ * @param string    $store_line
+ */
+function render_label( $order, $store_name, $store_line ) {
+	$address = $order->get_formatted_shipping_address();
+
+	if ( ! $address ) {
+		$address = $order->get_formatted_billing_address();
+	}
+
+	$name = trim( $order->get_formatted_shipping_full_name() );
+
+	if ( '' === $name ) {
+		$name = trim( $order->get_formatted_billing_full_name() );
+	}
+
+	$phone = method_exists( $order, 'get_shipping_phone' ) ? $order->get_shipping_phone() : '';
+
+	if ( ! $phone ) {
+		$phone = $order->get_billing_phone();
+	}
+
+	$units = 0;
+
+	foreach ( $order->get_items() as $item ) {
+		$units += (int) $item->get_quantity();
+	}
+
+	// The name already heads the label, so it is dropped from the address block.
+	$lines = array_filter( array_map( 'trim', explode( '<br/>', (string) $address ) ) );
+
+	if ( ! empty( $lines ) && $lines[ array_key_first( $lines ) ] === $name ) {
+		array_shift( $lines );
+	}
+	?>
+<section class="label-sheet">
+	<div class="to">
+		<div class="eyebrow"><?php esc_html_e( 'אל', 'marcha-pick-list' ); ?></div>
+		<div class="to-name"><?php echo esc_html( $name ); ?></div>
+		<div class="to-address"><?php echo wp_kses_post( implode( '<br>', $lines ) ); ?></div>
+		<?php if ( $phone ) : ?>
+			<div class="to-phone" dir="ltr"><?php echo esc_html( $phone ); ?></div>
+		<?php endif; ?>
+	</div>
+
+	<div class="order">
+		<span class="num">#<?php echo esc_html( $order->get_order_number() ); ?></span>
+		<span class="units">
+			<?php
+			printf(
+				/* translators: %d: number of units */
+				esc_html__( '%d פריטים', 'marcha-pick-list' ),
+				(int) $units
+			);
+			?>
+			· <?php echo esc_html( wc_format_datetime( $order->get_date_created(), 'd/m/Y' ) ); ?>
+		</span>
+	</div>
+
+	<div class="from">
+		<?php esc_html_e( 'מאת', 'marcha-pick-list' ); ?>
+		<b><?php echo esc_html( $store_name ); ?></b>
+		<?php echo esc_html( $store_line ); ?>
+		<span dir="ltr"><?php echo esc_html( wp_parse_url( home_url(), PHP_URL_HOST ) ); ?></span>
+	</div>
+</section>
 	<?php
 }
 
