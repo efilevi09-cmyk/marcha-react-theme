@@ -1,14 +1,13 @@
 <?php
 /**
- * Plugin Name:       מרשה בלרינה – רשימת ליקוט
+ * Plugin Name:       מרשה בלרינה – ליקוט ותעודות משלוח
  * Plugin URI:        https://marchaballerina.com/
- * Description:       מוסיפה פעולה קבוצתית במסך ההזמנות שמפיקה רשימת ליקוט מאוחדת לכמה הזמנות יחד — מקובצת לפי קטגוריה, עם תמונת מוצר, מידה, מק״ט וכמות. מיועדת להדפסה ישירה.
- * Version:           1.0.0
+ * Description:       מוסיפה למסך ההזמנות שתי פעולות קבוצתיות: רשימת ליקוט מאוחדת לכמה הזמנות יחד, ותעודת משלוח לכל הזמנה. הכל בעברית תקינה — HTML שמודפס מהדפדפן, בלי מנוע PDF שלא תומך ב-RTL.
+ * Version:           1.1.0
  * Requires at least: 6.0
  * Requires PHP:      7.4
  * Author:            Marcha Ballerina
  * Text Domain:       marcha-pick-list
- * Domain Path:       /languages
  *
  * @package MarchaPickList
  */
@@ -17,15 +16,16 @@ namespace Marcha\PickList;
 
 defined( 'ABSPATH' ) || exit;
 
-const VERSION    = '1.0.0';
-const ACTION     = 'marcha_pick_list';
-const NONCE      = 'marcha_pick_list_render';
-const QUERY_FLAG = 'marcha_pick_list';
-const CAPABILITY = 'manage_woocommerce';
+const VERSION      = '1.1.0';
+const ACTION_PICK  = 'marcha_pick_list';
+const ACTION_SLIP  = 'marcha_packing_slip';
+const NONCE        = 'marcha_docs_render';
+const QUERY_FLAG   = 'marcha_doc';
+const CAPABILITY   = 'manage_woocommerce';
 
-/* -------------------------------------------------------------------------
- * Bulk action registration
- * ---------------------------------------------------------------------- */
+/* =========================================================================
+ * Registration
+ * ====================================================================== */
 
 /**
  * The orders screen lives at a different hook depending on whether the store
@@ -35,11 +35,12 @@ function register_hooks() {
 	$screens = array( 'edit-shop_order', 'woocommerce_page_wc-orders' );
 
 	foreach ( $screens as $screen ) {
-		add_filter( "bulk_actions-{$screen}", __NAMESPACE__ . '\\add_bulk_action' );
+		add_filter( "bulk_actions-{$screen}", __NAMESPACE__ . '\\add_bulk_actions' );
 		add_filter( "handle_bulk_actions-{$screen}", __NAMESPACE__ . '\\handle_bulk_action', 10, 3 );
 	}
 
 	add_action( 'admin_init', __NAMESPACE__ . '\\maybe_render', 5 );
+	add_action( 'woocommerce_admin_order_actions_end', __NAMESPACE__ . '\\row_action', 10, 1 );
 }
 
 if ( is_admin() ) {
@@ -62,26 +63,28 @@ add_action(
  * @param array<string,string> $actions
  * @return array<string,string>
  */
-function add_bulk_action( $actions ) {
+function add_bulk_actions( $actions ) {
 	$actions = is_array( $actions ) ? $actions : array();
 
 	if ( current_user_can( CAPABILITY ) ) {
-		$actions[ ACTION ] = __( 'רשימת ליקוט למחסן', 'marcha-pick-list' );
+		$actions[ ACTION_PICK ] = __( 'רשימת ליקוט למחסן', 'marcha-pick-list' );
+		$actions[ ACTION_SLIP ] = __( 'תעודת משלוח להדפסה', 'marcha-pick-list' );
 	}
 
 	return $actions;
 }
 
 /**
- * Builds the redirect that renders the list. Nothing is written to the
+ * Builds the redirect that renders the document. Nothing is written to the
  * database — the bulk action only reads the selected orders.
  *
- * @param string    $redirect_to
- * @param string    $action
- * @param int[]     $order_ids
+ * @param string $redirect_to
+ * @param string $action
+ * @param int[]  $order_ids
+ * @return string
  */
 function handle_bulk_action( $redirect_to, $action, $order_ids ) {
-	if ( ACTION !== $action || ! current_user_can( CAPABILITY ) ) {
+	if ( ! in_array( $action, array( ACTION_PICK, ACTION_SLIP ), true ) || ! current_user_can( CAPABILITY ) ) {
 		return $redirect_to;
 	}
 
@@ -91,10 +94,37 @@ function handle_bulk_action( $redirect_to, $action, $order_ids ) {
 		return $redirect_to;
 	}
 
+	return document_url( ACTION_PICK === $action ? 'pick' : 'slip', $order_ids );
+}
+
+/**
+ * A single-order shortcut on each row of the orders table.
+ *
+ * @param \WC_Order $order
+ */
+function row_action( $order ) {
+	if ( ! $order instanceof \WC_Order || ! current_user_can( CAPABILITY ) ) {
+		return;
+	}
+
+	printf(
+		'<a class="button tips marcha-slip" href="%1$s" target="_blank" rel="noopener" data-tip="%2$s" aria-label="%2$s" style="background-position:center;background-repeat:no-repeat">%3$s</a>',
+		esc_url( document_url( 'slip', array( $order->get_id() ) ) ),
+		esc_attr__( 'תעודת משלוח', 'marcha-pick-list' ),
+		esc_html__( 'ת. משלוח', 'marcha-pick-list' )
+	);
+}
+
+/**
+ * @param string $doc
+ * @param int[]  $order_ids
+ * @return string
+ */
+function document_url( $doc, $order_ids ) {
 	$url = add_query_arg(
 		array(
-			QUERY_FLAG => '1',
-			'ids'      => implode( ',', $order_ids ),
+			QUERY_FLAG => $doc,
+			'ids'      => implode( ',', array_map( 'absint', $order_ids ) ),
 		),
 		admin_url( 'admin.php' )
 	);
@@ -102,9 +132,9 @@ function handle_bulk_action( $redirect_to, $action, $order_ids ) {
 	return wp_nonce_url( $url, NONCE );
 }
 
-/* -------------------------------------------------------------------------
- * Rendering
- * ---------------------------------------------------------------------- */
+/* =========================================================================
+ * Dispatch
+ * ====================================================================== */
 
 function maybe_render() {
 	if ( empty( $_GET[ QUERY_FLAG ] ) ) {
@@ -116,11 +146,12 @@ function maybe_render() {
 	}
 
 	if ( ! current_user_can( CAPABILITY ) ) {
-		wp_die( esc_html__( 'אין לך הרשאה להפיק רשימת ליקוט.', 'marcha-pick-list' ), 403 );
+		wp_die( esc_html__( 'אין לך הרשאה להפיק את המסמך הזה.', 'marcha-pick-list' ), 403 );
 	}
 
 	check_admin_referer( NONCE );
 
+	$doc       = sanitize_key( wp_unslash( $_GET[ QUERY_FLAG ] ) );
 	$raw       = isset( $_GET['ids'] ) ? sanitize_text_field( wp_unslash( $_GET['ids'] ) ) : '';
 	$order_ids = array_values( array_filter( array_map( 'absint', explode( ',', $raw ) ) ) );
 
@@ -128,9 +159,21 @@ function maybe_render() {
 		wp_die( esc_html__( 'לא נבחרו הזמנות.', 'marcha-pick-list' ) );
 	}
 
-	render_page( collect_lines( $order_ids ), $order_ids );
+	nocache_headers();
+	header( 'Content-Type: text/html; charset=utf-8' );
+
+	if ( 'slip' === $doc ) {
+		render_packing_slips( $order_ids );
+	} else {
+		render_pick_list( collect_lines( $order_ids ), $order_ids );
+	}
+
 	exit;
 }
+
+/* =========================================================================
+ * Data
+ * ====================================================================== */
 
 /**
  * Aggregates every line item of the selected orders into one row per
@@ -156,16 +199,15 @@ function collect_lines( $order_ids ) {
 				continue;
 			}
 
-			$product    = $item->get_product();
-			$variation  = ( $product && $product->is_type( 'variation' ) ) ? $product : null;
-			$parent_id  = $variation ? $variation->get_parent_id() : ( $product ? $product->get_id() : 0 );
-			$parent     = $parent_id ? wc_get_product( $parent_id ) : null;
-			$variant_id = $variation ? $variation->get_id() : 0;
-			$key        = $parent_id . ':' . $variant_id;
-			$quantity   = (int) $item->get_quantity();
+			$product   = $item->get_product();
+			$variation = ( $product && $product->is_type( 'variation' ) ) ? $product : null;
+			$parent_id = $variation ? $variation->get_parent_id() : ( $product ? $product->get_id() : 0 );
+			$parent    = $parent_id ? wc_get_product( $parent_id ) : null;
+			$key       = $parent_id . ':' . ( $variation ? $variation->get_id() : 0 );
+			$quantity  = (int) $item->get_quantity();
 
 			if ( isset( $lines[ $key ] ) ) {
-				$lines[ $key ]['qty']   += $quantity;
+				$lines[ $key ]['qty']     += $quantity;
 				$lines[ $key ]['orders'][] = $order_label;
 				continue;
 			}
@@ -190,6 +232,7 @@ function collect_lines( $order_ids ) {
 /**
  * @param array<string,mixed> $a
  * @param array<string,mixed> $b
+ * @return int
  */
 function compare_lines( $a, $b ) {
 	$by_category = strnatcasecmp( (string) $a['category'], (string) $b['category'] );
@@ -200,23 +243,22 @@ function compare_lines( $a, $b ) {
 
 	$by_name = strnatcasecmp( (string) $a['name'], (string) $b['name'] );
 
-	if ( 0 !== $by_name ) {
-		return $by_name;
-	}
-
-	return strnatcasecmp( (string) $a['size'], (string) $b['size'] );
+	return 0 !== $by_name ? $by_name : strnatcasecmp( (string) $a['size'], (string) $b['size'] );
 }
 
 /**
  * The size is what the picker actually walks the shelf with, so the variation
- * attributes are preferred and the item meta is the fallback.
+ * attributes come first and the item meta is the fallback.
+ *
+ * @param \WC_Order_Item_Product $item
+ * @param \WC_Product|null       $variation
+ * @return string
  */
 function line_size( $item, $variation ) {
 	if ( $variation ) {
-		$attributes = $variation->get_variation_attributes();
-		$values     = array();
+		$values = array();
 
-		foreach ( $attributes as $value ) {
+		foreach ( $variation->get_variation_attributes() as $value ) {
 			$value = trim( (string) $value );
 
 			if ( '' !== $value ) {
@@ -238,6 +280,11 @@ function line_size( $item, $variation ) {
 	return trim( implode( ' · ', array_filter( array_map( 'trim', $values ) ) ) );
 }
 
+/**
+ * @param \WC_Product|null $variation
+ * @param \WC_Product|null $parent
+ * @return string
+ */
 function line_image( $variation, $parent ) {
 	foreach ( array( $variation, $parent ) as $candidate ) {
 		if ( ! $candidate ) {
@@ -258,6 +305,10 @@ function line_image( $variation, $parent ) {
 	return '';
 }
 
+/**
+ * @param int $parent_id
+ * @return string
+ */
 function line_category( $parent_id ) {
 	if ( ! $parent_id ) {
 		return __( 'ללא קטגוריה', 'marcha-pick-list' );
@@ -275,30 +326,21 @@ function line_category( $parent_id ) {
 	return (string) reset( $names );
 }
 
+/* =========================================================================
+ * Shared chrome
+ * ====================================================================== */
+
 /**
- * @param array<string,array<string,mixed>> $lines
- * @param int[]                             $order_ids
+ * @param string $title
  */
-function render_page( $lines, $order_ids ) {
-	$total_units = array_sum( wp_list_pluck( $lines, 'qty' ) );
-	$order_count = count( $order_ids );
-	$printed_at  = wp_date( 'd/m/Y H:i' );
-
-	$grouped = array();
-
-	foreach ( $lines as $line ) {
-		$grouped[ $line['category'] ][] = $line;
-	}
-
-	nocache_headers();
-	header( 'Content-Type: text/html; charset=utf-8' );
+function print_head( $title ) {
 	?>
 <!DOCTYPE html>
 <html lang="he" dir="rtl">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title><?php esc_html_e( 'רשימת ליקוט', 'marcha-pick-list' ); ?> · <?php echo esc_html( $printed_at ); ?></title>
+<title><?php echo esc_html( $title ); ?></title>
 <style>
 :root{
 	--ink:#111418;
@@ -311,72 +353,110 @@ function render_page( $lines, $order_ids ) {
 *,*::before,*::after{box-sizing:border-box}
 html{-webkit-text-size-adjust:100%}
 body{
-	margin:0;
-	padding:var(--pad);
-	background:#f6f7f8;
-	color:var(--ink);
-	font-family:"Ploni",-apple-system,BlinkMacSystemFont,"Segoe UI",Rubik,Arial,sans-serif;
-	font-size:15px;
-	line-height:1.5;
+	margin:0;padding:var(--pad);background:#f6f7f8;color:var(--ink);
+	font-family:"Ploni","Assistant","Rubik",-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif;
+	font-size:15px;line-height:1.5;
 }
 .sheet{max-width:980px;margin-inline:auto;background:#fff;border-radius:var(--radius);padding:var(--pad);box-shadow:0 1px 3px rgba(0,0,0,.08)}
-header.masthead{display:flex;flex-wrap:wrap;gap:12px 24px;align-items:baseline;justify-content:space-between;border-bottom:2px solid var(--ink);padding-bottom:14px;margin-bottom:22px}
+.sheet + .sheet{margin-top:24px}
 h1{margin:0;font-size:clamp(20px,3vw,26px);letter-spacing:-.01em}
-.meta{color:var(--muted);font-size:14px;display:flex;gap:18px;flex-wrap:wrap}
-.meta b{color:var(--ink);font-weight:700}
-.toolbar{display:flex;gap:10px;margin-bottom:20px}
+.toolbar{max-width:980px;margin:0 auto 18px;display:flex;gap:10px}
 .toolbar button{font:inherit;font-weight:600;cursor:pointer;border:1px solid var(--line);background:#fff;color:var(--ink);padding:9px 18px;border-radius:8px;transition:background .15s ease,border-color .15s ease}
 .toolbar button:hover{background:#f3f4f6;border-color:#d1d5db}
 .toolbar button.primary{background:var(--accent);border-color:var(--accent);color:#fff}
 .toolbar button.primary:hover{background:#115e56}
-h2.group{font-size:15px;margin:26px 0 8px;padding:7px 12px;background:#f3f4f6;border-radius:6px;letter-spacing:.01em}
-h2.group:first-of-type{margin-top:0}
 table{width:100%;border-collapse:collapse}
 th,td{text-align:right;padding:9px 10px;border-bottom:1px solid var(--line);vertical-align:middle}
 thead th{font-size:12px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);border-bottom:1px solid var(--ink);padding-block:6px}
-tbody tr:last-child td{border-bottom:1px solid var(--line)}
 td.thumb{width:62px}
-td.thumb img{display:block;width:54px;height:54px;object-fit:cover;border-radius:6px;background:#f3f4f6}
-td.thumb .placeholder{width:54px;height:54px;border-radius:6px;background:#f3f4f6}
+td.thumb img,td.thumb .placeholder{display:block;width:54px;height:54px;object-fit:cover;border-radius:6px;background:#f3f4f6}
 td.name{font-weight:600;line-height:1.35}
-td.size{white-space:nowrap;font-variant-numeric:tabular-nums}
+td.size{white-space:nowrap;font-variant-numeric:tabular-nums;font-weight:700;font-size:17px}
 td.sku{color:var(--muted);font-size:13px;white-space:nowrap}
 td.qty{font-size:19px;font-weight:700;text-align:center;width:66px;font-variant-numeric:tabular-nums}
-td.orders{color:var(--muted);font-size:12px;max-width:190px}
 td.check{width:40px;text-align:center}
 td.check span{display:inline-block;width:20px;height:20px;border:2px solid #9ca3af;border-radius:4px}
-tfoot td{padding-top:14px;font-weight:700;border:0}
-footer.orders-included{margin-top:28px;padding-top:14px;border-top:1px solid var(--line);color:var(--muted);font-size:13px}
 .empty{padding:40px 0;text-align:center;color:var(--muted)}
 @media print{
 	body{background:#fff;padding:0;font-size:12.5px}
 	.sheet{box-shadow:none;border-radius:0;max-width:none;padding:0}
+	.sheet + .sheet{margin-top:0;break-before:page}
 	.toolbar{display:none}
-	h2.group{background:transparent;border-bottom:1.5px solid var(--ink);border-radius:0;padding-inline:0;break-after:avoid}
-	table{break-inside:auto}
-	tr{break-inside:avoid;break-after:auto}
 	thead{display:table-header-group}
+	tr{break-inside:avoid}
 	td.thumb img,td.thumb .placeholder{width:40px;height:40px}
 	@page{size:A4;margin:12mm}
 }
+/* pick list */
+header.masthead{display:flex;flex-wrap:wrap;gap:12px 24px;align-items:baseline;justify-content:space-between;border-bottom:2px solid var(--ink);padding-bottom:14px;margin-bottom:22px}
+.meta{color:var(--muted);font-size:14px;display:flex;gap:18px;flex-wrap:wrap}
+.meta b{color:var(--ink);font-weight:700}
+h2.group{font-size:15px;margin:26px 0 8px;padding:7px 12px;background:#f3f4f6;border-radius:6px}
+h2.group:first-of-type{margin-top:0}
+footer.orders-included{margin-top:28px;padding-top:14px;border-top:1px solid var(--line);color:var(--muted);font-size:13px}
+@media print{h2.group{background:transparent;border-bottom:1.5px solid var(--ink);border-radius:0;padding-inline:0;break-after:avoid}}
+/* packing slip */
+.slip-head{display:flex;justify-content:space-between;align-items:flex-start;gap:24px;border-bottom:2px solid var(--ink);padding-bottom:16px;margin-bottom:20px}
+.slip-head .brand{font-size:20px;font-weight:700;letter-spacing:-.01em}
+.slip-head .brand small{display:block;font-size:13px;font-weight:400;color:var(--muted);margin-top:2px}
+.slip-head .doc{text-align:left}
+.slip-head .doc .num{font-size:24px;font-weight:700;font-variant-numeric:tabular-nums}
+.slip-head .doc .label{font-size:13px;color:var(--muted)}
+.panels{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:18px;margin-bottom:22px}
+.panel h3{margin:0 0 6px;font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);font-weight:700}
+.panel .body{font-size:14px;line-height:1.6}
+.panel .body strong{font-size:15px}
+.note{margin-top:18px;padding:12px 14px;border-inline-start:3px solid var(--accent);background:#f0fdfa;border-radius:0 6px 6px 0;font-size:14px}
+.slip-foot{margin-top:26px;padding-top:12px;border-top:1px solid var(--line);color:var(--muted);font-size:12.5px;display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap}
 </style>
 </head>
 <body>
+	<?php
+}
+
+function print_toolbar() {
+	?>
+	<div class="toolbar">
+		<button type="button" class="primary" onclick="window.print()"><?php esc_html_e( 'הדפסה', 'marcha-pick-list' ); ?></button>
+		<button type="button" onclick="window.close()"><?php esc_html_e( 'סגירה', 'marcha-pick-list' ); ?></button>
+	</div>
+	<?php
+}
+
+function print_foot() {
+	echo "</body>\n</html>";
+}
+
+/* =========================================================================
+ * Pick list
+ * ====================================================================== */
+
+/**
+ * @param array<string,array<string,mixed>> $lines
+ * @param int[]                             $order_ids
+ */
+function render_pick_list( $lines, $order_ids ) {
+	$total_units = array_sum( wp_list_pluck( $lines, 'qty' ) );
+	$printed_at  = wp_date( 'd/m/Y H:i' );
+	$grouped     = array();
+
+	foreach ( $lines as $line ) {
+		$grouped[ $line['category'] ][] = $line;
+	}
+
+	print_head( __( 'רשימת ליקוט', 'marcha-pick-list' ) . ' · ' . $printed_at );
+	print_toolbar();
+	?>
 <main class="sheet">
 	<header class="masthead">
 		<h1><?php esc_html_e( 'רשימת ליקוט', 'marcha-pick-list' ); ?></h1>
 		<div class="meta">
-			<span><?php esc_html_e( 'הזמנות:', 'marcha-pick-list' ); ?> <b><?php echo esc_html( (string) $order_count ); ?></b></span>
+			<span><?php esc_html_e( 'הזמנות:', 'marcha-pick-list' ); ?> <b><?php echo esc_html( (string) count( $order_ids ) ); ?></b></span>
 			<span><?php esc_html_e( 'שורות:', 'marcha-pick-list' ); ?> <b><?php echo esc_html( (string) count( $lines ) ); ?></b></span>
 			<span><?php esc_html_e( 'סה״כ זוגות:', 'marcha-pick-list' ); ?> <b><?php echo esc_html( (string) $total_units ); ?></b></span>
 			<span><?php echo esc_html( $printed_at ); ?></span>
 		</div>
 	</header>
-
-	<div class="toolbar">
-		<button type="button" class="primary" onclick="window.print()"><?php esc_html_e( 'הדפסה', 'marcha-pick-list' ); ?></button>
-		<button type="button" onclick="window.close()"><?php esc_html_e( 'סגירה', 'marcha-pick-list' ); ?></button>
-	</div>
 
 	<?php if ( empty( $lines ) ) : ?>
 		<p class="empty"><?php esc_html_e( 'אין פריטים בהזמנות שנבחרו.', 'marcha-pick-list' ); ?></p>
@@ -400,7 +480,7 @@ footer.orders-included{margin-top:28px;padding-top:14px;border-top:1px solid var
 						<td class="check"><span></span></td>
 						<td class="thumb">
 							<?php if ( $row['image'] ) : ?>
-								<img src="<?php echo esc_url( $row['image'] ); ?>" alt="" loading="lazy" width="54" height="54">
+								<img src="<?php echo esc_url( $row['image'] ); ?>" alt="" width="54" height="54">
 							<?php else : ?>
 								<span class="placeholder"></span>
 							<?php endif; ?>
@@ -409,7 +489,7 @@ footer.orders-included{margin-top:28px;padding-top:14px;border-top:1px solid var
 						<td class="size"><?php echo esc_html( $row['size'] ? $row['size'] : '—' ); ?></td>
 						<td class="sku"><?php echo esc_html( $row['sku'] ? $row['sku'] : '—' ); ?></td>
 						<td class="qty"><?php echo esc_html( (string) $row['qty'] ); ?></td>
-						<td class="orders"><?php echo esc_html( implode( ', ', array_unique( $row['orders'] ) ) ); ?></td>
+						<td style="color:var(--muted);font-size:12px"><?php echo esc_html( implode( ', ', array_unique( $row['orders'] ) ) ); ?></td>
 					</tr>
 				<?php endforeach; ?>
 				</tbody>
@@ -434,7 +514,184 @@ footer.orders-included{margin-top:28px;padding-top:14px;border-top:1px solid var
 		?>
 	</footer>
 </main>
-</body>
-</html>
 	<?php
+	print_foot();
+}
+
+/* =========================================================================
+ * Packing slips
+ * ====================================================================== */
+
+/**
+ * @param int[] $order_ids
+ */
+function render_packing_slips( $order_ids ) {
+	print_head( __( 'תעודת משלוח', 'marcha-pick-list' ) );
+	print_toolbar();
+
+	$store_name = get_bloginfo( 'name' );
+	$store_line = store_address_line();
+	$printed    = 0;
+
+	foreach ( $order_ids as $order_id ) {
+		$order = wc_get_order( $order_id );
+
+		if ( ! $order ) {
+			continue;
+		}
+
+		++$printed;
+		render_packing_slip( $order, $store_name, $store_line );
+	}
+
+	if ( 0 === $printed ) {
+		echo '<main class="sheet"><p class="empty">' . esc_html__( 'לא נמצאו הזמנות.', 'marcha-pick-list' ) . '</p></main>';
+	}
+
+	print_foot();
+}
+
+/**
+ * @param \WC_Order $order
+ * @param string    $store_name
+ * @param string    $store_line
+ */
+function render_packing_slip( $order, $store_name, $store_line ) {
+	$shipping = $order->get_formatted_shipping_address();
+	$billing  = $order->get_formatted_billing_address();
+	$address  = $shipping ? $shipping : $billing;
+	$name     = trim( $order->get_formatted_shipping_full_name() );
+
+	if ( '' === $name ) {
+		$name = trim( $order->get_formatted_billing_full_name() );
+	}
+
+	$phone = $order->get_billing_phone();
+	$email = $order->get_billing_email();
+	$note  = $order->get_customer_note();
+	$items = $order->get_items();
+	$units = 0;
+
+	foreach ( $items as $item ) {
+		$units += (int) $item->get_quantity();
+	}
+	?>
+<main class="sheet">
+	<div class="slip-head">
+		<div class="brand">
+			<?php echo esc_html( $store_name ); ?>
+			<?php if ( $store_line ) : ?>
+				<small><?php echo esc_html( $store_line ); ?></small>
+			<?php endif; ?>
+		</div>
+		<div class="doc">
+			<div class="label"><?php esc_html_e( 'תעודת משלוח', 'marcha-pick-list' ); ?></div>
+			<div class="num">#<?php echo esc_html( $order->get_order_number() ); ?></div>
+			<div class="label"><?php echo esc_html( wc_format_datetime( $order->get_date_created(), 'd/m/Y' ) ); ?></div>
+		</div>
+	</div>
+
+	<div class="panels">
+		<div class="panel">
+			<h3><?php esc_html_e( 'נשלח אל', 'marcha-pick-list' ); ?></h3>
+			<div class="body">
+				<strong><?php echo esc_html( $name ); ?></strong><br>
+				<?php echo wp_kses_post( $address ? $address : '&mdash;' ); ?>
+			</div>
+		</div>
+		<div class="panel">
+			<h3><?php esc_html_e( 'יצירת קשר', 'marcha-pick-list' ); ?></h3>
+			<div class="body">
+				<?php if ( $phone ) : ?>
+					<span dir="ltr"><?php echo esc_html( $phone ); ?></span><br>
+				<?php endif; ?>
+				<?php if ( $email ) : ?>
+					<span dir="ltr"><?php echo esc_html( $email ); ?></span>
+				<?php endif; ?>
+			</div>
+		</div>
+		<div class="panel">
+			<h3><?php esc_html_e( 'משלוח', 'marcha-pick-list' ); ?></h3>
+			<div class="body">
+				<?php echo esc_html( $order->get_shipping_method() ? $order->get_shipping_method() : '—' ); ?><br>
+				<?php
+				printf(
+					/* translators: %d: number of units */
+					esc_html__( '%d פריטים', 'marcha-pick-list' ),
+					(int) $units
+				);
+				?>
+			</div>
+		</div>
+	</div>
+
+	<table>
+		<thead>
+			<tr>
+				<th colspan="2"><?php esc_html_e( 'מוצר', 'marcha-pick-list' ); ?></th>
+				<th><?php esc_html_e( 'מידה', 'marcha-pick-list' ); ?></th>
+				<th><?php esc_html_e( 'מק״ט', 'marcha-pick-list' ); ?></th>
+				<th style="text-align:center"><?php esc_html_e( 'כמות', 'marcha-pick-list' ); ?></th>
+			</tr>
+		</thead>
+		<tbody>
+		<?php
+		foreach ( $items as $item ) {
+			if ( ! $item instanceof \WC_Order_Item_Product ) {
+				continue;
+			}
+
+			$product   = $item->get_product();
+			$variation = ( $product && $product->is_type( 'variation' ) ) ? $product : null;
+			$parent_id = $variation ? $variation->get_parent_id() : ( $product ? $product->get_id() : 0 );
+			$parent    = $parent_id ? wc_get_product( $parent_id ) : null;
+			$image     = line_image( $variation, $parent );
+			?>
+			<tr>
+				<td class="thumb">
+					<?php if ( $image ) : ?>
+						<img src="<?php echo esc_url( $image ); ?>" alt="" width="54" height="54">
+					<?php else : ?>
+						<span class="placeholder"></span>
+					<?php endif; ?>
+				</td>
+				<td class="name"><?php echo esc_html( $parent ? $parent->get_name() : $item->get_name() ); ?></td>
+				<td class="size"><?php echo esc_html( line_size( $item, $variation ) ?: '—' ); ?></td>
+				<td class="sku"><?php echo esc_html( $product && $product->get_sku() ? $product->get_sku() : '—' ); ?></td>
+				<td class="qty"><?php echo esc_html( (string) (int) $item->get_quantity() ); ?></td>
+			</tr>
+			<?php
+		}
+		?>
+		</tbody>
+	</table>
+
+	<?php if ( $note ) : ?>
+		<div class="note">
+			<strong><?php esc_html_e( 'הערת לקוחה:', 'marcha-pick-list' ); ?></strong>
+			<?php echo esc_html( $note ); ?>
+		</div>
+	<?php endif; ?>
+
+	<div class="slip-foot">
+		<span><?php esc_html_e( 'תודה שקנית אצלנו 🤍 החלפה והחזרה עד 14 יום.', 'marcha-pick-list' ); ?></span>
+		<span dir="ltr"><?php echo esc_html( wp_parse_url( home_url(), PHP_URL_HOST ) ); ?></span>
+	</div>
+</main>
+	<?php
+}
+
+/**
+ * @return string
+ */
+function store_address_line() {
+	$parts = array(
+		get_option( 'woocommerce_store_address' ),
+		get_option( 'woocommerce_store_address_2' ),
+		get_option( 'woocommerce_store_city' ),
+	);
+
+	$parts = array_filter( array_map( 'trim', array_map( 'strval', $parts ) ) );
+
+	return implode( ', ', $parts );
 }
