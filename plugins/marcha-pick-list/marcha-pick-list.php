@@ -3,7 +3,7 @@
  * Plugin Name:       מרשה בלרינה – ליקוט ותעודות משלוח
  * Plugin URI:        https://marchaballerina.com/
  * Description:       מוסיפה למסך ההזמנות רשימת ליקוט מאוחדת, תעודת משלוח ומדבקת כתובת למשלוח — כפעולות קבוצתיות וככפתורים בכל שורה. הכל בעברית תקינה: HTML שמודפס מהדפדפן, בלי מנוע PDF שלא תומך ב-RTL.
- * Version:           1.2.0
+ * Version:           1.3.0
  * Requires at least: 6.0
  * Requires PHP:      7.4
  * Author:            Marcha Ballerina
@@ -16,7 +16,7 @@ namespace Marcha\PickList;
 
 defined( 'ABSPATH' ) || exit;
 
-const VERSION      = '1.2.0';
+const VERSION      = '1.3.0';
 const ACTION_PICK  = 'marcha_pick_list';
 const ACTION_SLIP  = 'marcha_packing_slip';
 const ACTION_LABEL = 'marcha_address_label';
@@ -42,6 +42,7 @@ function register_hooks() {
 
 	add_action( 'admin_init', __NAMESPACE__ . '\\maybe_render', 5 );
 	add_action( 'woocommerce_admin_order_actions_end', __NAMESPACE__ . '\\row_action', 10, 1 );
+	add_action( 'admin_head', __NAMESPACE__ . '\\admin_css' );
 }
 
 if ( is_admin() ) {
@@ -59,6 +60,40 @@ add_action(
 		}
 	}
 );
+
+/**
+ * WooCommerce hides button text in the orders actions column and expects an
+ * icon, so the two document buttons get their text back explicitly.
+ */
+function admin_css() {
+	$screen = function_exists( 'get_current_screen' ) ? get_current_screen() : null;
+
+	if ( ! $screen || ! in_array( $screen->id, array( 'edit-shop_order', 'woocommerce_page_wc-orders' ), true ) ) {
+		return;
+	}
+	?>
+<style id="marcha-doc-buttons">
+.column-wc_actions .marcha-doc-btn{
+	text-indent:0!important;
+	width:auto!important;
+	height:auto!important;
+	min-width:0!important;
+	padding:1px 9px!important;
+	margin:0 0 2px 2px!important;
+	font-size:12px;
+	line-height:1.9;
+	border-radius:4px;
+	display:inline-block!important;
+	vertical-align:middle;
+}
+.column-wc_actions .marcha-doc-btn::after{content:none!important}
+.column-wc_actions .marcha-doc-label{background:#ea580c;border-color:#c2410c;color:#fff;text-shadow:none}
+.column-wc_actions .marcha-doc-label:hover{background:#c2410c;border-color:#9a3412;color:#fff}
+.column-wc_actions .marcha-doc-slip{background:#fff;border-color:#8c8f94;color:#2c3338}
+.column-wc_actions .marcha-doc-slip:hover{background:#f6f7f7;border-color:#50575e;color:#1d2327}
+</style>
+	<?php
+}
 
 /**
  * @param array<string,string> $actions
@@ -126,7 +161,7 @@ function row_action( $order ) {
 			'doc'   => 'label',
 			'label' => __( 'מדבקה', 'marcha-pick-list' ),
 			'tip'   => __( 'מדבקת כתובת למשלוח', 'marcha-pick-list' ),
-			'style' => 'background:#ea580c;border-color:#c2410c;color:#fff;text-shadow:none;box-shadow:0 1px 0 #9a3412;',
+			'style' => '',
 		),
 	);
 
@@ -441,17 +476,24 @@ footer.orders-included{margin-top:28px;padding-top:14px;border-top:1px solid var
 
 /* address label */
 body.labels{background:#f6f7f8;padding:24px}
-.label-sheet{width:100mm;min-height:150mm;margin:0 auto 20px;background:#fff;border-radius:6px;box-shadow:0 1px 3px rgba(0,0,0,.08);padding:10mm;display:flex;flex-direction:column;gap:6mm}
-.label-sheet .to{flex:1}
-.label-sheet .eyebrow{font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);font-weight:700;margin-bottom:3mm}
-.label-sheet .to-name{font-size:25px;font-weight:700;line-height:1.2;margin-bottom:2mm}
-.label-sheet .to-address{font-size:19px;line-height:1.45}
-.label-sheet .to-phone{margin-top:3mm;font-size:21px;font-weight:700;font-variant-numeric:tabular-nums}
-.label-sheet .order{border-top:2px solid var(--ink);border-bottom:2px solid var(--ink);padding:3mm 0;display:flex;justify-content:space-between;align-items:baseline;gap:8px}
-.label-sheet .order .num{font-size:27px;font-weight:700;font-variant-numeric:tabular-nums;letter-spacing:-.01em}
-.label-sheet .order .units{font-size:15px;color:var(--muted)}
-.label-sheet .from{font-size:13px;line-height:1.5;color:var(--muted)}
-.label-sheet .from b{color:var(--ink);font-size:14px;display:block}
+.label-sheet{width:100mm;min-height:150mm;margin:0 auto 20px;background:#fff;border-radius:6px;box-shadow:0 1px 3px rgba(0,0,0,.08);padding:8mm;display:flex;flex-direction:column;gap:4mm}
+.label-sheet .eyebrow{font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);font-weight:700;margin-bottom:2mm}
+.label-sheet .to-name{font-size:23px;font-weight:700;line-height:1.2;margin-bottom:1.5mm}
+.label-sheet .to-address{font-size:17px;line-height:1.4}
+.label-sheet .to-phone{margin-top:2mm;font-size:20px;font-weight:700;font-variant-numeric:tabular-nums}
+.label-sheet .order{border-top:2px solid var(--ink);border-bottom:2px solid var(--ink);padding:2.5mm 0;display:flex;justify-content:space-between;align-items:baseline;gap:8px}
+.label-sheet .order .num{font-size:25px;font-weight:700;font-variant-numeric:tabular-nums;letter-spacing:-.01em}
+.label-sheet .order .units{font-size:13px;color:var(--muted)}
+.label-items{flex:1;display:flex;flex-direction:column;gap:2mm}
+.label-items .li{display:flex;align-items:center;gap:3mm}
+.label-items img,.label-items .ph{width:12mm;height:12mm;object-fit:cover;border-radius:3px;background:#f3f4f6;flex:none}
+.label-items .txt{flex:1;min-width:0}
+.label-items .ttl{font-size:12.5px;font-weight:600;line-height:1.3}
+.label-items .sub{font-size:11px;color:var(--muted)}
+.label-items .sz{font-size:20px;font-weight:700;font-variant-numeric:tabular-nums;flex:none;min-width:12mm;text-align:center}
+.label-items .more{font-size:12px;color:var(--muted)}
+.label-sheet .from{font-size:11.5px;line-height:1.45;color:var(--muted);border-top:1px solid var(--line);padding-top:2mm}
+.label-sheet .from b{color:var(--ink);font-size:12.5px}
 @media print{
 	body.labels{background:#fff;padding:0}
 	.label-sheet{width:auto;min-height:0;margin:0;border-radius:0;box-shadow:none;padding:0;height:100%}
@@ -792,10 +834,32 @@ function render_label( $order, $store_name, $store_line ) {
 	}
 
 	$units = 0;
+	$rows  = array();
 
 	foreach ( $order->get_items() as $item ) {
-		$units += (int) $item->get_quantity();
+		if ( ! $item instanceof \WC_Order_Item_Product ) {
+			continue;
+		}
+
+		$quantity  = (int) $item->get_quantity();
+		$units    += $quantity;
+		$product   = $item->get_product();
+		$variation = ( $product && $product->is_type( 'variation' ) ) ? $product : null;
+		$parent_id = $variation ? $variation->get_parent_id() : ( $product ? $product->get_id() : 0 );
+		$parent    = $parent_id ? wc_get_product( $parent_id ) : null;
+
+		$rows[] = array(
+			'name'  => $parent ? $parent->get_name() : $item->get_name(),
+			'size'  => line_size( $item, $variation ),
+			'sku'   => $product ? (string) $product->get_sku() : '',
+			'qty'   => $quantity,
+			'image' => line_image( $variation, $parent ),
+		);
 	}
+
+	// A 100x150mm label fits about six lines before it starts to crowd.
+	$shown     = array_slice( $rows, 0, 6 );
+	$remaining = count( $rows ) - count( $shown );
 
 	// The name already heads the label, so it is dropped from the address block.
 	$lines = array_filter( array_map( 'trim', explode( '<br/>', (string) $address ) ) );
@@ -805,7 +869,7 @@ function render_label( $order, $store_name, $store_line ) {
 	}
 	?>
 <section class="label-sheet">
-	<div class="to">
+	<div>
 		<div class="eyebrow"><?php esc_html_e( 'אל', 'marcha-pick-list' ); ?></div>
 		<div class="to-name"><?php echo esc_html( $name ); ?></div>
 		<div class="to-address"><?php echo wp_kses_post( implode( '<br>', $lines ) ); ?></div>
@@ -826,6 +890,35 @@ function render_label( $order, $store_name, $store_line ) {
 			?>
 			· <?php echo esc_html( wc_format_datetime( $order->get_date_created(), 'd/m/Y' ) ); ?>
 		</span>
+	</div>
+
+	<div class="label-items">
+		<?php foreach ( $shown as $row ) : ?>
+			<div class="li">
+				<?php if ( $row['image'] ) : ?>
+					<img src="<?php echo esc_url( $row['image'] ); ?>" alt="">
+				<?php else : ?>
+					<span class="ph"></span>
+				<?php endif; ?>
+				<div class="txt">
+					<div class="ttl"><?php echo esc_html( $row['name'] ); ?></div>
+					<?php if ( $row['sku'] || $row['qty'] > 1 ) : ?>
+						<div class="sub">
+							<?php echo esc_html( $row['sku'] ); ?>
+							<?php if ( $row['qty'] > 1 ) : ?>
+								· <?php printf( esc_html__( 'כמות %d', 'marcha-pick-list' ), (int) $row['qty'] ); ?>
+							<?php endif; ?>
+						</div>
+					<?php endif; ?>
+				</div>
+				<div class="sz"><?php echo esc_html( $row['size'] ? $row['size'] : '—' ); ?></div>
+			</div>
+		<?php endforeach; ?>
+		<?php if ( $remaining > 0 ) : ?>
+			<div class="more">
+				<?php printf( esc_html__( 'ועוד %d פריטים — ראי את תעודת המשלוח', 'marcha-pick-list' ), (int) $remaining ); ?>
+			</div>
+		<?php endif; ?>
 	</div>
 
 	<div class="from">
