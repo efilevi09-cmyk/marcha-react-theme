@@ -3,7 +3,7 @@
  * Plugin Name:       מרשה בלרינה – ליקוט ותעודות משלוח
  * Plugin URI:        https://marchaballerina.com/
  * Description:       מוסיפה למסך ההזמנות רשימת ליקוט מאוחדת, תעודת משלוח ומדבקת כתובת למשלוח — כפעולות קבוצתיות וככפתורים בכל שורה. הכל בעברית תקינה: HTML שמודפס מהדפדפן, בלי מנוע PDF שלא תומך ב-RTL.
- * Version:           1.3.0
+ * Version:           1.4.0
  * Requires at least: 6.0
  * Requires PHP:      7.4
  * Author:            Marcha Ballerina
@@ -16,7 +16,7 @@ namespace Marcha\PickList;
 
 defined( 'ABSPATH' ) || exit;
 
-const VERSION      = '1.3.0';
+const VERSION      = '1.4.0';
 const ACTION_PICK  = 'marcha_pick_list';
 const ACTION_SLIP  = 'marcha_packing_slip';
 const ACTION_LABEL = 'marcha_address_label';
@@ -43,6 +43,11 @@ function register_hooks() {
 	add_action( 'admin_init', __NAMESPACE__ . '\\maybe_render', 5 );
 	add_action( 'woocommerce_admin_order_actions_end', __NAMESPACE__ . '\\row_action', 10, 1 );
 	add_action( 'admin_head', __NAMESPACE__ . '\\admin_css' );
+
+	// Row links under the order number. On a phone the actions column sits
+	// behind the "show more details" toggle, but these are always shown.
+	add_filter( 'post_row_actions', __NAMESPACE__ . '\\post_row_links', 10, 2 );
+	add_filter( 'woocommerce_shop_order_list_table_row_actions', __NAMESPACE__ . '\\hpos_row_links', 10, 2 );
 }
 
 if ( is_admin() ) {
@@ -60,6 +65,59 @@ add_action(
 		}
 	}
 );
+
+/**
+ * @param array<string,string> $actions
+ * @param \WP_Post             $post
+ * @return array<string,string>
+ */
+function post_row_links( $actions, $post ) {
+	if ( ! $post instanceof \WP_Post || 'shop_order' !== $post->post_type ) {
+		return $actions;
+	}
+
+	return add_row_links( $actions, (int) $post->ID );
+}
+
+/**
+ * @param array<string,string> $actions
+ * @param mixed                $order
+ * @return array<string,string>
+ */
+function hpos_row_links( $actions, $order ) {
+	if ( ! $order instanceof \WC_Order ) {
+		return $actions;
+	}
+
+	return add_row_links( $actions, $order->get_id() );
+}
+
+/**
+ * @param array<string,string> $actions
+ * @param int                  $order_id
+ * @return array<string,string>
+ */
+function add_row_links( $actions, $order_id ) {
+	if ( ! current_user_can( CAPABILITY ) || ! $order_id ) {
+		return $actions;
+	}
+
+	$actions = is_array( $actions ) ? $actions : array();
+
+	$actions['marcha_label'] = sprintf(
+		'<a href="%s" target="_blank" rel="noopener" style="color:#c2410c;font-weight:600">%s</a>',
+		esc_url( document_url( 'label', array( $order_id ) ) ),
+		esc_html__( 'מדבקה', 'marcha-pick-list' )
+	);
+
+	$actions['marcha_slip'] = sprintf(
+		'<a href="%s" target="_blank" rel="noopener">%s</a>',
+		esc_url( document_url( 'slip', array( $order_id ) ) ),
+		esc_html__( 'תעודת משלוח', 'marcha-pick-list' )
+	);
+
+	return $actions;
+}
 
 /**
  * WooCommerce hides button text in the orders actions column and expects an
@@ -91,6 +149,18 @@ function admin_css() {
 .column-wc_actions .marcha-doc-label:hover{background:#c2410c;border-color:#9a3412;color:#fff}
 .column-wc_actions .marcha-doc-slip{background:#fff;border-color:#8c8f94;color:#2c3338}
 .column-wc_actions .marcha-doc-slip:hover{background:#f6f7f7;border-color:#50575e;color:#1d2327}
+@media screen and (max-width:782px){
+	/* The actions column is normally folded away on a phone. */
+	.wp-list-table .column-wc_actions{display:block!important;overflow:visible!important;padding:8px 10px!important}
+	.wp-list-table .column-wc_actions::before{content:none!important}
+	.column-wc_actions .marcha-doc-btn{
+		padding:7px 16px!important;
+		font-size:14px;
+		line-height:1.8;
+		margin:0 0 4px 4px!important;
+	}
+	.row-actions .marcha_label a,.row-actions .marcha_slip a{font-size:14px}
+}
 </style>
 	<?php
 }
