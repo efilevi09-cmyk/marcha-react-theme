@@ -3,7 +3,7 @@
  * Plugin Name:       מרשה בלרינה – ליקוט ותעודות משלוח
  * Plugin URI:        https://marchaballerina.com/
  * Description:       מוסיפה למסך ההזמנות רשימת ליקוט מאוחדת, תעודת משלוח ומדבקת כתובת למשלוח — כפעולות קבוצתיות וככפתורים בכל שורה. הכל בעברית תקינה: HTML שמודפס מהדפדפן, בלי מנוע PDF שלא תומך ב-RTL.
- * Version:           1.5.0
+ * Version:           1.5.1
  * Requires at least: 6.0
  * Requires PHP:      7.4
  * Author:            Marcha Ballerina
@@ -16,7 +16,7 @@ namespace Marcha\PickList;
 
 defined( 'ABSPATH' ) || exit;
 
-const VERSION      = '1.5.0';
+const VERSION      = '1.5.1';
 const ACTION_PICK  = 'marcha_pick_list';
 const ACTION_SLIP  = 'marcha_packing_slip';
 const ACTION_LABEL = 'marcha_address_label';
@@ -285,15 +285,19 @@ function row_action( $order ) {
  * @return string
  */
 function document_url( $doc, $order_ids ) {
-	$url = add_query_arg(
+	// Deliberately not wp_nonce_url(): that runs the URL through esc_html(),
+	// which is right for an href but turns every & into &amp; in a redirect
+	// Location header, so the nonce arrives under the key "amp;_wpnonce" and
+	// the request dies on "the link has expired". The nonce is added by hand
+	// and the three places that print this into markup escape it themselves.
+	return add_query_arg(
 		array(
 			QUERY_FLAG => $doc,
 			'ids'      => implode( ',', array_map( 'absint', $order_ids ) ),
+			'_wpnonce' => wp_create_nonce( NONCE ),
 		),
 		admin_url( 'admin.php' )
 	);
-
-	return wp_nonce_url( $url, NONCE );
 }
 
 /* =========================================================================
