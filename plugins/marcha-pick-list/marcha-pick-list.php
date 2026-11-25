@@ -3,7 +3,7 @@
  * Plugin Name:       מרשה בלרינה – ליקוט ותעודות משלוח
  * Plugin URI:        https://marchaballerina.com/
  * Description:       מוסיפה למסך ההזמנות רשימת ליקוט מאוחדת, תעודת משלוח ומדבקת כתובת למשלוח — כפעולות קבוצתיות וככפתורים בכל שורה. הכל בעברית תקינה: HTML שמודפס מהדפדפן, בלי מנוע PDF שלא תומך ב-RTL.
- * Version:           1.5.1
+ * Version:           1.6.0
  * Requires at least: 6.0
  * Requires PHP:      7.4
  * Author:            Marcha Ballerina
@@ -16,10 +16,11 @@ namespace Marcha\PickList;
 
 defined( 'ABSPATH' ) || exit;
 
-const VERSION      = '1.5.1';
+const VERSION      = '1.6.0';
 const ACTION_PICK  = 'marcha_pick_list';
 const ACTION_SLIP  = 'marcha_packing_slip';
 const ACTION_LABEL = 'marcha_address_label';
+const ACTION_TAPUZ = 'marcha_tapuz_export';
 const NONCE        = 'marcha_docs_render';
 const QUERY_FLAG   = 'marcha_doc';
 const CAPABILITY   = 'manage_woocommerce';
@@ -208,6 +209,7 @@ function add_bulk_actions( $actions ) {
 		ACTION_LABEL => __( '🖨️ הדפסת מדבקות משלוח', 'marcha-pick-list' ),
 		ACTION_SLIP  => __( '🖨️ הדפסת תעודות משלוח', 'marcha-pick-list' ),
 		ACTION_PICK  => __( '🖨️ הדפסת רשימת ליקוט למחסן', 'marcha-pick-list' ),
+		ACTION_TAPUZ => __( '📦 ייצוא לתפוז (קובץ ייבוא)', 'marcha-pick-list' ),
 	);
 
 	return $print + $actions;
@@ -223,7 +225,7 @@ function add_bulk_actions( $actions ) {
  * @return string
  */
 function handle_bulk_action( $redirect_to, $action, $order_ids ) {
-	if ( ! in_array( $action, array( ACTION_PICK, ACTION_SLIP, ACTION_LABEL ), true ) || ! current_user_can( CAPABILITY ) ) {
+	if ( ! in_array( $action, array( ACTION_PICK, ACTION_SLIP, ACTION_LABEL, ACTION_TAPUZ ), true ) || ! current_user_can( CAPABILITY ) ) {
 		return $redirect_to;
 	}
 
@@ -237,6 +239,7 @@ function handle_bulk_action( $redirect_to, $action, $order_ids ) {
 		ACTION_PICK  => 'pick',
 		ACTION_SLIP  => 'slip',
 		ACTION_LABEL => 'label',
+		ACTION_TAPUZ => 'tapuz',
 	);
 
 	return document_url( $map[ $action ], $order_ids );
@@ -328,6 +331,12 @@ function maybe_render() {
 	}
 
 	nocache_headers();
+
+	if ( 'tapuz' === $doc ) {
+		send_tapuz_csv( $order_ids );
+		exit;
+	}
+
 	header( 'Content-Type: text/html; charset=utf-8' );
 
 	if ( 'label' === $doc ) {
@@ -339,6 +348,317 @@ function maybe_render() {
 	}
 
 	exit;
+}
+
+/* =========================================================================
+ * Tapuz export
+ * ====================================================================== */
+
+/**
+ * The column order of the Baldar/Tapuz import template, copied from the CSV
+ * their own import screen offers for download. The importer reads by position,
+ * so these must stay in this order and keep their count.
+ *
+ * @return string[]
+ */
+function tapuz_columns() {
+	return array(
+		'שם',
+		'שם מזמין',
+		'קוד ישוב',
+		'שם ישוב',
+		'קוד רחוב',
+		'שם רחוב',
+		'בית',
+		'כניסה',
+		'קומה',
+		'דירה',
+		'טלפון',
+		'טלפון נוסף',
+		'תעודה',
+		'ברקוד',
+		'קרטונים',
+		'גוביינא',
+		'הערות',
+		'כיוון',
+		'סוג כפולה',
+		'סוג רכב',
+		'סוג דחיפות',
+		'תאריך משלוח',
+		'שעת התחלה',
+		'שעת סיום',
+		'חבילות',
+		'משטחים',
+	);
+}
+
+/**
+ * Lifts entrance, floor and flat out of a free text address line and returns
+ * what is left of it. This runs before the house number is read, because
+ * "בן גוריון 25, דירה 3" would otherwise hand over 3 as the house number.
+ *
+ * @param string $line
+ * @return array{0:string,1:array{entrance:string,floor:string,flat:string}}
+ */
+function tapuz_units( $line ) {
+	$line  = trim( preg_replace( '/\s+/u', ' ', (string) $line ) );
+	$units = array(
+		'entrance' => '',
+		'floor'    => '',
+		'flat'     => '',
+	);
+
+	if ( '' === $line ) {
+		return array( '', $units );
+	}
+
+	$patterns = array(
+		'flat'     => '/(?:דירה|דירת|דיר\')\s*[:\-]?\s*(\d+ ?[א-ת]?)/u',
+		'floor'    => '/(?:קומה|קומת)\s*[:\-]?\s*(\d+|קרקע)/u',
+		'entrance' => '/(?:כניסה|כנ\')\s*[:\-]?\s*([א-ת]|\d+)/u',
+	);
+
+	foreach ( $patterns as $key => $pattern ) {
+		if ( preg_match( $pattern, $line, $m ) ) {
+			$units[ $key ] = str_replace( ' ', '', trim( $m[1] ) );
+			$line          = str_replace( $m[0], ' ', $line );
+		}
+	}
+
+	$line = preg_replace( '/\s+/u', ' ', $line );
+	$line = trim( preg_replace( '/^[\s,]+|[\s,]+$/u', '', $line ) );
+
+	return array( $line, $units );
+}
+
+/**
+ * Splits an Israeli street line into a name and a house number. The number is
+ * the last run of digits, optionally followed by a single letter, so
+ * "הרצל 12א" becomes "הרצל" and "12א". A line with no number comes back whole.
+ *
+ * @param string $line
+ * @return string[] street, house
+ */
+function tapuz_split_street( $line ) {
+	$line = trim( preg_replace( '/\s+/u', ' ', (string) $line ) );
+
+	if ( '' === $line ) {
+		return array( '', '' );
+	}
+
+	if ( preg_match( '/^(.*?)[\s,]+(\d+ ?[א-תa-zA-Z]?)$/u', $line, $m ) && '' !== trim( $m[1] ) ) {
+		return array( trim( $m[1] ), str_replace( ' ', '', $m[2] ) );
+	}
+
+	return array( $line, '' );
+}
+
+/**
+ * Normalises an Israeli phone number to the local 0 prefixed form, since that
+ * is what the couriers dial from.
+ *
+ * @param string $phone
+ * @return string
+ */
+function tapuz_phone( $phone ) {
+	$digits = preg_replace( '/\D+/', '', (string) $phone );
+
+	if ( '' === $digits ) {
+		return '';
+	}
+
+	if ( 0 === strpos( $digits, '972' ) ) {
+		$digits = '0' . substr( $digits, 3 );
+	}
+
+	return $digits;
+}
+
+/**
+ * Converts text to the encoding the import file is written in. Falls back to
+ * the original string rather than emptying a field if neither converter is
+ * available.
+ *
+ * @param string $text
+ * @return string
+ */
+function tapuz_encode( $text ) {
+	$text = (string) $text;
+
+	if ( '' === $text ) {
+		return '';
+	}
+
+	if ( function_exists( 'iconv' ) ) {
+		$converted = @iconv( 'UTF-8', 'windows-1255//TRANSLIT', $text );
+
+		if ( is_string( $converted ) && '' !== $converted ) {
+			return $converted;
+		}
+	}
+
+	if ( function_exists( 'mb_convert_encoding' ) ) {
+		$converted = @mb_convert_encoding( $text, 'Windows-1255', 'UTF-8' );
+
+		if ( is_string( $converted ) && '' !== $converted ) {
+			return $converted;
+		}
+	}
+
+	return $text;
+}
+
+/**
+ * Strips the characters that would shift a column. The importer is a plain
+ * splitter, so a quoted comma inside a value cannot be relied on to survive:
+ * commas, quotes and line breaks become spaces instead.
+ *
+ * @param string $value
+ * @return string
+ */
+function tapuz_cell( $value ) {
+	$value = str_replace( array( "\r\n", "\r", "\n" ), ' ', (string) $value );
+	$value = str_replace( array( ',', '"', ';' ), ' ', $value );
+
+	return trim( preg_replace( '/\s+/u', ' ', $value ) );
+}
+
+/**
+ * Builds one import row per order, in the template's column order.
+ *
+ * @param int[] $order_ids
+ * @return array<int,string[]>
+ */
+function tapuz_rows( $order_ids ) {
+	$rows = array();
+
+	foreach ( $order_ids as $order_id ) {
+		$order = wc_get_order( $order_id );
+
+		if ( ! $order ) {
+			continue;
+		}
+
+		$name = trim( $order->get_formatted_shipping_full_name() );
+
+		if ( '' === $name ) {
+			$name = trim( $order->get_formatted_billing_full_name() );
+		}
+
+		$city   = $order->get_shipping_city() ? $order->get_shipping_city() : $order->get_billing_city();
+		$line1  = $order->get_shipping_address_1() ? $order->get_shipping_address_1() : $order->get_billing_address_1();
+		$line2  = $order->get_shipping_address_2() ? $order->get_shipping_address_2() : $order->get_billing_address_2();
+		$postal = $order->get_shipping_postcode() ? $order->get_shipping_postcode() : $order->get_billing_postcode();
+
+		list( $line1, $units1 ) = tapuz_units( $line1 );
+		list( $line2, $units2 ) = tapuz_units( $line2 );
+
+		$entrance = '' !== $units1['entrance'] ? $units1['entrance'] : $units2['entrance'];
+		$floor    = '' !== $units1['floor'] ? $units1['floor'] : $units2['floor'];
+		$flat     = '' !== $units1['flat'] ? $units1['flat'] : $units2['flat'];
+
+		list( $street, $house ) = tapuz_split_street( $line1 );
+
+		// A bare number left in the second line is a flat number. Anything
+		// wordier goes to the notes, so a landmark is not lost.
+		$extra = trim( (string) $line2 );
+
+		if ( '' === $flat && '' !== $extra && preg_match( '/^\d+$/', $extra ) ) {
+			$flat  = $extra;
+			$extra = '';
+		}
+
+		$pieces = 0;
+
+		foreach ( $order->get_items() as $item ) {
+			if ( $item instanceof \WC_Order_Item_Product ) {
+				$pieces += (int) $item->get_quantity();
+			}
+		}
+
+		$notes = array( sprintf( 'הזמנה %s', $order->get_order_number() ) );
+
+		if ( $pieces > 0 ) {
+			$notes[] = sprintf( '%d פריטים', $pieces );
+		}
+
+		if ( '' !== $extra ) {
+			$notes[] = $extra;
+		}
+
+		if ( '' !== trim( (string) $order->get_customer_note() ) ) {
+			$notes[] = trim( $order->get_customer_note() );
+		}
+
+		// Cash on delivery is the only case where the courier collects money.
+		$cod = ( 'cod' === $order->get_payment_method() ) ? (string) round( (float) $order->get_total() ) : '';
+
+		$row = array(
+			$name,                              // שם
+			'',                                 // שם מזמין
+			'',                                 // קוד ישוב
+			$city,                              // שם ישוב
+			'',                                 // קוד רחוב
+			$street,                            // שם רחוב
+			$house,                             // בית
+			$entrance,                          // כניסה
+			$floor,                             // קומה
+			$flat,                              // דירה
+			tapuz_phone( $order->get_billing_phone() ),  // טלפון
+			tapuz_phone( $order->get_shipping_phone() ), // טלפון נוסף
+			$order->get_order_number(),         // תעודה
+			'',                                 // ברקוד
+			'',                                 // קרטונים
+			$cod,                               // גוביינא
+			implode( ' · ', $notes ),           // הערות
+			'',                                 // כיוון
+			'',                                 // סוג כפולה
+			'',                                 // סוג רכב
+			'',                                 // סוג דחיפות
+			'',                                 // תאריך משלוח
+			'',                                 // שעת התחלה
+			'',                                 // שעת סיום
+			'1',                                // חבילות
+			'',                                 // משטחים
+		);
+
+		// The postcode has no column of its own, so it rides along in the notes
+		// where a courier can still read it.
+		if ( '' !== trim( (string) $postal ) ) {
+			$row[16] .= ' · מיקוד ' . trim( $postal );
+		}
+
+		$rows[] = array_map( __NAMESPACE__ . '\\tapuz_cell', $row );
+	}
+
+	return $rows;
+}
+
+/**
+ * Streams the import file. Nothing is sent to Tapuz from here: the file is
+ * produced for the person to upload on the Baldar import screen, which is
+ * where the deliveries are actually created.
+ *
+ * @param int[] $order_ids
+ */
+function send_tapuz_csv( $order_ids ) {
+	$columns = tapuz_columns();
+	$rows    = tapuz_rows( $order_ids );
+	$name    = 'tapuz-' . gmdate( 'Ymd-Hi', current_time( 'timestamp' ) ) . '.csv';
+
+	header( 'Content-Type: text/csv; charset=windows-1255' );
+	header( 'Content-Disposition: attachment; filename="' . $name . '"' );
+
+	$out = implode( ',', $columns );
+
+	foreach ( $rows as $row ) {
+		// Guard against a row that lost or gained a field: the importer reads
+		// by position, so a short row would silently shift every value after it.
+		$row = array_slice( array_pad( $row, count( $columns ), '' ), 0, count( $columns ) );
+		$out .= "\r\n" . implode( ',', $row );
+	}
+
+	echo tapuz_encode( $out ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 }
 
 /* =========================================================================
