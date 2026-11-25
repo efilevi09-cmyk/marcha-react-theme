@@ -3,7 +3,7 @@
  * Plugin Name:       מרשה בלרינה – ליקוט ותעודות משלוח
  * Plugin URI:        https://marchaballerina.com/
  * Description:       מוסיפה למסך ההזמנות רשימת ליקוט מאוחדת, תעודת משלוח ומדבקת כתובת למשלוח — כפעולות קבוצתיות וככפתורים בכל שורה. הכל בעברית תקינה: HTML שמודפס מהדפדפן, בלי מנוע PDF שלא תומך ב-RTL.
- * Version:           1.6.0
+ * Version:           1.6.1
  * Requires at least: 6.0
  * Requires PHP:      7.4
  * Author:            Marcha Ballerina
@@ -16,7 +16,7 @@ namespace Marcha\PickList;
 
 defined( 'ABSPATH' ) || exit;
 
-const VERSION      = '1.6.0';
+const VERSION      = '1.6.1';
 const ACTION_PICK  = 'marcha_pick_list';
 const ACTION_SLIP  = 'marcha_packing_slip';
 const ACTION_LABEL = 'marcha_address_label';
@@ -578,7 +578,9 @@ function tapuz_rows( $order_ids ) {
 
 		$notes = array( sprintf( 'הזמנה %s', $order->get_order_number() ) );
 
-		if ( $pieces > 0 ) {
+		if ( 1 === $pieces ) {
+			$notes[] = 'פריט אחד';
+		} elseif ( $pieces > 1 ) {
 			$notes[] = sprintf( '%d פריטים', $pieces );
 		}
 
