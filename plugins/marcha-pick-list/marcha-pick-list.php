@@ -3,7 +3,7 @@
  * Plugin Name:       מרשה בלרינה – ליקוט ותעודות משלוח
  * Plugin URI:        https://marchaballerina.com/
  * Description:       מוסיפה למסך ההזמנות רשימת ליקוט מאוחדת, תעודת משלוח ומדבקת כתובת למשלוח — כפעולות קבוצתיות וככפתורים בכל שורה. הכל בעברית תקינה: HTML שמודפס מהדפדפן, בלי מנוע PDF שלא תומך ב-RTL.
- * Version:           1.4.0
+ * Version:           1.5.0
  * Requires at least: 6.0
  * Requires PHP:      7.4
  * Author:            Marcha Ballerina
@@ -16,7 +16,7 @@ namespace Marcha\PickList;
 
 defined( 'ABSPATH' ) || exit;
 
-const VERSION      = '1.4.0';
+const VERSION      = '1.5.0';
 const ACTION_PICK  = 'marcha_pick_list';
 const ACTION_SLIP  = 'marcha_packing_slip';
 const ACTION_LABEL = 'marcha_address_label';
@@ -48,6 +48,31 @@ function register_hooks() {
 	// behind the "show more details" toggle, but these are always shown.
 	add_filter( 'post_row_actions', __NAMESPACE__ . '\\post_row_links', 10, 2 );
 	add_filter( 'woocommerce_shop_order_list_table_row_actions', __NAMESPACE__ . '\\hpos_row_links', 10, 2 );
+
+	// "Hidden columns" is a per-user Screen Options preference, so one person
+	// sees the print buttons and the next does not. The actions column carries
+	// the only per-order print control, so it is kept visible for everyone.
+	add_filter( 'hidden_columns', __NAMESPACE__ . '\\keep_actions_column_visible', 99, 2 );
+}
+
+/**
+ * Drops the WooCommerce actions column from the per-user hidden list on the
+ * orders screen. Every other column keeps whatever the user chose.
+ *
+ * @param string[]    $hidden
+ * @param \WP_Screen  $screen
+ * @return string[]
+ */
+function keep_actions_column_visible( $hidden, $screen = null ) {
+	if ( ! is_array( $hidden ) || ! $screen instanceof \WP_Screen ) {
+		return $hidden;
+	}
+
+	if ( ! in_array( $screen->id, array( 'edit-shop_order', 'woocommerce_page_wc-orders' ), true ) ) {
+		return $hidden;
+	}
+
+	return array_values( array_diff( $hidden, array( 'wc_actions' ) ) );
 }
 
 if ( is_admin() ) {
@@ -172,13 +197,20 @@ function admin_css() {
 function add_bulk_actions( $actions ) {
 	$actions = is_array( $actions ) ? $actions : array();
 
-	if ( current_user_can( CAPABILITY ) ) {
-		$actions[ ACTION_PICK ] = __( 'רשימת ליקוט למחסן', 'marcha-pick-list' );
-		$actions[ ACTION_SLIP ]  = __( 'תעודת משלוח להדפסה', 'marcha-pick-list' );
-		$actions[ ACTION_LABEL ] = __( 'מדבקת משלוח להדפסה', 'marcha-pick-list' );
+	if ( ! current_user_can( CAPABILITY ) ) {
+		return $actions;
 	}
 
-	return $actions;
+	// Every label opens with the word "הדפסת" so the print options are found by
+	// anyone scanning the list for it, and they are moved to the top of the
+	// dropdown rather than appended below the status actions.
+	$print = array(
+		ACTION_LABEL => __( '🖨️ הדפסת מדבקות משלוח', 'marcha-pick-list' ),
+		ACTION_SLIP  => __( '🖨️ הדפסת תעודות משלוח', 'marcha-pick-list' ),
+		ACTION_PICK  => __( '🖨️ הדפסת רשימת ליקוט למחסן', 'marcha-pick-list' ),
+	);
+
+	return $print + $actions;
 }
 
 /**
