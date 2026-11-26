@@ -16,9 +16,17 @@ add_action( 'after_setup_theme', function () {
 
 /**
  * Routes rendered natively by WordPress/WooCommerce inside the React shell.
+ *
+ * Blog posts belong here with the editorial pages: they carry nothing but
+ * WordPress content, and the SEO fallback has no branch of its own for them.
+ * Without this a single post printed neither path - the article was missing
+ * from the markup and from the rendered page alike.
  */
 function marcha_is_native_route() {
 	if ( function_exists( 'is_checkout' ) && ( is_checkout() || is_account_page() ) ) {
+		return true;
+	}
+	if ( is_singular( 'post' ) ) {
 		return true;
 	}
 	return is_page() && ! is_front_page() && ! marcha_is_spa_page();
